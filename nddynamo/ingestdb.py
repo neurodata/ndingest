@@ -22,8 +22,8 @@ class IngestDB:
 
   def __init__(self, project_name='kasthuri11', channel_name='image', resolution=0):
 
-    self.db = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
-    self.table = self.db.Table(table_name)
+    db = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
+    self.table = db.Table(table_name)
     self.project = project_name
     self.channel = channel_name
     self.resolution = resolution
@@ -92,7 +92,7 @@ class IngestDB:
     return {'cuboid_key': '{}&{}&{}&{}&{}&{}'.format(self.project, self.channel, self.resolution, x, y, z)}
 
 
-  def updateItem(self, x=0, y=0, z=0, slice_number, task_id):
+  def updateItem(self, x=0, y=0, z=0, task_id):
     """Updating item for a give slice number"""
     
     try:
@@ -101,7 +101,7 @@ class IngestDB:
           UpdateExpression = 'ADD slice_list :slice_number',
           ExpressionAttributeValues = 
             {
-              ':slice_number': slice_number,
+              ':slice_number': z,
               ':task_id': task_id
             }
       )

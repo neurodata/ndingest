@@ -22,8 +22,8 @@ class S3IndexDB:
 
   def __init__(self, project_name='kasthuri11', channel_name='image', resolution=0):
 
-    self.db = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
-    self.table = self.db.Table(table_name)
+    db = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
+    self.table = db.Table(table_name)
     self.project = project_name
     self.channel = channel_name
     self.resolution = resolution

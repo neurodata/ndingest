@@ -67,10 +67,18 @@ class UploadBucket:
   def putobject(self, message):
     """Put object in the upload bucket"""
     
+    # opening the file
+    try:
+      tile_handle = open(message.body)
+    # if the file does not exist then send an empty file
+    except IOError as e:
+      import cStringIO
+      tile_handle = cStringIO.StringIO()
+    
     try:
       upload_obj = self.bucket.put_object(
           ACL = 'private',
-          Body = open(message.body),
+          Body = tile_handle,
           Key = self.generateKey(message.body),
           Metadata = {
             'receipt_handle' : message.receipt_handle
@@ -80,6 +88,8 @@ class UploadBucket:
     except Exception as e:
       print e
       raise
+    finally:
+      tile_handle.close()
 
 
   def deleteobject(self, file_name):

@@ -50,7 +50,23 @@ class UploadQueue:
     except Exception as e:
       print e
       raise
+  
+  @staticmethod  
+  def deleteQueue(region_name='us-west-2', endpoint_url='http://localhost:4568'):
+    """Delete the upload queue"""
 
+    # creating the resource
+    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
+    try:
+      # try fetching queue first
+      queue = sqs.get_queue_by_name(
+          QueueName = upload_queue
+      )
+      # deleting the queue
+      response = queue.delete()
+    except Exception as e:
+      print e
+      raise
 
   def sendMessage(self, file_name):
     """Send message to upload queue"""

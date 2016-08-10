@@ -88,7 +88,11 @@ class UploadQueue:
       message_list = self.queue.receive_messages(
           MaxNumberOfMessages=1
       )
-      return message_list[0]
+      # checking for empty responses
+      if not message_list:
+        return None
+      else:
+        return message_list[0]
     except Exception as e:
       print e
       raise

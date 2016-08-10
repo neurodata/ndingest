@@ -16,12 +16,10 @@ from abc import abstractmethod
 import boto3
 import botocore
 
-# TODO KL Load the queue name here
-queue_name = 'insert_queue'
 
 class NDQueue:
 
-  def __init__(self, region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def __init__(self, queue_name, region_name='us-west-2', endpoint_url='http://localhost:4568'):
     """Create resource for the queue"""
 
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
@@ -35,7 +33,7 @@ class NDQueue:
 
 
   @staticmethod
-  def createQueue(region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def createQueue(queue_name, region_name='us-west-2', endpoint_url='http://localhost:4568'):
     """Create the queue"""
     
     # creating the resource
@@ -55,7 +53,7 @@ class NDQueue:
 
 
   @staticmethod
-  def deleteQueue(region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def deleteQueue(queue_name, region_name='us-west-2', endpoint_url='http://localhost:4568'):
     """Delete the queue"""
     
     # creating the resource

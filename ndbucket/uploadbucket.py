@@ -23,9 +23,10 @@ class UploadBucket:
   def __init__(self, region_name='us-west-2', endpoint_url='http://localhost:4567'):
     """Create resource for the upload queue"""
 
-    s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
+    self.s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
+    # s3 = boto3.resource('s3')
     try:
-      self.bucket = s3.Bucket(upload_bucket)
+      self.bucket = self.s3.Bucket(upload_bucket)
     except botocore.exceptions.ClientError as e:
       print e
       raise
@@ -36,6 +37,7 @@ class UploadBucket:
     """Create the upload bucket"""
     
     s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
+    # s3 = boto3.resource('s3')
     bucket = s3.Bucket(upload_bucket)
     try:
       # creating the bucket
@@ -52,6 +54,7 @@ class UploadBucket:
     """Delete the upload bucket"""
     
     s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
+    # s3 = boto3.resource('s3')
     bucket = s3.Bucket(upload_bucket)
     try:
       # deleting the bucket
@@ -64,6 +67,7 @@ class UploadBucket:
     """Generate the key for the file in scratch space"""
     return file_name
 
+
   def putobject(self, message):
     """Put object in the upload bucket"""
     
@@ -74,12 +78,13 @@ class UploadBucket:
     except IOError as e:
       import cStringIO
       tile_handle = cStringIO.StringIO()
-    
+   
+    key = self.generateKey(message.body)
     try:
       upload_obj = self.bucket.put_object(
           ACL = 'private',
           Body = tile_handle,
-          Key = self.generateKey(message.body),
+          Key = key,
           Metadata = {
             'receipt_handle' : message.receipt_handle
           },
@@ -92,20 +97,34 @@ class UploadBucket:
       tile_handle.close()
 
 
-  def deleteobject(self, file_name):
+  def getobject(self, object_key):
+    """Get object from the upload bucket"""
+
+    try:
+      s3_obj = self.s3.Object(self.bucket.name, object_key)
+      response = s3_obj.get()
+      return response['Body'].read(), response['Metadata']['receipt_handle'], response['Metadata']['task_id']
+    except Exception as e:
+      print e
+      raise e
+
+
+  def deleteobject(self, object_key):
     """Delete object from the upload bucket"""
     
     try:
-      response = self.bucket.delete_objects(
-          Delete = {
-            'Objects' : [
-              {
-                'Key' : self.generateKey(file_name)
-              },
-            ],
-            'Quiet' : False
-          }
-      )
+      s3_obj = self.s3.Object(self.bucket.name, object_key)
+      s3_obj.delete()
+      # response = self.bucket.delete_objects(
+          # Delete = {
+            # 'Objects' : [
+              # {
+                # 'Key' : self.generateKey(file_name)
+              # },
+            # ],
+            # 'Quiet' : False
+          # }
+      # )
     except Exception as e:
       print e
       raise

@@ -20,10 +20,11 @@ queue_name = 'insert_queue'
 
 class InsertQueue:
 
-  def __init__(self, region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def __init__(self, region_name=region_name, endpoint_url=endpoint_url):
     """Create resource for the upload queue"""
 
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
+    # sqs = boto3.resource('sqs')
     try:
       self.queue = sqs.get_queue_by_name(
           QueueName = queue_name
@@ -33,12 +34,13 @@ class InsertQueue:
       raise
   
   @staticmethod
-  def createQueue(region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def createQueue(region_name=region_name, endpoint_url=endpoint_url):
     """Create the upload queue"""
-    
+   
+    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
+    # sqs = boto3.resource('sqs')
     try:
       # creating the queue, if the queue already exists catch exception
-      sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
       queue = sqs.create_queue(
         QueueName = queue_name,
         Attributes = {
@@ -46,6 +48,23 @@ class InsertQueue:
           'MaximumMessageSize' : '262144'
         }
       )
+    except Exception as e:
+      print e
+      raise
+  
+  @staticmethod
+  def deleteQueue():
+    """Delete the insert queue"""
+    
+    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
+    # sqs = boto3.resource('sqs')
+    try:
+      # try fetching queue first
+      queue = sqs.get_queue_by_name(
+          QueueName = queue_name
+      )
+      # deleting the queue
+      response = queue.delete()
     except Exception as e:
       print e
       raise

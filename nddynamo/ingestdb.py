@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import boto3
+from boto3.dynamodb.conditions import Key, Attr
 import botocore
 
 # TODO KL Import this from settings/parameter file
@@ -29,92 +30,136 @@ class IngestDB:
     self.resolution = resolution
  
   @staticmethod
-  def createDB():
+  def createTable():
     """Create the ingest database in dynamodb"""
     
-    db = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
-    table = db.create_table(
-        TableName = table_name,
-        KeySchema = [
-          {
-            'AttributeName': 'cuboid_key',
-            'KeyType': 'HASH'
-          }
-        ],
-        AttributeDefinitions = [
-          {
-            'AttributeName': 'cuboid_key',
-            'AttributeType': 'S'
-          },
-          {
-            'AttributeName': 'task_id',
-            'AttributeType': 'N'
-          }
-        ],
-        GlobalSecondaryIndexes = [
-          {
-            'IndexName': 'task_id',
-            'KeySchema': [
-              {
-                'AttributeName': 'task_id',
-                'KeyType': 'HASH'
-              },
-            ],
-            'Projection': {
-              'ProjectionType': 'ALL'
-            },
-            'ProvisionedThroughput': {
-              'ReadCapacityUnits': 10,
-              'WriteCapacityUnits': 10
+    dynamo = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
+    try:
+      table = dynamo.create_table(
+          TableName = table_name,
+          KeySchema = [
+            {
+              'AttributeName': 'cuboid_key',
+              'KeyType': 'HASH'
             }
-          },
-        ],
-        ProvisionedThroughput={
-          'ReadCapacityUnits': 10,
-          'WriteCapacityUnits': 10
-        }
-    )
-
-    print "Table Status: ", table.table.status
+          ],
+          AttributeDefinitions = [
+            {
+              'AttributeName': 'cuboid_key',
+              'AttributeType': 'S'
+            },
+            {
+              'AttributeName': 'task_id',
+              'AttributeType': 'N'
+            }
+          ],
+          GlobalSecondaryIndexes = [
+            {
+              'IndexName': 'task_id',
+              'KeySchema': [
+                {
+                  'AttributeName': 'task_id',
+                  'KeyType': 'HASH'
+                },
+              ],
+              'Projection': {
+                'ProjectionType': 'ALL'
+              },
+              'ProvisionedThroughput': {
+                'ReadCapacityUnits': 10,
+                'WriteCapacityUnits': 10
+              }
+            },
+          ],
+          ProvisionedThroughput={
+            'ReadCapacityUnits': 10,
+            'WriteCapacityUnits': 10
+          }
+      )
+      print "Table {} Status: {}".format(table.table_name, table.table_status)
+    except Exception as e:
+      print e
+      raise e
 
 
   @staticmethod
-  def deleteDB():
+  def deleteTable():
     """Delete the ingest database in dynamodb"""
 
-    db = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
-    table = self.db.Table(table_name)
-    table.delete()
+    dynamo = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
+    try:
+      table = dynamo.Table(table_name)
+      table.delete()
+    except Exception as e:
+      print e
+      raise e
 
 
   def generateKey(self, x, y, z):
     """Generate key for each supercuboid"""
-    return {'cuboid_key': '{}&{}&{}&{}&{}&{}'.format(self.project, self.channel, self.resolution, x, y, z)}
+    return {'cuboid_key': '{}&{}&{}&{}&{}&{}'.format(self.project, self.channel, self.resolution, x, y, z/64)}
 
 
-  def updateItem(self, x=0, y=0, z=0, task_id):
+  def updateItem(self, file_name, task_id=0):
     """Updating item for a give slice number"""
+    
+    x, y, z = [int(i) for i in file_name.split('.')[0].split('_')]
+    key = self.generateKey(x, y, z)
+    print key
     
     try:
       self.table.update_item(
-          Key = self.generateKey(x, y, z),
-          UpdateExpression = 'ADD slice_list :slice_number',
+          Key = key,
+          UpdateExpression = 'ADD slice_list :slice_number SET task_id = :id',
           ExpressionAttributeValues = 
             {
-              ':slice_number': z,
-              ':task_id': task_id
+              ':slice_number': set([z]),
+              ':id': task_id
             }
       )
     except botocore.exceptions.ClientError as e:
-        raise e
+      print e  
+      raise e
   
+  
+  def getItem(self, key):
+    """Get the item from the ingest table"""
+    
+    try:
+      response = self.table.query(
+          KeyConditionExpression = Key('cuboid_key').eq(key)
+      )
+      # TODO write a yield function to pop one item at a time
+      return response['Items'][0]
+    except Exception as e:
+      print e
+      raise e
+
+
+  def getTaskItems(self, task_id):
+    """Get all the items for a given task from the ingest table"""
+
+    try:
+      response = self.table.query(
+          IndexName = 'task_id-index',
+          KeyConditionExpression = 'task_id = :id',
+          ExpressionAttributeValues = {
+            ':id' : task_id
+          }
+      )
+      return response
+    except Exception as e:
+      print e
+      raise e
+
 
   def deleteItem(self, key):
     """Delete item from database"""
     
     try:
-      self.table.delete_item(
+      response = self.table.delete_item(
           Key = self.generateKey(0, 0, 0)
       )
+      return response
     except botocore.exceptions.ClientError as e:
       raise e

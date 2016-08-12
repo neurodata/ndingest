@@ -15,36 +15,25 @@
 import sys
 import os
 sys.path += [os.path.abspath('..')]
-from ndbucket.uploadbucket import UploadBucket as UQ
+import boto3
+import botocore
 
-from moto import mock_s3
-import pdb; pdb.set_trace()
+from ndbucket.uploadbucket import UploadBucket
+from ndqueue.uploadqueue import UploadQueue
 
-class Message:
-  def __init__(self):
-    self.body = 'abc123'
-    self.receipt_handle = 'test'
+# read manifest file
 
-class Test_Upload_Bucket():
+# TODO validate the file
 
-  # @mock_s3
-  def setup_class(self):
-    """Setup Parameters"""
-    UQ.createBucket()
-
-  # @mock_s3
-  def teardown_class(self):
-    """Teardown Parameters"""
-    UQ.deleteBucket()
+# post the manifest file
 
 
-  # @mock_s3
-  def test_put_object(self):
-    """Testing put object"""
-    
-    uq = UQ()
-    m = Message()
-    uq.putobject(m)
-    value = uq.getobject('abc123')
-    import pdb; pdb.set_trace()
-    uq.deleteobject('abc123')
+# TODO make this section multi-threaded
+
+# fetch messages from the upload queue
+upload_queue = UploadQueue()
+message = upload_queue.receiveMessage()
+
+# upload the file to the s3 bucket
+upload_bucket = UploadBucket()
+upload_bucket.putobject(message)

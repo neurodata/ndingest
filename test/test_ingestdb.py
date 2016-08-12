@@ -15,36 +15,22 @@
 import sys
 import os
 sys.path += [os.path.abspath('..')]
-from ndbucket.uploadbucket import UploadBucket as UQ
-
-from moto import mock_s3
-import pdb; pdb.set_trace()
-
-class Message:
-  def __init__(self):
-    self.body = 'abc123'
-    self.receipt_handle = 'test'
-
-class Test_Upload_Bucket():
-
-  # @mock_s3
-  def setup_class(self):
-    """Setup Parameters"""
-    UQ.createBucket()
-
-  # @mock_s3
-  def teardown_class(self):
-    """Teardown Parameters"""
-    UQ.deleteBucket()
+from nddynamo.ingestdb import IngestDB as IDB
 
 
-  # @mock_s3
-  def test_put_object(self):
-    """Testing put object"""
-    
-    uq = UQ()
-    m = Message()
-    uq.putobject(m)
-    value = uq.getobject('abc123')
-    import pdb; pdb.set_trace()
-    uq.deleteobject('abc123')
+try:
+  IDB.createTable()
+  idb = IDB()
+  idb.updateItem('0_0_1.tif')
+  idb.updateItem('0_0_2.tif')
+  idb.updateItem('0_0_3.tif')
+  item_value = idb.getItem('kasthuri11&image&0&0&0&0')
+  print item_value
+  assert(item_value == [1])
+  value = idb.deleteItem(key_value)
+  print value
+except Exception as e:
+  print e
+  pass
+
+IDB.deleteTable()

@@ -19,11 +19,12 @@ from ndbucket.uploadbucket import UploadBucket as UQ
 
 from moto import mock_s3
 import pdb; pdb.set_trace()
+key_value = '1_2_3.tif'
 
 class Message:
   def __init__(self):
-    self.body = 'abc123'
-    self.receipt_handle = 'test'
+    self.body = key_value
+    self.receipt_handle = 'test&handle'
 
 class Test_Upload_Bucket():
 
@@ -45,6 +46,5 @@ class Test_Upload_Bucket():
     uq = UQ()
     m = Message()
     uq.putobject(m)
-    value = uq.getobject('abc123')
-    import pdb; pdb.set_trace()
-    uq.deleteobject('abc123')
+    value = uq.getobject(key_value)
+    uq.deleteobject(key_value)

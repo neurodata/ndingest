@@ -18,19 +18,47 @@ sys.path += [os.path.abspath('..')]
 from nddynamo.ingestdb import IngestDB as IDB
 
 
-try:
-  IDB.createTable()
-  idb = IDB()
-  idb.updateItem('0_0_1.tif')
-  idb.updateItem('0_0_2.tif')
-  idb.updateItem('0_0_3.tif')
-  item_value = idb.getItem('kasthuri11&image&0&0&0&0')
-  print item_value
-  assert(item_value == [1])
-  value = idb.deleteItem(key_value)
-  print value
-except Exception as e:
-  print e
-  pass
+class Test_IngestDB():
 
-IDB.deleteTable()
+  def setup_class(self):
+    """Setup parameters"""
+    IDB.createTable()
+    self.idb = IDB()
+    
+  def teardown_class(self):
+    """Teardown parameters"""
+    IDB.deleteTable()
+    
+  def test_putItem(self):
+    """Test data insertion"""
+    
+    # inserting three values for task 0
+    self.idb.putItem('0_0_1.tif', 0)
+    self.idb.putItem('0_0_2.tif', 0)
+    self.idb.putItem('0_0_3.tif', 0)
+
+    # inserting 2 values for task 1
+    self.idb.putItem('0_0_66.tif', 1)
+    self.idb.putItem('0_0_67.tif', 1)
+
+    # checking if the items were inserted
+    item_value = self.idb.getItem('kasthuri11&image&0&0&0&0')
+    assert( item_value['slice_list'] == set([1, 2, 3]) )
+
+    item_value = self.idb.getItem('kasthuri11&image&0&0&0&1')
+    assert( item_value['slice_list'] == set([66, 67]) )
+  
+  def test_queryTaskItems(self):
+    """Test the query over SI"""
+    
+    item_values, count = self.idb.getTaskItems(0)
+    assert( count == 1 )
+    assert( item_values[0]['slice_list'] == set([1, 2, 3]) )
+
+
+  def test_deleteItem(self):
+    """Test item deletion"""
+    
+    value = self.idb.deleteItem('0_0_0.tif')
+    item_value = self.idb.getItem('kasthuri11&image&0&0&0&0')
+    assert(item_value == None)

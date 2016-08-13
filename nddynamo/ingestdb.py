@@ -17,7 +17,7 @@ from boto3.dynamodb.conditions import Key, Attr
 import botocore
 
 # TODO KL Import this from settings/parameter file
-table_name = 'Test'
+table_name = 'ingest_db'
 
 class IngestDB:
 
@@ -100,7 +100,7 @@ class IngestDB:
     return {'cuboid_key': '{}&{}&{}&{}&{}&{}'.format(self.project, self.channel, self.resolution, x, y, z/64)}
 
 
-  def updateItem(self, file_name, task_id=0):
+  def putItem(self, file_name, task_id=0):
     """Updating item for a give slice number"""
     
     x, y, z = [int(i) for i in file_name.split('.')[0].split('_')]
@@ -126,11 +126,18 @@ class IngestDB:
     """Get the item from the ingest table"""
     
     try:
-      response = self.table.query(
-          KeyConditionExpression = Key('cuboid_key').eq(key)
+      response = self.table.get_item(
+          Key = {
+            'cuboid_key' : key
+          },
+          ConsistentRead = True,
+          ReturnConsumedCapacity = 'INDEXES'
       )
+      # response = self.table.query(
+          # KeyConditionExpression = Key('cuboid_key').eq(key)
+      # )
       # TODO write a yield function to pop one item at a time
-      return response['Items'][0]
+      return response['Item'] if 'Item' in response else None
     except Exception as e:
       print e
       raise e
@@ -138,16 +145,16 @@ class IngestDB:
 
   def getTaskItems(self, task_id):
     """Get all the items for a given task from the ingest table"""
-
+    
     try:
       response = self.table.query(
-          IndexName = 'task_id-index',
+          IndexName = 'task_id',
           KeyConditionExpression = 'task_id = :id',
           ExpressionAttributeValues = {
             ':id' : task_id
           }
       )
-      return response
+      return response['Items'], response['Count']
     except Exception as e:
       print e
       raise e

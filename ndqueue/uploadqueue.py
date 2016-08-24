@@ -12,36 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import boto3
 import botocore
 
-# TODO KL Load the queue name here
-upload_queue = 'upload_queue'
+from ndqueue import NDQueue
 
-class UploadQueue:
+class UploadQueue(NDQueue):
 
-  def __init__(self, region_name='us-west-2', endpoint_url='http://localhost:4568'):
-    """Create resource for the upload queue"""
-
-    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
-    try:
-      self.queue = sqs.get_queue_by_name(
-          QueueName = upload_queue
-      )
-    except botocore.exceptions.ClientError as e:
-      # UploadQueue.createQueue()
-      print e
-      raise
   
+  def __init__(self, proj_info, region_name='us-west-2', endpoint_url='http://localhost:4568'):
+    """Create resources for the queue"""
+    
+    queue_name = UploadQueue.generateQueueName(proj_info)
+    NDQueue.__init__(self, queue_name)
+
+
   @staticmethod
-  def createQueue(region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def createQueue(proj_info, region_name='us-west-2', endpoint_url='http://localhost:4568'):
     """Create the upload queue"""
     
+    queue_name = UploadQueue.generateQueueName(proj_info)
+
     try:
       # creating the queue, if the queue already exists catch exception
       sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
       queue = sqs.create_queue(
-        QueueName = upload_queue,
+        QueueName = queue_name,
         Attributes = {
           'DelaySeconds' : '0',
           'MaximumMessageSize' : '262144'
@@ -50,17 +47,20 @@ class UploadQueue:
     except Exception as e:
       print e
       raise
-  
+
+
   @staticmethod  
-  def deleteQueue(region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def deleteQueue(proj_info, region_name='us-west-2', endpoint_url='http://localhost:4568'):
     """Delete the upload queue"""
 
+    queue_name = UploadQueue.generateQueueName(proj_info)
+    
     # creating the resource
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
     try:
       # try fetching queue first
       queue = sqs.get_queue_by_name(
-          QueueName = upload_queue
+          QueueName = queue_name
       )
       # deleting the queue
       response = queue.delete()
@@ -68,54 +68,21 @@ class UploadQueue:
       print e
       raise
 
-  def sendMessage(self, file_name):
-    """Send message to upload queue"""
-    
-    try:
-      response = self.queue.send_message(
-          MessageBody = file_name,
-          DelaySeconds = 0
-      )
-    except Exception as e:
-      print e
-      raise
-  
-  
-  def receiveMessage(self):
-    """Receive a message from the upload queue and return it"""
-    
-    try:
-      message_list = self.queue.receive_messages(
-          MaxNumberOfMessages=1
-      )
-      # checking for empty responses
-      if not message_list:
-        return None
-      else:
-        return message_list[0]
-    except Exception as e:
-      print e
-      raise
-    
+  @staticmethod
+  def generateQueueName(proj_info):
+    """Generate the queue name based on project information"""
+    return '&'.join(proj_info+['UPLOAD'])
 
-  def deleteMessage(self, message):
-    """Delete message from upload queue"""
-    
-    try:
-      response = self.queue.delete_messages(
-          Entries = [
-            {
-              'Id' : message.message_id,
-              'ReceiptHandle' : message.receipt_handle
-              },
-          ]
-      )
-      # TODO KL Better handling for 400 aka when delete fails
-      if 'Failed' in response:
-        print response['Failed']['Message']
-        raise
-      else:
-        return response
-    except Exception as e:
-      print e
-      raise
+  def sendMessage(self, tile_info):
+    """Send a message to upload queue"""
+    NDQueue.sendMessage(self, json.dumps(tile_info))
+
+  def receiveMessage(self, number_of_messages=1):
+    """Receive a message from the upload queue"""
+    message_list = NDQueue.receiveMessage(self, number_of_messages=number_of_messages)
+    for message in message_list:
+      yield message.message_id, message.receipt_handle, json.loads(message.body)
+
+  def deleteMessage(self, message_id, receipt_handle):
+    """Delete a message from the upload queue"""
+    return NDQueue.deleteMessage(self, message_id, receipt_handle)

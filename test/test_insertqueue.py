@@ -18,30 +18,29 @@ sys.path += [os.path.abspath('..')]
 
 import pytest
 from ndqueue.insertqueue import InsertQueue as IQ
-from moto import mock_sqs
+
+# proj_info = [project, channel, resolution]
+proj_info = ['kasthuri11', 'image', '0']
 
 class Test_Insert_Queue():
 
-  @mock_sqs
   def setup_class(self):
     """Setup class parameters"""
-    # IQ.createQueue()
+    IQ.createQueue(proj_info)
+    self.insert_queue = IQ(proj_info)
     pass
   
-  @mock_sqs
   def teardown_class(self):
     """Teardown parameters"""
-    # IQ.deleteQueue()
+    IQ.deleteQueue(proj_info)
     pass
 
-  @mock_sqs
-  def test_sendMessage(self):
+  def test_Message(self):
     """Testing the upload queue"""
     
-    iq = IQ()
-    iq.sendMessage('abc_123')
-    message = iq.receiveMessage()
-    print message
-    iq.deleteMessage(message)
-    
-    assert(message == 'abc_123')
+    supercuboid_key = 'kasthuri11&image&0&0'
+    self.insert_queue.sendMessage(supercuboid_key)
+    for message_id, receipt_handle, message_body in self.insert_queue.receiveMessage():
+      assert(supercuboid_key == message_body)
+      response = self.insert_queue.deleteMessage(message_id, receipt_handle)
+      assert('Successful' in response)

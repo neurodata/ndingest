@@ -15,30 +15,23 @@
 import boto3
 import botocore
 
-# TODO KL Load the queue name here
-queue_name = 'insert_queue'
+from ndqueue import NDQueue
 
-class InsertQueue:
+class InsertQueue(NDQueue):
 
-  def __init__(self, region_name=region_name, endpoint_url=endpoint_url):
-    """Create resource for the upload queue"""
+  def __init__(self, proj_info, region_name='us-west-2', endpoint_url='http://localhost:4568'):
+    """Create resources for the queue"""
+    
+    queue_name = InsertQueue.generateQueueName(proj_info)
+    NDQueue.__init__(self, queue_name)
 
-    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
-    # sqs = boto3.resource('sqs')
-    try:
-      self.queue = sqs.get_queue_by_name(
-          QueueName = queue_name
-      )
-    except botocore.exceptions.ClientError as e:
-      print e
-      raise
-  
+
   @staticmethod
-  def createQueue(region_name=region_name, endpoint_url=endpoint_url):
+  def createQueue(proj_info, region_name='us-west-2', endpoint_url='http://localhost:4568'):
     """Create the upload queue"""
-   
+    
+    queue_name = InsertQueue.generateQueueName(proj_info)
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
-    # sqs = boto3.resource('sqs')
     try:
       # creating the queue, if the queue already exists catch exception
       queue = sqs.create_queue(
@@ -51,13 +44,15 @@ class InsertQueue:
     except Exception as e:
       print e
       raise
-  
-  @staticmethod
-  def deleteQueue():
-    """Delete the insert queue"""
-    
+
+
+  @staticmethod  
+  def deleteQueue(proj_info, region_name='us-west-2', endpoint_url='http://localhost:4568'):
+    """Delete the upload queue"""
+
+    queue_name = InsertQueue.generateQueueName(proj_info)
+    # creating the resource
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
-    # sqs = boto3.resource('sqs')
     try:
       # try fetching queue first
       queue = sqs.get_queue_by_name(
@@ -70,46 +65,24 @@ class InsertQueue:
       raise
 
 
+  @staticmethod
+  def generateQueueName(proj_info):
+    """Generate the queue name based on project information"""
+    return '-'.join(proj_info+['INSERT'])
+  
+  
   def sendMessage(self, supercuboid_key):
-    """Send message to upload queue"""
-    
-    try:
-      response = self.queue.send_message(
-          MessageBody = supercuboid_key,
-          DelaySeconds = 0
-      )
-    except Exception as e:
-      print e
-      raise
-  
-  
-  def receiveMessage(self):
-    """Receive a message from the upload queue and return it"""
-    
-    try:
-      message_list = self.queue.receive_messages(
-          MaxNumberOfMessages=1
-      )
-      return message_list[0]
-    except Exception as e:
-      print e
-      raise
-    
+    """Send a message to upload queue"""
+    NDQueue.sendMessage(self, supercuboid_key)
 
-  def deleteMessage(self, message):
-    """Delete message from upload queue"""
-    
-    try:
-      response = self.queue.delete_messages(
-          Entries = [
-            {
-              'Id' : message.message_id,
-              'ReceiptHandle' : message.receipt_handle
-              },
-          ]
-      )
-      # TODO KL Better handling for 400 aka when delete fails
-      print response
-    except Exception as e:
-      print e
-      raise
+
+  def receiveMessage(self, number_of_messages=1):
+    """Receive a message from the upload queue"""
+    message_list = NDQueue.receiveMessage(self, number_of_messages=number_of_messages)
+    for message in message_list:
+      yield message.message_id, message.receipt_handle, message.body
+
+
+  def deleteMessage(self, message_id, receipt_handle):
+    """Delete a message from the upload queue"""
+    return NDQueue.deleteMessage(self, message_id, receipt_handle)

@@ -18,13 +18,18 @@ sys.path += [os.path.abspath('..')]
 from nddynamo.s3indexdb import S3IndexDB as S3DB
 
 
+project_name = 'kasthuri11'
+channel_name = 'image'
+channel_name2 = 'image2'
+resolution = 0
+
 class Test_S3IndexDB():
 
   def setup_class(self):
     """Setup parameters"""
     S3DB.createTable()
-    self.s3db = S3DB('kasthuri11', 'image', 0)
-    self.s3db2 = S3DB('kasthuri11', 'image2', 0)
+    self.s3db = S3DB(project_name, channel_name, resolution)
+    self.s3db2 = S3DB(project_name, channel_name2, resolution)
     
   def teardown_class(self):
     """Teardown parameters"""
@@ -34,61 +39,54 @@ class Test_S3IndexDB():
     """Test data insertion"""
     
     # inserting three values for task 0, zvalues 0-2
-    self.s3db.putItem(0, 0, 0)
-    self.s3db.putItem(0, 0, 1)
-    self.s3db.putItem(0, 0, 2)
+    x_value = 0
+    y_value = 0
+    for z_value in range(0, 2, 1):
+      self.s3db.putItem(x_value, y_value, z_value)
   
     # checking if the items were inserted
-    item_value = self.s3db.getItem(0, 0, 0)
-    assert( item_value['project_name'] == 'kasthuri11' )
-    assert( item_value['channel_resolution_taskid'] == 'image&0&0' )
-    
-    item_value = self.s3db.getItem(0, 0, 1)
-    assert( item_value['project_name'] == 'kasthuri11' )
-    assert( item_value['channel_resolution_taskid'] == 'image&0&0' )
-    
-    item_value = self.s3db.getItem(0, 0, 2)
-    assert( item_value['project_name'] == 'kasthuri11' )
-    assert( item_value['channel_resolution_taskid'] == 'image&0&0' )
+    for z_value in range(0, 2, 1):
+      item_value = self.s3db.getItem(x_value, y_value, z_value)
+      assert( item_value['project_name'] == project_name )
+      assert( item_value['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name, resolution, 0) )
     
     # inserting two values for task 1, zvalues 0-1
-    self.s3db.putItem(0, 0, 0, 1)
-    self.s3db.putItem(0, 0, 1, 1)
+    for z_value in range(0, 1, 1):
+      self.s3db.putItem(x_value, y_value, z_value, 1)
     
     # checking if the items were updated
-    item_value = self.s3db.getItem(0, 0, 0)
-    assert( item_value['project_name'] == 'kasthuri11' )
-    assert( item_value['channel_resolution_taskid'] == 'image&0&1' )
+    for z_value in range(0, 1, 1):
+      item_value = self.s3db.getItem(x_value, y_value, z_value)
+      assert( item_value['project_name'] == project_name )
+      assert( item_value['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name, resolution, 1) )
     
-    item_value = self.s3db.getItem(0, 0, 2)
-    assert( item_value['project_name'] == 'kasthuri11' )
-    assert( item_value['channel_resolution_taskid'] == 'image&0&0' )
-
   
   def test_queryProjectItems(self):
     """Test the query over SI"""
     
     # inserting three values for task 0, zvalues 0-2
-    self.s3db2.putItem(0, 0, 0)
-    self.s3db2.putItem(0, 0, 1)
-    self.s3db2.putItem(0, 0, 2)
+    x_value = 0
+    y_value = 0
+    for z_value in range(0, 2, 1):
+      self.s3db.putItem(x_value, y_value, z_value)
     
-    import pdb; pdb.set_trace()
-    item_values, count = self.s3db.queryProjectItems()
-    print item_values
-    item_values, count = self.s3db2.queryChannelItems()
-    print item_values
-    # assert( count == 1 )
-    # assert( item_values[0]['slice_list'] == set([1, 2, 3]) )
+    for item in self.s3db.queryProjectItems():
+      assert( item['project_name'] == project_name )
+    
+    for item in self.s3db2.queryChannelItems():
+      assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name2, resolution, 0) )
+      
+    for item in self.s3db.queryTaskItems(1):
+      # import pdb; pdb.set_trace()
+      assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name2, resolution, 0) )
 
 
-  # def test_deleteItem(self):
-    # """Test item deletion"""
+  def test_deleteItem(self):
+    """Test item deletion"""
     
-    # value = self.s3db.deleteItem('kasthuri11&image&0&0&0&0')
-    # item_value = self.s3db.getItem('kasthuri11&image&0&0&0&0')
-    # assert(item_value == None)
-    
-    # value = self.s3db.deleteItem('kasthuri11&image&0&0&0&1')
-    # item_value = self.s3db.getItem('kasthuri11&image&0&0&0&1')
-    # assert(item_value == None)
+    x_value = 0
+    y_value = 0
+    for z_value in range(0, 2, 1):
+      value = self.s3db.deleteItem(x_value, y_value, z_value)
+      item = self.s3db.getItem(x_value, y_value, z_value)
+      assert(item == None)

@@ -167,7 +167,8 @@ class S3IndexDB:
     except Exception as e:
       print e
       raise e
-    
+
+
   def queryProjectItems(self):
     """Query items based on project name"""
     
@@ -180,10 +181,12 @@ class S3IndexDB:
           # ':info_value' : info
         # }
       )
-      return response, 0
+      for item in response['Items']:
+        yield item
     except Exception as e:
       print e
       raise e
+
 
   def queryChannelItems(self):
     """Query items based on channel name"""
@@ -194,10 +197,12 @@ class S3IndexDB:
         Select = 'ALL_ATTRIBUTES',
         KeyConditionExpression = Key('project_name').eq(self.project) & Key('channel_resolution_taskid').begins_with(self.channel)
       )
-      return response, 0
+      for item in response['Items']:
+        yield item
     except Exception as e:
       print e
       raise e
+
 
   def queryResolutionItems(self):
     """Query items based on channel name"""
@@ -209,11 +214,13 @@ class S3IndexDB:
         Select = 'ALL_ATTRIBUTES',
         KeyConditionExpression = Key('project_name').eq(self.project) & Key('channel_resolution_taskid').begins_with(filter_expression)
       )
-      return response, 0
+      for item in response['Items']:
+        yield item
     except Exception as e:
       print e
       raise e
-  
+
+
   def queryTaskItems(self, task_id):
     """Query items based on channel name"""
     
@@ -224,18 +231,23 @@ class S3IndexDB:
         Select = 'ALL_ATTRIBUTES',
         KeyConditionExpression = Key('project_name').eq(self.project) & Key('channel_resolution_taskid').begins_with(filter_expression)
       )
-      return response, 0
+      for item in response['Items']:
+        yield item
     except Exception as e:
       print e
       raise e
 
-  def deleteItem(self, supercuboid_key):
+
+  def deleteItem(self, x, y, z):
     """Delete item from database"""
     
+    supercuboid_key = self.generateKey(x, y, z)
+    version_number = 0
     try:
       self.table.delete_item(
           Key = {
-            'supercuboid_key' : supercuboid_key
+            'supercuboid_key' : supercuboid_key,
+            'version_number' : version_number
           }
       )
     except botocore.exceptions.ClientError as e:

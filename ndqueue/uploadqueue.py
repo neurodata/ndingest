@@ -75,7 +75,7 @@ class UploadQueue(NDQueue):
 
   def sendMessage(self, tile_info):
     """Send a message to upload queue"""
-    NDQueue.sendMessage(self, json.dumps(tile_info))
+    return NDQueue.sendMessage(self, json.dumps(tile_info))
 
   def receiveMessage(self, number_of_messages=1):
     """Receive a message from the upload queue"""

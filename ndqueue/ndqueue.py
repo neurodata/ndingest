@@ -37,7 +37,8 @@ class NDQueue:
       response = self.queue.send_message(
           MessageBody = message_body,
           DelaySeconds = delay_seconds
-      )   
+      )
+      return response
     except Exception as e:
       print e
       raise

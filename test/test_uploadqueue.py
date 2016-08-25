@@ -17,9 +17,14 @@ import os
 sys.path += [os.path.abspath('..')]
 import json
 from ndqueue.uploadqueue import UploadQueue as UQ
+from ndqueue.uploadmessage import UploadMessage as UM
+
+project_name = 'kasthuri11'
+channel_name = 'image'
+resolution = 0
 
 # proj_info = [project, channel, resolution]
-proj_info = ['kasthuri11', 'image', '0']
+proj_info = [project_name, channel_name, str(resolution)]
 
 class Test_UploadQueue():
 
@@ -36,21 +41,20 @@ class Test_UploadQueue():
   def test_Message(self):
     """Test put, get and delete Message"""
     
-    tile_info = { 'project' : 'kasthuri11',
-                  'channel' : 'image',
-                  'x_tile'  : 1,
-                  'y_tile'  : 0,
-                  'x_tile'  : 1
-                }
+    x_tile = 0
+    y_tile = 0
 
-    # send message to the queue
-    self.upload_queue.sendMessage(tile_info)
-    self.upload_queue.sendMessage(tile_info)
-    self.upload_queue.sendMessage(tile_info)
+    for z_tile in range(0, 2, 1):
+      # encode the message
+      message = UM.encode(project_name, channel_name, resolution, x_tile, y_tile, z_tile)
+      # send message to the queue
+      self.upload_queue.sendMessage(message)
+    
     # receive message from the queue
     for message_id, receipt_handle, message_body in self.upload_queue.receiveMessage(number_of_messages=3):
       # check if we get the tile_info back correctly
-      assert(tile_info == message_body)
+      import pdb; pdb.set_trace()
+      assert(message_body['z_tile'] in [0, 1, 2])
       # delete message from the queue
       response = self.upload_queue.deleteMessage(message_id, receipt_handle)
       # check if the message was sucessfully deleted

@@ -15,7 +15,7 @@
 class UploadMessage:
     
   @staticmethod
-  def encode(project_name, channel_name, resolution, x_tile, y_tile, z_tile, time_range):
+  def encode(project_name, channel_name, resolution, x_tile, y_tile, z_tile, time_range=None):
     """Encode a message for the upload queue"""
     return { 'project' : project_name,
              'channel' : channel_name,

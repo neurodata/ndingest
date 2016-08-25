@@ -33,10 +33,9 @@ class UploadQueue(NDQueue):
     """Create the upload queue"""
     
     queue_name = UploadQueue.generateQueueName(proj_info)
-
+    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
     try:
       # creating the queue, if the queue already exists catch exception
-      sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
       queue = sqs.create_queue(
         QueueName = queue_name,
         Attributes = {
@@ -44,6 +43,7 @@ class UploadQueue(NDQueue):
           'MaximumMessageSize' : '262144'
         }
       )
+      return queue_name
     except Exception as e:
       print e
       raise

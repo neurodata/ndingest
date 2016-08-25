@@ -14,6 +14,7 @@
 
 import ndproj
 from ndqueue.uploadqueue import UploadQueue
+from ndqueue.uploadmessage import UploadMessage
 
 class NdWorker():
 
@@ -26,32 +27,11 @@ class NdWorker():
     self.proj = ndproj.NDProjectsDB().loadToken(token)
 
 
-  def generateMessage(x_tile, y_tile, z_tile, time_range):
-    """Generate the message to be inserted into the queue"""
-    return { 'project' : self.proj.getProjectName(),
-             'resolution' : self.resolution,
-             'channel' : self.channel,
-             'x_tile' : x_tile,
-             'y_tile' : y_tile,
-             'z_tile' : z_tile,
-             'time_range' : time_range
-           }
- 
-
-  def setupQueue():
-    """Setup the queue and return the queue name"""
-    queue_name = '{}_{}_{}'.format(self.proj.getProjectName(), self.channel, self.res)
-    UploadQueue.createQueue(queue_name)
-    self.queue = UploadQueue(queue_name)
-
-    return queue_name
-
-
   def populateQueue(tile_size=1024, time_interval=0):
     """Populate the message queue"""
     
     # setup the queue
-    queue_name = self.setupQueue()
+    queue_name = UploadQueue.createQueue()
     
     # load the image sizes
     [[ximage_size, yimage_size, zimage_size],(start_time, end_time)] = self.proj.datasetcfg.imageSize(self.resolution)
@@ -76,6 +56,7 @@ class NdWorker():
             time_range = None if time_interval is 0 else [time, time_interval]
             # generate a message for each one
             print "inserting message:x{}y{}z{}".format(xtile, ytile, ztile)
-            self.queue.sendMessage(self.generateMessage(xtile, ytile, ztile, time_range))
+            message = UploadMessage.encode(self.proj.getProjectName(), self.channel, self.resolution, xtile, ytile, ztile, time_range)
+            self.queue.sendMessage(message)
 
     return queue_name

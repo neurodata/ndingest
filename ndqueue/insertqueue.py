@@ -41,6 +41,7 @@ class InsertQueue(NDQueue):
           'MaximumMessageSize' : '262144'
         }
       )
+      return queue_name
     except Exception as e:
       print e
       raise

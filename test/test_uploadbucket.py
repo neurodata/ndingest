@@ -14,12 +14,19 @@
 
 import sys
 import os
+import cStringIO
 sys.path += [os.path.abspath('..')]
 from ndbucket.uploadbucket import UploadBucket as UQ
 
-from moto import mock_s3
-import pdb; pdb.set_trace()
+# from moto import mock_s3
 key_value = '1_2_3.tif'
+
+project_name = 'kasthuri11'
+channel_name = 'image'
+resolution = 0
+
+# proj_info = [project, channel, resolution]
+proj_info = [project_name, channel_name, str(resolution)]
 
 class Message:
   def __init__(self):
@@ -36,6 +43,7 @@ class Test_Upload_Bucket():
   # @mock_s3
   def teardown_class(self):
     """Teardown Parameters"""
+    # pass
     UQ.deleteBucket()
 
 
@@ -43,8 +51,24 @@ class Test_Upload_Bucket():
   def test_put_object(self):
     """Testing put object"""
     
+    # import pdb; pdb.set_trace()
     uq = UQ()
-    m = Message()
-    uq.putobject(m)
-    value = uq.getobject(key_value)
-    uq.deleteobject(key_value)
+    
+    x_tile = 0
+    y_tile = 0
+    message_id = '1123'
+    receipt_handle = 'test_string'
+
+    for z_tile in range(0, 2, 1):
+      # creating a tile handle for test
+      tile_handle = cStringIO.StringIO()
+      # uploading object
+      response = uq.putObject(tile_handle, project_name, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle)
+      tile_handle.close()
+      object_key = uq.generateObjectKey(project_name, channel_name, resolution, x_tile, y_tile, z_tile)
+      # fetching object
+      object_body, object_receipt_handle, object_message_id = uq.getObject(object_key)
+      assert( object_message_id == message_id )
+      assert( object_receipt_handle == receipt_handle )
+      # delete the object
+      response = uq.deleteObject(object_key)

@@ -24,8 +24,8 @@ class UploadQueue(NDQueue):
   def __init__(self, proj_info, region_name='us-west-2', endpoint_url='http://localhost:4568'):
     """Create resources for the queue"""
     
-    queue_name = UploadQueue.generateQueueName(proj_info)
-    NDQueue.__init__(self, queue_name)
+    self.queue_name = UploadQueue.generateQueueName(proj_info)
+    NDQueue.__init__(self, self.queue_name)
 
 
   @staticmethod

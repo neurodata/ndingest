@@ -33,6 +33,7 @@ class NDWorker():
     
     # setup the queue
     queue_name = UploadQueue.createQueue([self.proj.getProjectName(), self.channel, str(self.resolution)])
+    upload_queue = UploadQueue([self.proj.getProjectName(), self.channel, str(self.resolution)])
     
     # load the image sizes
     [[ximage_size, yimage_size, zimage_size],(start_time, end_time)] = self.proj.datasetcfg.imageSize(self.resolution)
@@ -45,7 +46,7 @@ class NDWorker():
     num_ytiles = yimage_size / tile_size
     
     # iterate over time
-    for time in range(start_time, end_time, time_interval):
+    for time in range(start_time, end_time+1, time_interval):
     
       # iterate over the x and y range
       for ytile in range(0, num_ytiles, 1):
@@ -54,10 +55,11 @@ class NDWorker():
           # iterate over zrange
           for ztile in range(z_offset, zimage_size, 1):
             
-            time_range = None if time_interval is 0 else [time, time_interval]
+            time_range = None if end_time - start_time == 0 else [time, time_interval]
             # generate a message for each one
             print "inserting message:x{}y{}z{}".format(xtile, ytile, ztile)
             message = UploadMessage.encode(self.proj.getProjectName(), self.channel, self.resolution, xtile, ytile, ztile, time_range)
-            self.queue.sendMessage(message)
+            response = upload_queue.sendMessage(message)
+            print response
 
     return queue_name

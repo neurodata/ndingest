@@ -18,7 +18,7 @@ sys.path += [os.path.abspath('..')]
 from nddynamo.tileindexdb import TileIndexDB
 
 
-class Test_IngestDB():
+class Test_TileIndexDB():
 
   def setup_class(self):
     """Setup parameters"""

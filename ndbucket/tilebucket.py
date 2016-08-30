@@ -16,14 +16,15 @@ import hashlib
 import boto3
 import botocore
 from django.conf import settings
+import ndlib
+from s3util import generateS3Key
 
-
-class UploadBucket:
+class TileBucket:
 
   def __init__(self, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resource for the upload queue"""
     
-    bucket_name = UploadBucket.generateBucketName()
+    bucket_name = TileBucket.getBucketName()
     self.s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
     try:
       self.bucket = self.s3.Bucket(bucket_name)
@@ -36,7 +37,7 @@ class UploadBucket:
   def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
     """Create the upload bucket"""
     
-    bucket_name = UploadBucket.generateBucketName()
+    bucket_name = TileBucket.getBucketName()
     s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
     bucket = s3.Bucket(bucket_name)
     try:
@@ -53,7 +54,7 @@ class UploadBucket:
   def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
     """Delete the upload bucket"""
     
-    bucket_name = UploadBucket.generateBucketName()
+    bucket_name = TileBucket.getBucketName()
     s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
     bucket = s3.Bucket(bucket_name)
     try:
@@ -65,25 +66,22 @@ class UploadBucket:
   
   
   @staticmethod
-  def generateBucketName():
+  def getBucketName():
     """Generate the bucket name"""
-    return 'upload_bucket'
+    return settings.S3_TILE_BUCKET
 
 
-  def generateObjectKey(self, project_name, channel_name, resolution, x_tile, y_tile, z_tile):
+  def generateObjectKey(self, project_name, channel_name, resolution, x_tile, y_tile, z_tile, time=0):
     """Generate the key for the file in scratch space"""
-
-    m = hashlib.md5()
-    m.update('{}&{}&{}&{}&{}&{}'.format(project_name, channel_name, res, x_tile, y_tile, z_tile))
-    # important to do hexdigest - s3 like hex-hashed keys
-    return '{}&{}&{}&{}&{}&{}&{}'.format(m.hexdigest(), project_name, channel_name, res, x_tile, y_tile, z_tile) 
+    zidx = ndlib.XYZMorton([x_tile, y_tile, z_tile])
+    return generateS3Key(project_name, channel_name, resolution, zidx, time)
 
 
-  def putObject(self, tile_handle, project_name, channel_name, res, x_tile, y_tile, z_tile, message_id, receipt_handle):
+  def putObject(self, tile_handle, project_name, channel_name, res, x_tile, y_tile, z_tile, message_id, receipt_handle, time=0):
     """Put object in the upload bucket"""
     
     # generate the key
-    object_key = self.generateObjectKey(project_name, channel_name, res, x_tile, y_tile, z_tile)
+    object_key = self.generateObjectKey(project_name, channel_name, res, x_tile, y_tile, z_tile, time)
     
     # opening the file
     # try:

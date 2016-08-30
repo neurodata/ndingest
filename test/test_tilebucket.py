@@ -14,45 +14,36 @@
 
 import sys
 import os
-import cStringIO
-sys.path += [os.path.abspath('..')]
-from ndbucket.uploadbucket import UploadBucket as UQ
+sys.path += [os.path.abspath('../../django')]
+import ND.settings
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
 
-# from moto import mock_s3
-key_value = '1_2_3.tif'
+import cStringIO
+from ndbucket.tilebucket import TileBucket
 
 project_name = 'kasthuri11'
 channel_name = 'image'
 resolution = 0
 
-# proj_info = [project, channel, resolution]
+# proj_info format == [project, channel, resolution]
 proj_info = [project_name, channel_name, str(resolution)]
 
-class Message:
-  def __init__(self):
-    self.body = key_value
-    self.receipt_handle = 'test&handle'
 
 class Test_Upload_Bucket():
 
-  # @mock_s3
   def setup_class(self):
     """Setup Parameters"""
-    UQ.createBucket(endpoint_url='http://localhost:4567')
+    TileBucket.createBucket(endpoint_url='http://localhost:4567')
+    self.tile_bucket = TileBucket(endpoint_url='http://localhost:4567')
 
-  # @mock_s3
+
   def teardown_class(self):
     """Teardown Parameters"""
-    # pass
-    UQ.deleteBucket(endpoint_url='http://localhost:4567')
+    TileBucket.deleteBucket(endpoint_url='http://localhost:4567')
 
 
-  # @mock_s3
   def test_put_object(self):
     """Testing put object"""
-    
-    # import pdb; pdb.set_trace()
-    uq = UQ(endpoint_url='http://localhost:4567')
     
     x_tile = 0
     y_tile = 0
@@ -63,12 +54,12 @@ class Test_Upload_Bucket():
       # creating a tile handle for test
       tile_handle = cStringIO.StringIO()
       # uploading object
-      response = uq.putObject(tile_handle, project_name, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle)
+      response = self.tile_bucket.putObject(tile_handle, project_name, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle)
       tile_handle.close()
-      object_key = uq.generateObjectKey(project_name, channel_name, resolution, x_tile, y_tile, z_tile)
+      object_key = self.tile_bucket.generateObjectKey(project_name, channel_name, resolution, x_tile, y_tile, z_tile)
       # fetching object
-      object_body, object_receipt_handle, object_message_id = uq.getObject(object_key)
+      object_body, object_receipt_handle, object_message_id = self.tile_bucket.getObject(object_key)
       assert( object_message_id == message_id )
       assert( object_receipt_handle == receipt_handle )
       # delete the object
-      response = uq.deleteObject(object_key)
+      response = self.tile_bucket.deleteObject(object_key)

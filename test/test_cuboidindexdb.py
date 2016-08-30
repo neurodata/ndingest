@@ -25,18 +25,20 @@ channel_name = 'image'
 channel_name2 = 'image2'
 resolution = 0
 
-class Test_S3IndexDB():
+class Test_CuboidIndexDB():
 
   def setup_class(self):
     """Setup parameters"""
     CuboidIndexDB.createTable(endpoint_url='http://localhost:8000')
-    self.s3db = CuboidIndexDB(project_name, channel_name, endpoint_url='http://localhost:8000')
-    self.s3db2 = CuboidIndexDB(project_name, channel_name2, endpoint_url='http://localhost:8000')
+    self.cuboid_index = CuboidIndexDB(project_name, channel_name, endpoint_url='http://localhost:8000')
+    self.cuboid_index2 = CuboidIndexDB(project_name, channel_name2, endpoint_url='http://localhost:8000')
     
+
   def teardown_class(self):
     """Teardown parameters"""
     CuboidIndexDB.deleteTable(endpoint_url='http://localhost:8000')
     
+
   def test_putItem(self):
     """Test data insertion"""
     
@@ -44,21 +46,21 @@ class Test_S3IndexDB():
     x_value = 0
     y_value = 0
     for z_value in range(0, 2, 1):
-      self.s3db.putItem(resolution, x_value, y_value, z_value)
+      self.cuboid_index.putItem(resolution, x_value, y_value, z_value)
   
     # checking if the items were inserted
     for z_value in range(0, 2, 1):
-      item_value = self.s3db.getItem(resolution, x_value, y_value, z_value)
+      item_value = self.cuboid_index.getItem(resolution, x_value, y_value, z_value)
       assert( item_value['project_name'] == project_name )
       assert( item_value['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name, resolution, 0) )
     
     # inserting two values for task 1, zvalues 0-1
     for z_value in range(0, 1, 1):
-      self.s3db.putItem(resolution, x_value, y_value, z_value, task_id=1)
+      self.cuboid_index.putItem(resolution, x_value, y_value, z_value, task_id=1)
     
     # checking if the items were updated
     for z_value in range(0, 1, 1):
-      item_value = self.s3db.getItem(resolution, x_value, y_value, z_value)
+      item_value = self.cuboid_index.getItem(resolution, x_value, y_value, z_value)
       assert( item_value['project_name'] == project_name )
       assert( item_value['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name, resolution, 1) )
     
@@ -70,15 +72,15 @@ class Test_S3IndexDB():
     x_value = 0
     y_value = 0
     for z_value in range(0, 2, 1):
-      self.s3db.putItem(resolution, x_value, y_value, z_value)
+      self.cuboid_index.putItem(resolution, x_value, y_value, z_value)
     
-    for item in self.s3db.queryProjectItems():
+    for item in self.cuboid_index.queryProjectItems():
       assert( item['project_name'] == project_name )
     
-    for item in self.s3db2.queryChannelItems():
+    for item in self.cuboid_index2.queryChannelItems():
       assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name2, resolution, 0) )
       
-    for item in self.s3db.queryTaskItems(resolution, 1):
+    for item in self.cuboid_index.queryTaskItems(resolution, 1):
       # import pdb; pdb.set_trace()
       assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name2, resolution, 0) )
 
@@ -89,6 +91,6 @@ class Test_S3IndexDB():
     x_value = 0
     y_value = 0
     for z_value in range(0, 2, 1):
-      value = self.s3db.deleteXYZ(resolution, x_value, y_value, z_value)
-      item = self.s3db.getItem(resolution, x_value, y_value, z_value)
+      value = self.cuboid_index.deleteXYZ(resolution, x_value, y_value, z_value)
+      item = self.cuboid_index.getItem(resolution, x_value, y_value, z_value)
       assert(item == None)

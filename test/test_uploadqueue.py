@@ -19,8 +19,8 @@ import ND.settings
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
 
 import json
-from ndqueue.uploadqueue import UploadQueue as UQ
-from ndqueue.uploadmessage import UploadMessage as UM
+from ndqueue.uploadqueue import UploadQueue
+from ndqueue.uploadmessage import UploadMessage
 
 project_name = 'kasthuri11'
 channel_name = 'image'
@@ -33,12 +33,12 @@ class Test_UploadQueue():
 
   def setup_class(self):
     """Setup the class"""
-    UQ.createQueue(proj_info, endpoint_url='http://localhost:4568')
-    self.upload_queue = UQ(proj_info, endpoint_url='http://localhost:4568')
+    UploadQueue.createQueue(proj_info, endpoint_url='http://localhost:4568')
+    self.upload_queue = UploadQueue(proj_info, endpoint_url='http://localhost:4568')
 
   def teardown_class(self):
     """Teardown parameters"""
-    UQ.deleteQueue(proj_info, endpoint_url='http://localhost:4568')
+    UploadQueue.deleteQueue(proj_info, endpoint_url='http://localhost:4568')
 
   
   def test_Message(self):
@@ -49,7 +49,7 @@ class Test_UploadQueue():
 
     for z_tile in range(0, 2, 1):
       # encode the message
-      message = UM.encode(project_name, channel_name, resolution, x_tile, y_tile, z_tile)
+      message = UploadMessage.encode(project_name, channel_name, resolution, x_tile, y_tile, z_tile)
       # send message to the queue
       self.upload_queue.sendMessage(message)
     

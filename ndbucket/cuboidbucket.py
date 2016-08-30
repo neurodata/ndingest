@@ -23,7 +23,7 @@ class CuboidBucket:
   def __init__(self, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resource for the upload queue"""
     
-    bucket_name = settings.S3_CUBOID_STORE
+    bucket_name = CuboidBucket.getBucketName()
     self.s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
     try:
       self.bucket = self.s3.Bucket(bucket_name)
@@ -36,7 +36,7 @@ class CuboidBucket:
   def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
     """Create the upload bucket"""
     
-    bucket_name = settings.S3_CUBOID_STORE
+    bucket_name = CuboidBucket.getBucketName()
     s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
     bucket = s3.Bucket(bucket_name)
     try:
@@ -53,7 +53,7 @@ class CuboidBucket:
   def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
     """Delete the upload bucket"""
     
-    bucket_name = settings.S3_CUBOID_STORE
+    bucket_name = CuboidBucket.getBucketName()
     s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
     bucket = s3.Bucket(bucket_name)
     try:
@@ -63,6 +63,10 @@ class CuboidBucket:
       print e
       raise
   
+  @staticmethod
+  def getBucketName():
+    """Generate the Bucket Name"""
+    return settings.S3_CUBOID_BUCKET
   
   # def putObject(self, tile_handle, project_name, channel_name, res, x_tile, y_tile, z_tile, message_id, receipt_handle):
     # """Put object in the upload bucket"""

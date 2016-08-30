@@ -92,4 +92,5 @@ class NDQueue:
           { 'Id' : message_id,
             'ReceiptHandle' : receipt_handle
           }
+      )
     return entries

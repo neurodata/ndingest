@@ -24,8 +24,10 @@ class CuboidIndexDB:
 
   def __init__(self, project_name, channel_name, region_name=settings.REGION_NAME, endpoint_url=None):
 
+    # create the resource
+    table_name = CuboidIndexDB.getTableName()
     db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    self.table = db.Table(settings.DYNAMO_S3INDEX_TABLE)
+    self.table = db.Table(table_name)
     self.project = project_name
     self.channel = channel_name
  
@@ -34,10 +36,12 @@ class CuboidIndexDB:
   def createTable(region_name=settings.REGION_NAME, endpoint_url=None):
     """Create the s3index database in dynamodb"""
     
+    # create the resource
+    table_name = CuboidIndexDB.getTableName()
     db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
       table = db.create_table(
-          TableName = settings.DYNAMO_S3INDEX_TABLE,
+          TableName = table_name,
           KeySchema = [
             {
               'AttributeName': 'supercuboid_key',
@@ -101,15 +105,21 @@ class CuboidIndexDB:
   @staticmethod
   def deleteTable(region_name=settings.REGION_NAME, endpoint_url=None):
     """Delete the ingest database in dynamodb"""
-
+    
+    # create the resource
+    table_name = CuboidIndexDB.getTableName()
     db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
-      table = db.Table(settings.DYNAMO_S3INDEX_TABLE)
+      table = db.Table(table_name)
       table.delete()
     except Exception as e:
       print e
       raise e
-
+  
+  @staticmethod
+  def getTableName():
+    """Return table name"""
+    return settings.DYNAMO_CUBOIDINDEX_TABLE
 
   def generatePrimaryKey(self, resolution, x, y, z, time=0):
     """Generate key for each supercuboid"""

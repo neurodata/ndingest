@@ -25,7 +25,7 @@ class TileIndexDB:
   def __init__(self, project_name, channel_name, region_name=settings.REGION_NAME, endpoint_url=None):
 
     # creating the resource
-    table_name = settings.DYNAMO_TILEINDEX_DB
+    table_name = TileIndexDB.getTableName()
     db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     self.table = db.Table(table_name)
@@ -37,7 +37,7 @@ class TileIndexDB:
     """Create the ingest database in dynamodb"""
     
     # creating the resource
-    table_name = settings.DYNAMO_TILEINDEX_DB
+    table_name = TileIndexDB.getTableName()
     db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
@@ -93,7 +93,7 @@ class TileIndexDB:
     """Delete the ingest database in dynamodb"""
 
     # creating the resource
-    table_name = settings.DYNAMO_TILEINDEX_DB
+    table_name = TileIndexDB.getTableName()
     db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
@@ -102,7 +102,11 @@ class TileIndexDB:
     except Exception as e:
       print e
       raise e
-
+  
+  @staticmethod
+  def getTableName():
+    """Return table name"""
+    return settings.DYNAMO_TILEINDEX_TABLE
 
   def generateKey(self, x, y, z):
     """Generate key for each supercuboid"""

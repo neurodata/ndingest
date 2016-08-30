@@ -22,7 +22,7 @@ class IngestQueue(NDQueue):
   def __init__(self, proj_info, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resources for the queue"""
     
-    queue_name = InsertQueue.generateQueueName(proj_info)
+    queue_name = IngestQueue.generateQueueName(proj_info)
     NDQueue.__init__(self, queue_name, region_name, endpoint_url)
 
 
@@ -31,7 +31,7 @@ class IngestQueue(NDQueue):
     """Create the upload queue"""
     
     # creating the resource
-    queue_name = InsertQueue.generateQueueName(proj_info)
+    queue_name = IngestQueue.generateQueueName(proj_info)
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
@@ -54,7 +54,7 @@ class IngestQueue(NDQueue):
     """Delete the upload queue"""
 
     # creating the resource
-    queue_name = InsertQueue.generateQueueName(proj_info)
+    queue_name = IngestQueue.generateQueueName(proj_info)
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:

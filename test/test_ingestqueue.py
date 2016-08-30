@@ -19,30 +19,30 @@ import ND.settings
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
 
 import pytest
-from ndqueue.insertqueue import InsertQueue as IQ
+from ndqueue.ingestqueue import IngestQueue
 
-# proj_info = [project, channel, resolution]
+# proj_info == [project, channel, resolution]
 proj_info = ['kasthuri11', 'image', '0']
 
-class Test_Insert_Queue():
+class Test_Ingest_Queue():
 
   def setup_class(self):
     """Setup class parameters"""
-    IQ.createQueue(proj_info, endpoint_url='http://localhost:4568')
-    self.insert_queue = IQ(proj_info, endpoint_url='http://localhost:4568')
+    IngestQueue.createQueue(proj_info, endpoint_url='http://localhost:4568')
+    self.ingest_queue = IngestQueue(proj_info, endpoint_url='http://localhost:4568')
     pass
   
   def teardown_class(self):
     """Teardown parameters"""
-    IQ.deleteQueue(proj_info, endpoint_url='http://localhost:4568')
+    IngestQueue.deleteQueue(proj_info, endpoint_url='http://localhost:4568')
     pass
 
   def test_Message(self):
     """Testing the upload queue"""
     
     supercuboid_key = 'kasthuri11&image&0&0'
-    self.insert_queue.sendMessage(supercuboid_key)
-    for message_id, receipt_handle, message_body in self.insert_queue.receiveMessage():
+    self.ingest_queue.sendMessage(supercuboid_key)
+    for message_id, receipt_handle, message_body in self.ingest_queue.receiveMessage():
       assert(supercuboid_key == message_body)
-      response = self.insert_queue.deleteMessage(message_id, receipt_handle)
+      response = self.ingest_queue.deleteMessage(message_id, receipt_handle)
       assert('Successful' in response)

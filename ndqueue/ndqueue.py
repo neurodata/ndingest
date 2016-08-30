@@ -58,9 +58,11 @@ class NDQueue:
       raise
     
   
-  def deleteMessage(self, message_id, receipt_handle):
+  def deleteMessage(self, message_id, receipt_handle, number_of_messages=1):
     """Delete message from queue"""
     
+
+    # KL TODO Fix this for deleting multiple messages
     try:
       response = self.queue.delete_messages(
           Entries = [
@@ -79,3 +81,15 @@ class NDQueue:
     except Exception as e:
       print e
       raise
+
+
+  def _populateEntries(self, message_id_list, receipt_handle_list):
+    """Populate a list of Entries"""
+
+    entries = []
+    for message_id, receipt_handle in zip(message_id_list, receipt_handle_list):
+      entries.append( 
+          { 'Id' : message_id,
+            'ReceiptHandle' : receipt_handle
+          }
+    return entries

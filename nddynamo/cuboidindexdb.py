@@ -20,7 +20,7 @@ from django.conf import settings
 import ndlib
 from s3util import generateS3Key
 
-class S3IndexDB:
+class CuboidIndexDB:
 
   def __init__(self, project_name, channel_name, region_name=settings.REGION_NAME, endpoint_url=None):
 
@@ -111,10 +111,10 @@ class S3IndexDB:
       raise e
 
 
-  def generatePrimaryKey(self, resolution, x, y, z):
+  def generatePrimaryKey(self, resolution, x, y, z, time=0):
     """Generate key for each supercuboid"""
     zidx = ndlib.XYZMorton([x, y, z])
-    return generateS3Key(self.project, self.channel, resolution, zidx)
+    return generateS3Key(self.project, self.channel, resolution, zidx, time)
     # return '{}&{}&{}&{}&{}&{}'.format(self.project, self.channel, resolution, x, y, z)
 
   
@@ -123,10 +123,10 @@ class S3IndexDB:
     # return '{}&{}&{}&{}'.format(self.project, self.channel, resolution, task_id)
 
 
-  def putItem(self, resolution, x, y, z, task_id=0):
+  def putItem(self, resolution, x, y, z, time=0, task_id=0):
     """Inserting an index for each supercuboid_array"""
     
-    supercuboid_key = self.generatePrimaryKey(resolution, x, y, z)
+    supercuboid_key = self.generatePrimaryKey(resolution, x, y, z, time)
     version_number = 0
 
     try:

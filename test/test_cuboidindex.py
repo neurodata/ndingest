@@ -18,7 +18,7 @@ sys.path += [os.path.abspath('../../django')]
 import ND.settings
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
 
-from nddynamo.s3indexdb import S3IndexDB as S3DB
+from nddynamo.cuboidindexdb import CuboidIndexDB
 
 project_name = 'kasthuri11'
 channel_name = 'image'
@@ -29,13 +29,13 @@ class Test_S3IndexDB():
 
   def setup_class(self):
     """Setup parameters"""
-    S3DB.createTable(endpoint_url='http://localhost:8000')
-    self.s3db = S3DB(project_name, channel_name, endpoint_url='http://localhost:8000')
-    self.s3db2 = S3DB(project_name, channel_name2, endpoint_url='http://localhost:8000')
+    CuboidIndexDB.createTable(endpoint_url='http://localhost:8000')
+    self.s3db = CuboidIndexDB(project_name, channel_name, endpoint_url='http://localhost:8000')
+    self.s3db2 = CuboidIndexDB(project_name, channel_name2, endpoint_url='http://localhost:8000')
     
   def teardown_class(self):
     """Teardown parameters"""
-    S3DB.deleteTable(endpoint_url='http://localhost:8000')
+    CuboidIndexDB.deleteTable(endpoint_url='http://localhost:8000')
     
   def test_putItem(self):
     """Test data insertion"""

@@ -15,25 +15,31 @@
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import botocore
+from django.conf import settings
 
 # TODO KL Import this from settings/parameter file
 table_name = 'ingest_db'
 
-class IngestDB:
+class TileIndexDB:
 
-  def __init__(self, project_name='kasthuri11', channel_name='image', resolution=0):
+  def __init__(self, project_name, channel_name, region_name=settings.REGION_NAME, endpoint_url=None):
 
-    db = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
+    # creating the resource
+    table_name = settings.DYNAMO_TILEINDEX_DB
+    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    
     self.table = db.Table(table_name)
     self.project = project_name
     self.channel = channel_name
-    self.resolution = resolution
  
   @staticmethod
-  def createTable():
+  def createTable(region_name=settings.REGION_NAME, endpoint_url=None):
     """Create the ingest database in dynamodb"""
     
-    dynamo = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
+    # creating the resource
+    table_name = settings.DYNAMO_TILEINDEX_DB
+    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    
     try:
       table = dynamo.create_table(
           TableName = table_name,
@@ -83,10 +89,13 @@ class IngestDB:
 
 
   @staticmethod
-  def deleteTable():
+  def deleteTable(region_name=settings.REGION_NAME, endpoint_url=None):
     """Delete the ingest database in dynamodb"""
 
-    dynamo = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
+    # creating the resource
+    table_name = settings.DYNAMO_TILEINDEX_DB
+    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    
     try:
       table = dynamo.Table(table_name)
       table.delete()

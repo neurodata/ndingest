@@ -12,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import boto3
 import botocore
 from django.conf import settings
 from ndqueue import NDQueue
 
-class InsertQueue(NDQueue):
+class CleanupQueue(NDQueue):
 
+  
   def __init__(self, proj_info, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resources for the queue"""
     
-    queue_name = InsertQueue.generateQueueName(proj_info)
-    NDQueue.__init__(self, queue_name, region_name, endpoint_url)
+    self.queue_name = UploadQueue.generateQueueName(proj_info)
+    return NDQueue.__init__(self, self.queue_name, region_name, endpoint_url)
 
 
   @staticmethod
@@ -31,7 +33,7 @@ class InsertQueue(NDQueue):
     """Create the upload queue"""
     
     # creating the resource
-    queue_name = InsertQueue.generateQueueName(proj_info)
+    queue_name = UploadQueue.generateQueueName(proj_info)
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
@@ -54,7 +56,7 @@ class InsertQueue(NDQueue):
     """Delete the upload queue"""
 
     # creating the resource
-    queue_name = InsertQueue.generateQueueName(proj_info)
+    queue_name = UploadQueue.generateQueueName(proj_info)
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
@@ -64,6 +66,7 @@ class InsertQueue(NDQueue):
       )
       # deleting the queue
       response = queue.delete()
+      return response
     except Exception as e:
       print e
       raise
@@ -72,21 +75,21 @@ class InsertQueue(NDQueue):
   @staticmethod
   def generateQueueName(proj_info):
     """Generate the queue name based on project information"""
-    return '-'.join(proj_info+['INSERT'])
-  
-  
-  def sendMessage(self, supercuboid_key):
+    return '&'.join(proj_info+['CLEANUP'])
+
+
+  def sendMessage(self, tile_info):
     """Send a message to upload queue"""
-    NDQueue.sendMessage(self, supercuboid_key)
+    return NDQueue.sendMessage(self, json.dumps(tile_info))
 
 
   def receiveMessage(self, number_of_messages=1):
     """Receive a message from the upload queue"""
     message_list = NDQueue.receiveMessage(self, number_of_messages=number_of_messages)
     for message in message_list:
-      yield message.message_id, message.receipt_handle, message.body
+      yield message.message_id, message.receipt_handle, json.loads(message.body)
 
 
-  def deleteMessage(self, message_id, receipt_handle):
+  def deleteMessage(self, message_id, receipt_handle, number_of_messages=1):
     """Delete a message from the upload queue"""
-    return NDQueue.deleteMessage(self, message_id, receipt_handle)
+    return NDQueue.deleteMessage(self, message_id, receipt_handle, number_of_messages=number_of_messages)

@@ -15,19 +15,19 @@
 import sys
 import os
 sys.path += [os.path.abspath('..')]
-from nddynamo.ingestdb import IngestDB as IDB
+from nddynamo.tileindexdb import TileIndexDB
 
 
 class Test_IngestDB():
 
   def setup_class(self):
     """Setup parameters"""
-    IDB.createTable()
-    self.idb = IDB()
+    TileIndexDB.createTable(endpoint_url='http://localhost:8080')
+    self.idb = TileIndexDB(endpoint_url='http://localhost:8080')
     
   def teardown_class(self):
     """Teardown parameters"""
-    IDB.deleteTable()
+    TileIndexDB.deleteTable(endpoint_url='http://localhost:8080')
     
   def test_putItem(self):
     """Test data insertion"""

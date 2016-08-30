@@ -15,13 +15,12 @@
 import hashlib
 import boto3
 import botocore
+from django.conf import settings
 
-# TODO KL Load the queue name here
-upload_bucket = 'upload_bucket'
 
 class UploadBucket:
 
-  def __init__(self, region_name='us-west-2', endpoint_url='http://localhost:4567'):
+  def __init__(self, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resource for the upload queue"""
     
     bucket_name = UploadBucket.generateBucketName()
@@ -34,7 +33,7 @@ class UploadBucket:
 
 
   @staticmethod
-  def createBucket(region_name='us-west-2', endpoint_url='http://localhost:4567'):
+  def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
     """Create the upload bucket"""
     
     bucket_name = UploadBucket.generateBucketName()
@@ -51,7 +50,7 @@ class UploadBucket:
 
 
   @staticmethod
-  def deleteBucket(region_name='us-west-2', endpoint_url='http://localhost:4567'):
+  def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
     """Delete the upload bucket"""
     
     bucket_name = UploadBucket.generateBucketName()
@@ -68,12 +67,12 @@ class UploadBucket:
   @staticmethod
   def generateBucketName():
     """Generate the bucket name"""
-
     return 'upload_bucket'
 
 
-  def generateObjectKey(self, project_name, channel_name, res, x_tile, y_tile, z_tile):
+  def generateObjectKey(self, project_name, channel_name, resolution, x_tile, y_tile, z_tile):
     """Generate the key for the file in scratch space"""
+
     m = hashlib.md5()
     m.update('{}&{}&{}&{}&{}&{}'.format(project_name, channel_name, res, x_tile, y_tile, z_tile))
     # important to do hexdigest - s3 like hex-hashed keys
@@ -109,7 +108,7 @@ class UploadBucket:
     except Exception as e:
       print e
       raise
-
+  
 
   def getObject(self, object_key):
     """Get object from the upload bucket"""

@@ -16,29 +16,28 @@ import blosc
 import boto3
 import botocore
 from boto3.dynamodb.conditions import Key, Attr
-
-# TODO KL Import this from settings/parameter file
-table_name = 's3index_db'
+from django.conf import settings
+import ndlib
+from s3util import generateS3Key
 
 class S3IndexDB:
 
-  def __init__(self, project_name='kasthuri11', channel_name='image', resolution=0):
+  def __init__(self, project_name, channel_name, region_name=settings.REGION_NAME, endpoint_url=None):
 
-    db = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
-    self.table = db.Table(table_name)
+    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    self.table = db.Table(settings.DYNAMO_S3INDEX_TABLE)
     self.project = project_name
     self.channel = channel_name
-    self.resolution = resolution
  
 
   @staticmethod
-  def createTable():
+  def createTable(region_name=settings.REGION_NAME, endpoint_url=None):
     """Create the s3index database in dynamodb"""
     
-    db = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
+    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
       table = db.create_table(
-          TableName = table_name,
+          TableName = settings.DYNAMO_S3INDEX_TABLE,
           KeySchema = [
             {
               'AttributeName': 'supercuboid_key',
@@ -46,7 +45,7 @@ class S3IndexDB:
             },
             {
               'AttributeName': 'version_number',
-              'KeyType': 'SORT'
+              'KeyType': 'RANGE'
             }
           ],
           AttributeDefinitions = [
@@ -77,7 +76,7 @@ class S3IndexDB:
                 },
                 {
                   'AttributeName': 'channel_resolution_taskid',
-                  'KeyType': 'SORT'
+                  'KeyType': 'RANGE'
                 }
               ],
               'Projection': {
@@ -100,34 +99,34 @@ class S3IndexDB:
 
 
   @staticmethod
-  def deleteTable():
+  def deleteTable(region_name=settings.REGION_NAME, endpoint_url=None):
     """Delete the ingest database in dynamodb"""
 
-    db = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
+    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
-      table = db.Table(table_name)
+      table = db.Table(settings.DYNAMO_S3INDEX_TABLE)
       table.delete()
     except Exception as e:
       print e
       raise e
 
 
-  def generateKey(self, x, y, z):
+  def generatePrimaryKey(self, resolution, x, y, z):
     """Generate key for each supercuboid"""
-    # return {'supercuboid_key': '{}&{}&{}&{}&{}&{}'.format(self.project, self.channel, self.resolution, x, y, z)}
-    return '{}&{}&{}&{}&{}&{}'.format(self.project, self.channel, self.resolution, x, y, z)
+    zidx = ndlib.XYZMorton([x, y, z])
+    return generateS3Key(self.project, self.channel, resolution, zidx)
+    # return '{}&{}&{}&{}&{}&{}'.format(self.project, self.channel, resolution, x, y, z)
 
   
-  def generateInfoKey(self, task_id):
-    """Generate task key for the project channel"""
-    return '{}&{}&{}&{}'.format(self.project, self.channel, self.resolution, task_id)
+  # def generateInfoKey(self, resolution, task_id):
+    # """Generate task key for the project channel"""
+    # return '{}&{}&{}&{}'.format(self.project, self.channel, resolution, task_id)
 
 
-  def putItem(self, x, y, z, task_id=0):
+  def putItem(self, resolution, x, y, z, task_id=0):
     """Inserting an index for each supercuboid_array"""
     
-    supercuboid_key = self.generateKey(x, y, z)
-    # info_key = self.generateInfoKey(task_id)
+    supercuboid_key = self.generatePrimaryKey(resolution, x, y, z)
     version_number = 0
 
     try:
@@ -136,7 +135,7 @@ class S3IndexDB:
             'supercuboid_key' : supercuboid_key,
             'version_number' : version_number,
             'project_name' : self.project,
-            'channel_resolution_taskid' : '{}&{}&{}'.format(self.channel, self.resolution, task_id)
+            'channel_resolution_taskid' : '{}&{}&{}'.format(self.channel, resolution, task_id)
           },
           ReturnValues = 'NONE',
           ReturnConsumedCapacity = 'INDEXES'
@@ -146,10 +145,10 @@ class S3IndexDB:
       raise e
  
 
-  def getItem(self, x, y, z):
+  def getItem(self, resolution, x, y, z):
     """Get an item based on supercuboid_key"""
 
-    supercuboid_key = self.generateKey(x, y, z)
+    supercuboid_key = self.generatePrimaryKey(resolution, x, y, z)
     version_number = 0
     try:
       response =  self.table.get_item(
@@ -204,10 +203,10 @@ class S3IndexDB:
       raise e
 
 
-  def queryResolutionItems(self):
+  def queryResolutionItems(self, resolution):
     """Query items based on channel name"""
     
-    filter_expression = '{}&{}'.format(self.channel, self.resolution)
+    filter_expression = '{}&{}'.format(self.channel, resolution)
     try:
       response = self.table.query(
         IndexName = 'info_index',
@@ -221,10 +220,10 @@ class S3IndexDB:
       raise e
 
 
-  def queryTaskItems(self, task_id):
+  def queryTaskItems(self, resolution, task_id):
     """Query items based on channel name"""
     
-    filter_expression = '{}&{}&{}'.format(self.channel, self.resolution, task_id)
+    filter_expression = '{}&{}&{}'.format(self.channel, resolution, task_id)
     try:
       response = self.table.query(
         IndexName = 'info_index',
@@ -238,18 +237,25 @@ class S3IndexDB:
       raise e
 
 
-  def deleteItem(self, x, y, z):
+  def deleteXYZ(self, resolution, x, y, z):
     """Delete item from database"""
     
-    supercuboid_key = self.generateKey(x, y, z)
+    supercuboid_key = self.generatePrimaryKey(resolution, x, y, z)
+    return self.deleteItem(supercuboid_key)
+  
+
+  def deleteItem(self, supercuboid_key):
+    """Delete item from database"""
+    
     version_number = 0
     try:
-      self.table.delete_item(
+      response = self.table.delete_item(
           Key = {
             'supercuboid_key' : supercuboid_key,
             'version_number' : version_number
           }
       )
+      return response
     except botocore.exceptions.ClientError as e:
       print e
       raise e

@@ -38,13 +38,13 @@ class Test_Upload_Bucket():
   # @mock_s3
   def setup_class(self):
     """Setup Parameters"""
-    UQ.createBucket()
+    UQ.createBucket(endpoint_url='http://localhost:4567')
 
   # @mock_s3
   def teardown_class(self):
     """Teardown Parameters"""
     # pass
-    UQ.deleteBucket()
+    UQ.deleteBucket(endpoint_url='http://localhost:4567')
 
 
   # @mock_s3
@@ -52,7 +52,7 @@ class Test_Upload_Bucket():
     """Testing put object"""
     
     # import pdb; pdb.set_trace()
-    uq = UQ()
+    uq = UQ(endpoint_url='http://localhost:4567')
     
     x_tile = 0
     y_tile = 0

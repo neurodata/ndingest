@@ -14,7 +14,9 @@
 
 import sys
 import os
-sys.path += [os.path.abspath('..')]
+sys.path += [os.path.abspath('../../django')]
+import ND.settings
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
 
 import pytest
 from ndqueue.insertqueue import InsertQueue as IQ
@@ -26,13 +28,13 @@ class Test_Insert_Queue():
 
   def setup_class(self):
     """Setup class parameters"""
-    IQ.createQueue(proj_info)
-    self.insert_queue = IQ(proj_info)
+    IQ.createQueue(proj_info, endpoint_url='http://localhost:4568')
+    self.insert_queue = IQ(proj_info, endpoint_url='http://localhost:4568')
     pass
   
   def teardown_class(self):
     """Teardown parameters"""
-    IQ.deleteQueue(proj_info)
+    IQ.deleteQueue(proj_info, endpoint_url='http://localhost:4568')
     pass
 
   def test_Message(self):

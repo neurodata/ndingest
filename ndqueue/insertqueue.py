@@ -14,27 +14,29 @@
 
 import boto3
 import botocore
-
+from django.conf import settings
 from ndqueue import NDQueue
 
 class InsertQueue(NDQueue):
 
-  def __init__(self, proj_info, region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def __init__(self, proj_info, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resources for the queue"""
     
     queue_name = InsertQueue.generateQueueName(proj_info)
-    NDQueue.__init__(self, queue_name)
+    NDQueue.__init__(self, queue_name, region_name, endpoint_url)
 
 
   @staticmethod
-  def createQueue(proj_info, region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def createQueue(proj_info, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create the upload queue"""
     
+    # creating the resource
     queue_name = InsertQueue.generateQueueName(proj_info)
-    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
+    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    
     try:
       # creating the queue, if the queue already exists catch exception
-      queue = sqs.create_queue(
+      response = sqs.create_queue(
         QueueName = queue_name,
         Attributes = {
           'DelaySeconds' : '0',
@@ -48,12 +50,13 @@ class InsertQueue(NDQueue):
 
 
   @staticmethod  
-  def deleteQueue(proj_info, region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def deleteQueue(proj_info, region_name=settings.REGION_NAME, endpoint_url=None):
     """Delete the upload queue"""
 
-    queue_name = InsertQueue.generateQueueName(proj_info)
     # creating the resource
-    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
+    queue_name = InsertQueue.generateQueueName(proj_info)
+    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    
     try:
       # try fetching queue first
       queue = sqs.get_queue_by_name(

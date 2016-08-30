@@ -14,14 +14,14 @@
 
 import boto3
 import botocore
-
+from django.conf import settings
 
 class NDQueue:
 
-  def __init__(self, queue_name, region_name='us-west-2', endpoint_url='http://localhost:4568'):
+  def __init__(self, queue_name, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resource for the queue"""
     
-    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url)
+    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
       self.queue = sqs.get_queue_by_name(
           QueueName = queue_name

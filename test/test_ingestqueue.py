@@ -30,12 +30,10 @@ class Test_Ingest_Queue():
     """Setup class parameters"""
     IngestQueue.createQueue(proj_info, endpoint_url='http://localhost:4568')
     self.ingest_queue = IngestQueue(proj_info, endpoint_url='http://localhost:4568')
-    pass
   
   def teardown_class(self):
     """Teardown parameters"""
     IngestQueue.deleteQueue(proj_info, endpoint_url='http://localhost:4568')
-    pass
 
   def test_Message(self):
     """Testing the upload queue"""

@@ -34,7 +34,7 @@ class Test_Upload_Bucket():
   def setup_class(self):
     """Setup Parameters"""
     TileBucket.createBucket(endpoint_url='http://localhost:4567')
-    self.tile_bucket = TileBucket(endpoint_url='http://localhost:4567')
+    self.tile_bucket = TileBucket(project_name, endpoint_url='http://localhost:4567')
 
 
   def teardown_class(self):
@@ -54,9 +54,9 @@ class Test_Upload_Bucket():
       # creating a tile handle for test
       tile_handle = cStringIO.StringIO()
       # uploading object
-      response = self.tile_bucket.putObject(tile_handle, project_name, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle)
+      response = self.tile_bucket.putObject(tile_handle, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle)
       tile_handle.close()
-      object_key = self.tile_bucket.generateObjectKey(project_name, channel_name, resolution, x_tile, y_tile, z_tile)
+      object_key = self.tile_bucket.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile)
       # fetching object
       object_body, object_receipt_handle, object_message_id = self.tile_bucket.getObject(object_key)
       assert( object_message_id == message_id )

@@ -26,9 +26,9 @@ class TileIndexDB:
 
     # creating the resource
     table_name = TileIndexDB.getTableName()
-    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    dynamo = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
-    self.table = db.Table(table_name)
+    self.table = dynamo.Table(table_name)
     self.project = project_name
     self.channel = channel_name
  
@@ -38,20 +38,20 @@ class TileIndexDB:
     
     # creating the resource
     table_name = TileIndexDB.getTableName()
-    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    dynamo = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
       table = dynamo.create_table(
           TableName = table_name,
           KeySchema = [
             {
-              'AttributeName': 'cuboid_key',
+              'AttributeName': 'supercuboid_key',
               'KeyType': 'HASH'
             }
           ],
           AttributeDefinitions = [
             {
-              'AttributeName': 'cuboid_key',
+              'AttributeName': 'supercuboid_key',
               'AttributeType': 'S'
             },
             {
@@ -61,12 +61,12 @@ class TileIndexDB:
           ],
           GlobalSecondaryIndexes = [
             {
-              'IndexName': 'task_id',
+              'IndexName': 'task_index',
               'KeySchema': [
                 {
                   'AttributeName': 'task_id',
                   'KeyType': 'HASH'
-                },
+                }
               ],
               'Projection': {
                 'ProjectionType': 'ALL'
@@ -82,7 +82,6 @@ class TileIndexDB:
             'WriteCapacityUnits': 10
           }
       )
-      print "Table {} Status: {}".format(table.table_name, table.table_status)
     except Exception as e:
       print e
       raise e
@@ -94,7 +93,7 @@ class TileIndexDB:
 
     # creating the resource
     table_name = TileIndexDB.getTableName()
-    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    dynamo = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
       table = dynamo.Table(table_name)
@@ -103,26 +102,32 @@ class TileIndexDB:
       print e
       raise e
   
+
   @staticmethod
   def getTableName():
     """Return table name"""
     return settings.DYNAMO_TILEINDEX_TABLE
 
-  def generateKey(self, x, y, z):
+
+  def generatePrimaryKey(self, resolution, x_index, y_index, z_index, t_index):
     """Generate key for each supercuboid"""
-    return {'cuboid_key': '{}&{}&{}&{}&{}&{}'.format(self.project, self.channel, self.resolution, x, y, z/64)}
+    # TODO KL divide by SC size
+    morton_index = ndlib.XYZMorton([x_index, y_index, z_index])
+    return generateS3Key(self.project, self.channel, resolution, morton_index, t_index)
 
 
-  def putItem(self, file_name, task_id=0):
+  def putItem(self, resolution, x_index, y_index, z_index, t_index=0, task_id=0):
     """Updating item for a give slice number"""
     
-    x, y, z = [int(i) for i in file_name.split('.')[0].split('_')]
-    key = self.generateKey(x, y, z)
+    # x, y, z = [int(i) for i in file_name.split('.')[0].split('_')]
+    supercuboid_key = self.generatePrimaryKey(resolution, x_index, y_index, z_index, t_index)
     print key
     
     try:
       self.table.update_item(
-          Key = key,
+          Key = {
+            'supercuboid_key': supercuboid_key
+          },
           UpdateExpression = 'ADD slice_list :slice_number SET task_id = :id',
           ExpressionAttributeValues = 
             {
@@ -135,13 +140,13 @@ class TileIndexDB:
       raise e
   
   
-  def getItem(self, key):
+  def getItem(self, supercuboid_key):
     """Get the item from the ingest table"""
     
     try:
       response = self.table.get_item(
           Key = {
-            'cuboid_key' : key
+            'cuboid_key' : supercuboid_key
           },
           ConsistentRead = True,
           ReturnConsumedCapacity = 'INDEXES'

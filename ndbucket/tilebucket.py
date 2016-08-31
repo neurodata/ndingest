@@ -16,15 +16,16 @@ import hashlib
 import boto3
 import botocore
 from django.conf import settings
-import ndlib
+import hashlib
 from s3util import generateS3Key
 
 class TileBucket:
 
-  def __init__(self, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resource for the upload queue"""
     
     bucket_name = TileBucket.getBucketName()
+    self.project_name = project_name
     self.s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
     try:
       self.bucket = self.s3.Bucket(bucket_name)
@@ -71,25 +72,24 @@ class TileBucket:
     return settings.S3_TILE_BUCKET
 
 
-  def generateObjectKey(self, project_name, channel_name, resolution, x_tile, y_tile, z_tile, time=0):
+  def encodeObjectKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
     """Generate the key for the file in scratch space"""
-    zidx = ndlib.XYZMorton([x_tile, y_tile, z_tile])
-    return generateS3Key(project_name, channel_name, resolution, zidx, time)
+    hashm = hashlib.md5()
+    hashm.update('{}&{}&{}&{}&{}&{}&{}'.format(self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index))
+    return '{}&{}&{}&{}&{}&{}&{}&{}'.format(hashm.hexdigest(), self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index)
+  
+
+  @staticmethod
+  def decodeObjectKey(object_key):
+    """Decode an object key"""
+    return object_key.split('&')
 
 
-  def putObject(self, tile_handle, project_name, channel_name, res, x_tile, y_tile, z_tile, message_id, receipt_handle, time=0):
+  def putObject(self, tile_handle, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle, time=0):
     """Put object in the upload bucket"""
     
     # generate the key
-    object_key = self.generateObjectKey(project_name, channel_name, res, x_tile, y_tile, z_tile, time)
-    
-    # opening the file
-    # try:
-      # tile_handle = open(key)
-    # # if the file does not exist then send an empty file
-    # except IOError as e:
-      # import cStringIO
-      # tile_handle = cStringIO.StringIO()
+    object_key = self.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile, time)
 
     try:
       response = self.bucket.put_object(

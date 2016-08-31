@@ -23,7 +23,7 @@ class IngestQueue(NDQueue):
     """Create resources for the queue"""
     
     queue_name = IngestQueue.generateQueueName(proj_info)
-    NDQueue.__init__(self, queue_name, region_name, endpoint_url)
+    NDQueue.__init__(self, queue_name, region_name=region_name, endpoint_url=endpoint_url)
 
 
   @staticmethod

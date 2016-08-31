@@ -25,7 +25,7 @@ class UploadQueue(NDQueue):
     """Create resources for the queue"""
     
     self.queue_name = UploadQueue.generateQueueName(proj_info)
-    return NDQueue.__init__(self, self.queue_name, region_name, endpoint_url)
+    return NDQueue.__init__(self, self.queue_name, region_name=region_name, endpoint_url=endpoint_url)
 
 
   @staticmethod

@@ -26,8 +26,8 @@ class CuboidIndexDB:
 
     # create the resource
     table_name = CuboidIndexDB.getTableName()
-    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    self.table = db.Table(table_name)
+    dynamo = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    self.table = dynamo.Table(table_name)
     self.project = project_name
     self.channel = channel_name
  
@@ -38,9 +38,9 @@ class CuboidIndexDB:
     
     # create the resource
     table_name = CuboidIndexDB.getTableName()
-    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    dynamo = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
-      table = db.create_table(
+      table = dynamo.create_table(
           TableName = table_name,
           KeySchema = [
             {
@@ -108,9 +108,9 @@ class CuboidIndexDB:
     
     # create the resource
     table_name = CuboidIndexDB.getTableName()
-    db = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    dynamo = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
-      table = db.Table(table_name)
+      table = dynamo.Table(table_name)
       table.delete()
     except Exception as e:
       print e
@@ -125,12 +125,6 @@ class CuboidIndexDB:
     """Generate key for each supercuboid"""
     zidx = ndlib.XYZMorton([x, y, z])
     return generateS3Key(self.project, self.channel, resolution, zidx, time)
-    # return '{}&{}&{}&{}&{}&{}'.format(self.project, self.channel, resolution, x, y, z)
-
-  
-  # def generateInfoKey(self, resolution, task_id):
-    # """Generate task key for the project channel"""
-    # return '{}&{}&{}&{}'.format(self.project, self.channel, resolution, task_id)
 
 
   def putItem(self, resolution, x, y, z, time=0, task_id=0):

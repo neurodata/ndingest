@@ -22,14 +22,13 @@ from s3util import generateS3Key
 
 class CuboidIndexDB:
 
-  def __init__(self, project_name, channel_name, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
 
     # create the resource
     table_name = CuboidIndexDB.getTableName()
     dynamo = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     self.table = dynamo.Table(table_name)
     self.project = project_name
-    self.channel = channel_name
  
 
   @staticmethod
@@ -121,16 +120,16 @@ class CuboidIndexDB:
     """Return table name"""
     return settings.DYNAMO_CUBOIDINDEX_TABLE
 
-  def generatePrimaryKey(self, resolution, x, y, z, time=0):
+  def generatePrimaryKey(self, channel_name, resolution, x, y, z, time_index=0):
     """Generate key for each supercuboid"""
-    zidx = ndlib.XYZMorton([x, y, z])
-    return generateS3Key(self.project, self.channel, resolution, zidx, time)
+    morton_index = ndlib.XYZMorton([x, y, z])
+    return generateS3Key(self.project, channel_name, resolution, morton_index, time_index)
 
 
-  def putItem(self, resolution, x, y, z, time=0, task_id=0):
+  def putItem(self, channel_name, resolution, x, y, z, time=0, task_id=0):
     """Inserting an index for each supercuboid_array"""
     
-    supercuboid_key = self.generatePrimaryKey(resolution, x, y, z, time)
+    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z, time)
     version_number = 0
 
     try:
@@ -139,7 +138,7 @@ class CuboidIndexDB:
             'supercuboid_key' : supercuboid_key,
             'version_number' : version_number,
             'project_name' : self.project,
-            'channel_resolution_taskid' : '{}&{}&{}'.format(self.channel, resolution, task_id)
+            'channel_resolution_taskid' : '{}&{}&{}'.format(channel_name, resolution, task_id)
           },
           ReturnValues = 'NONE',
           ReturnConsumedCapacity = 'INDEXES'
@@ -149,10 +148,10 @@ class CuboidIndexDB:
       raise e
  
 
-  def getItem(self, resolution, x, y, z):
+  def getItem(self, channel_name, resolution, x, y, z):
     """Get an item based on supercuboid_key"""
 
-    supercuboid_key = self.generatePrimaryKey(resolution, x, y, z)
+    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z)
     version_number = 0
     try:
       response =  self.table.get_item(
@@ -191,14 +190,14 @@ class CuboidIndexDB:
       raise e
 
 
-  def queryChannelItems(self):
+  def queryChannelItems(self, channel_name):
     """Query items based on channel name"""
     
     try:
       response = self.table.query(
         IndexName = 'info_index',
         Select = 'ALL_ATTRIBUTES',
-        KeyConditionExpression = Key('project_name').eq(self.project) & Key('channel_resolution_taskid').begins_with(self.channel)
+        KeyConditionExpression = Key('project_name').eq(self.project) & Key('channel_resolution_taskid').begins_with(channel_name)
       )
       for item in response['Items']:
         yield item
@@ -207,27 +206,10 @@ class CuboidIndexDB:
       raise e
 
 
-  def queryResolutionItems(self, resolution):
+  def queryResolutionItems(self, channel_name, resolution):
     """Query items based on channel name"""
     
-    filter_expression = '{}&{}'.format(self.channel, resolution)
-    try:
-      response = self.table.query(
-        IndexName = 'info_index',
-        Select = 'ALL_ATTRIBUTES',
-        KeyConditionExpression = Key('project_name').eq(self.project) & Key('channel_resolution_taskid').begins_with(filter_expression)
-      )
-      for item in response['Items']:
-        yield item
-    except Exception as e:
-      print e
-      raise e
-
-
-  def queryTaskItems(self, resolution, task_id):
-    """Query items based on channel name"""
-    
-    filter_expression = '{}&{}&{}'.format(self.channel, resolution, task_id)
+    filter_expression = '{}&{}'.format(channel_name, resolution)
     try:
       response = self.table.query(
         IndexName = 'info_index',
@@ -241,10 +223,27 @@ class CuboidIndexDB:
       raise e
 
 
-  def deleteXYZ(self, resolution, x, y, z):
+  def queryTaskItems(self, channel_name, resolution, task_id):
+    """Query items based on channel name"""
+    
+    filter_expression = '{}&{}&{}'.format(channel_name, resolution, task_id)
+    try:
+      response = self.table.query(
+        IndexName = 'info_index',
+        Select = 'ALL_ATTRIBUTES',
+        KeyConditionExpression = Key('project_name').eq(self.project) & Key('channel_resolution_taskid').begins_with(filter_expression)
+      )
+      for item in response['Items']:
+        yield item
+    except Exception as e:
+      print e
+      raise e
+
+
+  def deleteXYZ(self, channel_name, resolution, x, y, z):
     """Delete item from database"""
     
-    supercuboid_key = self.generatePrimaryKey(resolution, x, y, z)
+    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z)
     return self.deleteItem(supercuboid_key)
   
 

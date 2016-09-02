@@ -25,7 +25,7 @@ class CleanupQueue(NDQueue):
     """Create resources for the queue"""
     
     self.queue_name = UploadQueue.generateQueueName(proj_info)
-    return NDQueue.__init__(self, self.queue_name, region_name, endpoint_url)
+    return super(CleanupQueue, self).__init__(self.queue_name, region_name, endpoint_url)
 
 
   @staticmethod
@@ -80,16 +80,16 @@ class CleanupQueue(NDQueue):
 
   def sendMessage(self, tile_info):
     """Send a message to upload queue"""
-    return NDQueue.sendMessage(self, json.dumps(tile_info))
+    return super(CleanupQueue, self).sendMessage(json.dumps(tile_info))
 
 
   def receiveMessage(self, number_of_messages=1):
     """Receive a message from the upload queue"""
-    message_list = NDQueue.receiveMessage(self, number_of_messages=number_of_messages)
+    message_list = super(CleanupQueue, self).receiveMessage(number_of_messages=number_of_messages)
     for message in message_list:
       yield message.message_id, message.receipt_handle, json.loads(message.body)
 
 
   def deleteMessage(self, message_id, receipt_handle, number_of_messages=1):
     """Delete a message from the upload queue"""
-    return NDQueue.deleteMessage(self, message_id, receipt_handle, number_of_messages=number_of_messages)
+    return super(CleanupQueue, self).deleteMessage(message_id, receipt_handle, number_of_messages=number_of_messages)

@@ -16,7 +16,7 @@ import boto3
 import botocore
 from django.conf import settings
 
-class NDQueue:
+class NDQueue(object):
 
   def __init__(self, queue_name, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resource for the queue"""

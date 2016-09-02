@@ -23,7 +23,7 @@ class IngestQueue(NDQueue):
     """Create resources for the queue"""
     
     queue_name = IngestQueue.generateQueueName(proj_info)
-    NDQueue.__init__(self, queue_name, region_name=region_name, endpoint_url=endpoint_url)
+    super(IngestQueue, self).__init__(queue_name, region_name=region_name, endpoint_url=endpoint_url)
 
 
   @staticmethod
@@ -77,16 +77,17 @@ class IngestQueue(NDQueue):
   
   def sendMessage(self, supercuboid_key):
     """Send a message to upload queue"""
-    NDQueue.sendMessage(self, supercuboid_key)
+    super(IngestQueue, self).sendMessage(supercuboid_key)
 
 
   def receiveMessage(self, number_of_messages=1):
     """Receive a message from the upload queue"""
-    message_list = NDQueue.receiveMessage(self, number_of_messages=number_of_messages)
+
+    message_list = super(IngestQueue, self).receiveMessage(number_of_messages=number_of_messages)
     for message in message_list:
       yield message.message_id, message.receipt_handle, message.body
 
 
   def deleteMessage(self, message_id, receipt_handle, number_of_messages=1):
     """Delete a message from the upload queue"""
-    return NDQueue.deleteMessage(self, message_id, receipt_handle, number_of_messages=1)
+    return super(IngestQueue, self).deleteMessage(message_id, receipt_handle, number_of_messages=1)

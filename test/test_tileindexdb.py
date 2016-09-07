@@ -28,7 +28,7 @@ class Test_TileIndexDB():
   def setup_class(self):
     """Setup parameters"""
     TileIndexDB.createTable(endpoint_url='http://localhost:8000')
-    self.tileindex_db = TileIndexDB(project_name, channel_name, endpoint_url='http://localhost:8000')
+    self.tileindex_db = TileIndexDB(project_name, endpoint_url='http://localhost:8000')
     
   def teardown_class(self):
     """Teardown parameters"""
@@ -37,33 +37,57 @@ class Test_TileIndexDB():
   def test_putItem(self):
     """Test data insertion"""
     
+    x_tile = 0
+    y_tile = 0
     # inserting three values for task 0
-    self.tileindex_db.putItem('0_0_1.tif', 0)
-    self.tileindex_db.putItem('0_0_2.tif', 0)
-    self.tileindex_db.putItem('0_0_3.tif', 0)
-
+    for z_tile in range(0, 3, 1):
+      self.tileindex_db.putItem(channel_name, resolution, x_tile, y_tile, z_tile, task_id=0)
+    
     # inserting 2 values for task 1
-    self.tileindex_db.putItem('0_0_66.tif', 1)
-    self.tileindex_db.putItem('0_0_67.tif', 1)
+    for z_tile in range(66, 68, 1):
+      self.tileindex_db.putItem(channel_name, resolution, x_tile, y_tile, z_tile, task_id=1)
 
     # checking if the items were inserted
-    item_value = self.tileindex_db.getItem('kasthuri11&image&0&0&0&0')
-    assert( item_value['slice_list'] == set([1, 2, 3]) )
-
-    item_value = self.tileindex_db.getItem('kasthuri11&image&0&0&0&1')
-    assert( item_value['slice_list'] == set([66, 67]) )
+    z_tile = 0
+    supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+    item_value = self.tileindex_db.getItem(supercuboid_key)
+    assert( item_value['zindex_list'] == set([0, 1, 2]) )
+    
+    z_tile = 65
+    supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+    item_value = self.tileindex_db.getItem(supercuboid_key)
+    assert( item_value['zindex_list'] == set([66, 67]) )
   
   def test_queryTaskItems(self):
     """Test the query over SI"""
     
-    item_values, count = self.tileindex_db.getTaskItems(0)
-    assert( count == 1 )
-    assert( item_values[0]['slice_list'] == set([1, 2, 3]) )
+    for item in self.tileindex_db.getTaskItems(0):
+      assert( item['zindex_list'] == set([0, 1, 2]) )
 
 
   def test_deleteItem(self):
     """Test item deletion"""
     
-    value = self.tileindex_db.deleteItem('0_0_0.tif')
-    item_value = self.tileindex_db.getItem('kasthuri11&image&0&0&0&0')
-    assert(item_value == None)
+    x_tile = 0
+    y_tile = 0
+    # inserting three values for task 0
+    for z_tile in range(0, 3, 1):
+      supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+      self.tileindex_db.deleteItem(supercuboid_key)
+    
+    # inserting 2 values for task 1
+    for z_tile in range(66, 68, 1):
+      supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+      self.tileindex_db.deleteItem(supercuboid_key)
+    
+    # inserting three values for task 0
+    for z_tile in range(0, 3, 1):
+      supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+      item = self.tileindex_db.getItem(supercuboid_key)
+      assert(item == None)
+    
+    # inserting 2 values for task 1
+    for z_tile in range(66, 68, 1):
+      supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+      item = self.tileindex_db.getItem(supercuboid_key)
+      assert(item == None)

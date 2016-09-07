@@ -12,25 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from operator import div
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import botocore
 from django.conf import settings
+import ndlib
+from s3util import generateS3Key
+
 
 # TODO KL Import this from settings/parameter file
 table_name = 'ingest_db'
 
 class TileIndexDB:
 
-  def __init__(self, project_name, channel_name, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
 
     # creating the resource
     table_name = TileIndexDB.getTableName()
     dynamo = boto3.resource('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     self.table = dynamo.Table(table_name)
-    self.project = project_name
-    self.channel = channel_name
+    self.project_name = project_name
  
   @staticmethod
   def createTable(region_name=settings.REGION_NAME, endpoint_url=None):
@@ -109,30 +112,29 @@ class TileIndexDB:
     return settings.DYNAMO_TILEINDEX_TABLE
 
 
-  def generatePrimaryKey(self, resolution, x_index, y_index, z_index, t_index):
+  def generatePrimaryKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
     """Generate key for each supercuboid"""
     # TODO KL divide by SC size
-    morton_index = ndlib.XYZMorton([x_index, y_index, z_index])
-    return generateS3Key(self.project, self.channel, resolution, morton_index, t_index)
+    morton_index = ndlib.XYZMorton(map(div, [x_index, y_index, z_index], settings.SUPER_CUBOID_SIZE))
+    return generateS3Key(self.project_name, channel_name, resolution, morton_index, t_index)
 
 
-  def putItem(self, resolution, x_index, y_index, z_index, t_index=0, task_id=0):
+  def putItem(self, channel_name, resolution, x_index, y_index, z_index, t_index=0, task_id=0):
     """Updating item for a give slice number"""
     
     # x, y, z = [int(i) for i in file_name.split('.')[0].split('_')]
-    supercuboid_key = self.generatePrimaryKey(resolution, x_index, y_index, z_index, t_index)
-    print key
+    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x_index, y_index, z_index, t_index)
     
     try:
       self.table.update_item(
           Key = {
             'supercuboid_key': supercuboid_key
           },
-          UpdateExpression = 'ADD slice_list :slice_number SET task_id = :id',
+          UpdateExpression = 'ADD zindex_list :z_index SET task_id = :task_id',
           ExpressionAttributeValues = 
             {
-              ':slice_number': set([z]),
-              ':id': task_id
+              ':z_index': set([z_index]),
+              ':task_id': task_id
             }
       )
     except botocore.exceptions.ClientError as e:
@@ -146,7 +148,7 @@ class TileIndexDB:
     try:
       response = self.table.get_item(
           Key = {
-            'cuboid_key' : supercuboid_key
+            'supercuboid_key' : supercuboid_key
           },
           ConsistentRead = True,
           ReturnConsumedCapacity = 'INDEXES'
@@ -166,24 +168,28 @@ class TileIndexDB:
     
     try:
       response = self.table.query(
-          IndexName = 'task_id',
-          KeyConditionExpression = 'task_id = :id',
+          IndexName = 'task_index',
+          KeyConditionExpression = 'task_id = :task_id',
           ExpressionAttributeValues = {
-            ':id' : task_id
+            ':task_id' : task_id
           }
       )
-      return response['Items'], response['Count']
+      for item in response['Items']:
+        yield item
+      # return response['Items'], response['Count']
     except Exception as e:
       print e
       raise e
 
 
-  def deleteItem(self, key):
+  def deleteItem(self, supercuboid_key):
     """Delete item from database"""
-    
+   
     try:
       response = self.table.delete_item(
-          Key = self.generateKey(0, 0, 0)
+          Key = {
+            'supercuboid_key' : supercuboid_key
+          }
       )
       return response
     except botocore.exceptions.ClientError as e:

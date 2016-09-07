@@ -118,6 +118,9 @@ class TileIndexDB:
     morton_index = ndlib.XYZMorton(map(div, [x_index, y_index, z_index], settings.SUPER_CUBOID_SIZE))
     return generateS3Key(self.project_name, channel_name, resolution, morton_index, t_index)
 
+  def supercuboidReady(self, z_index, zindex_list):
+    """Verify if we have all tiles for a given supercuboid"""
+    return zindex_list == set(range(z_index / settings.SUPER_CUBOID_SIZE[2], settings.SUPER_CUBOID_SIZE[2], 1))
 
   def putItem(self, channel_name, resolution, x_index, y_index, z_index, t_index=0, task_id=0):
     """Updating item for a give slice number"""
@@ -126,17 +129,18 @@ class TileIndexDB:
     supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x_index, y_index, z_index, t_index)
     
     try:
-      self.table.update_item(
+      response = self.table.update_item(
           Key = {
             'supercuboid_key': supercuboid_key
           },
           UpdateExpression = 'ADD zindex_list :z_index SET task_id = :task_id',
-          ExpressionAttributeValues = 
-            {
+          ExpressionAttributeValues = {
               ':z_index': set([z_index]),
               ':task_id': task_id
-            }
+          },
+          ReturnValues = 'ALL_NEW'
       )
+      return supercuboid_key, self.supercuboidReady(z_index, response['Attributes']['zindex_list'])
     except botocore.exceptions.ClientError as e:
       print e  
       raise e

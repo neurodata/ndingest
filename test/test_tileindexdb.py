@@ -17,6 +17,7 @@ import os
 sys.path += [os.path.abspath('../../django')]
 import ND.settings
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
+from django.conf import settings
 from nddynamo.tileindexdb import TileIndexDB
 
 project_name = 'kasthuri11'
@@ -63,6 +64,18 @@ class Test_TileIndexDB():
     
     for item in self.tileindex_db.getTaskItems(0):
       assert( item['zindex_list'] == set([0, 1, 2]) )
+
+  def test_supercuboidReady(self):
+    """Test if the supercuboid is ready"""
+    
+    x_tile = 0
+    y_tile = 0
+    for z_tile in range(129, 129+settings.SUPER_CUBOID_SIZE[2], 1):
+      supercuboid_key, supercuboid_ready = self.tileindex_db.putItem(channel_name, resolution, x_tile, y_tile, z_tile, task_id=0)
+      if z_tile < 129+settings.SUPER_CUBOID_SIZE[2]:
+        assert(supercuboid_ready is False)
+      else:
+        assert(supercuboid_ready is True)
 
 
   def test_deleteItem(self):

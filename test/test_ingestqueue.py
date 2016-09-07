@@ -20,20 +20,21 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
 
 import pytest
 from ndqueue.ingestqueue import IngestQueue
+from ndingestproj.ndingestproj import NDIngestProj
 
-# proj_info == [project, channel, resolution]
-proj_info = ['kasthuri11', 'image', '0']
+# nd_proj == [project, channel, resolution]
+nd_proj = NDIngestProj('kasthuri11', 'image', '0')
 
 class Test_Ingest_Queue():
 
   def setup_class(self):
     """Setup class parameters"""
-    IngestQueue.createQueue(proj_info, endpoint_url='http://localhost:4568')
-    self.ingest_queue = IngestQueue(proj_info, endpoint_url='http://localhost:4568')
+    IngestQueue.createQueue(nd_proj, endpoint_url='http://localhost:4568')
+    self.ingest_queue = IngestQueue(nd_proj, endpoint_url='http://localhost:4568')
   
   def teardown_class(self):
     """Teardown parameters"""
-    IngestQueue.deleteQueue(proj_info, endpoint_url='http://localhost:4568')
+    IngestQueue.deleteQueue(nd_proj, endpoint_url='http://localhost:4568')
 
   def test_Message(self):
     """Testing the upload queue"""

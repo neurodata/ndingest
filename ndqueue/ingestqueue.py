@@ -19,19 +19,19 @@ from ndqueue import NDQueue
 
 class IngestQueue(NDQueue):
 
-  def __init__(self, proj_info, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resources for the queue"""
     
-    queue_name = IngestQueue.generateQueueName(proj_info)
+    queue_name = IngestQueue.generateQueueName(nd_proj)
     super(IngestQueue, self).__init__(queue_name, region_name=region_name, endpoint_url=endpoint_url)
 
 
   @staticmethod
-  def createQueue(proj_info, region_name=settings.REGION_NAME, endpoint_url=None):
+  def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create the upload queue"""
     
     # creating the resource
-    queue_name = IngestQueue.generateQueueName(proj_info)
+    queue_name = IngestQueue.generateQueueName(nd_proj)
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
@@ -50,11 +50,11 @@ class IngestQueue(NDQueue):
 
 
   @staticmethod  
-  def deleteQueue(proj_info, region_name=settings.REGION_NAME, endpoint_url=None):
+  def deleteQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
     """Delete the upload queue"""
 
     # creating the resource
-    queue_name = IngestQueue.generateQueueName(proj_info)
+    queue_name = IngestQueue.generateQueueName(nd_proj)
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
@@ -70,9 +70,9 @@ class IngestQueue(NDQueue):
 
 
   @staticmethod
-  def generateQueueName(proj_info):
+  def generateQueueName(nd_proj):
     """Generate the queue name based on project information"""
-    return '-'.join(proj_info+['INSERT'])
+    return '-'.join(nd_proj.generateProjectInfo()+['INSERT'])
   
   
   def sendMessage(self, supercuboid_key):

@@ -12,8 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import boto3
+from serializer import Serializer
+
 class NDMessage(object):
 
   def __init__(self):
-    return
+    self.serializer = Serializer.getSerializer('Neurodata')
 
+  def encode(self):
+    self.serializer.encode()
+
+  def decode(self):
+    self.serializer.decode()

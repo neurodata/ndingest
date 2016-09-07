@@ -20,25 +20,21 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
 
 import json
 from ndqueue.uploadqueue import UploadQueue
-from ndqueue.uploadmessage import UploadMessage
+from ndqueue.ndserializer import NDSerializer
+from ndingestproj.ndingestproj import NDIngestProj
+nd_proj = NDIngestProj('kasthuri11', 'image', '0')
 
-project_name = 'kasthuri11'
-channel_name = 'image'
-resolution = 0
-
-# proj_info = [project, channel, resolution]
-proj_info = [project_name, channel_name, str(resolution)]
 
 class Test_UploadQueue():
 
   def setup_class(self):
     """Setup the class"""
-    UploadQueue.createQueue(proj_info, endpoint_url='http://localhost:4568')
-    self.upload_queue = UploadQueue(proj_info, endpoint_url='http://localhost:4568')
+    UploadQueue.createQueue(nd_proj, endpoint_url='http://localhost:4568')
+    self.upload_queue = UploadQueue(nd_proj, endpoint_url='http://localhost:4568')
 
   def teardown_class(self):
     """Teardown parameters"""
-    UploadQueue.deleteQueue(proj_info, endpoint_url='http://localhost:4568')
+    UploadQueue.deleteQueue(nd_proj, endpoint_url='http://localhost:4568')
 
   
   def test_Message(self):
@@ -49,7 +45,7 @@ class Test_UploadQueue():
 
     for z_tile in range(0, 2, 1):
       # encode the message
-      message = UploadMessage.encode(project_name, channel_name, resolution, x_tile, y_tile, z_tile)
+      message = NDSerializer.encode(nd_proj.project_name, nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
       # send message to the queue
       self.upload_queue.sendMessage(message)
     

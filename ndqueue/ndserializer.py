@@ -12,24 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ndmessage import NDMessage
-import boto3
+class NDSerializer:
+    
+  @staticmethod
+  def encode(project_name, channel_name, resolution, x_tile, y_tile, z_tile, time_range=None):
+    """Encode a message for the upload queue"""
+    return { 'project' : project_name,
+             'channel' : channel_name,
+             'resolution' : resolution,
+             'x_tile' : x_tile,
+             'y_tile' : y_tile,
+             'z_tile' : z_tile,
+             'time_range' : time_range
+           }
 
-class UploadMessage(NDMessage):
+  @staticmethod
+  def decode(message_body):
+    """Decode a message from the upload queue"""
 
-  def __init__(self, message):
-    self.message
-
-  @property
-  def message_id(self):
-    return self.message.message_id
-
-  @property
-  def receipt_handle(self):
-    return None
-
-  @receipt_handle.setter
-  def receipt_handle(self, value):
-    pass
-
-
+    return message_body

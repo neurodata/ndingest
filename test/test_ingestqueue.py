@@ -21,9 +21,8 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
 import pytest
 from ndqueue.ingestqueue import IngestQueue
 from ndingestproj.ndingestproj import NDIngestProj
-
-# nd_proj == [project, channel, resolution]
 nd_proj = NDIngestProj('kasthuri11', 'image', '0')
+
 
 class Test_Ingest_Queue():
 

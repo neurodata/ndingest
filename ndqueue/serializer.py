@@ -12,24 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ndmessage import NDMessage
-import boto3
+from ndserializer import NDSerializer
+from bossserializer import BossSerializer
 
-class UploadMessage(NDMessage):
+class Serializer:
 
-  def __init__(self, message):
-    self.message
-
-  @property
-  def message_id(self):
-    return self.message.message_id
-
-  @property
-  def receipt_handle(self):
-    return None
-
-  @receipt_handle.setter
-  def receipt_handle(self, value):
-    pass
-
-
+  @staticmethod
+  def setSerializer(serializer_name):
+    if serializer_name == 'Neurodata':
+      return NDSerializer
+    elif serializer_name == 'Boss':
+      return BossSerializer

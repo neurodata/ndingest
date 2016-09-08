@@ -51,26 +51,26 @@ def NDIngest(webargs, post_data):
     project_dict = nd_dict['project']
     channels = nd_dict['channels']
     metadata_dict = nd_dict['metadata']
-  except Exception, e:
+  except Exception as e:
     logger.error("Missing requred fields of dataset,project,channels,metadata.")
     return json.dumps("Missing required fields of dataset,project,channels,metadata. Please check if one of them is not missing.")
   
   # try:
     # DATASET_SCHEMA.validate(dataset_dict)
-  # except Exception, e:
+  # except Exception as e:
     # logger.error("Invalid Dataset schema")
     # return json.dumps("Invalid Dataset schema")
   
   # try:
     # PROJECT_SCHEMA.validate(project_dict)
-  # except Exception, e:
+  # except Exception as e:
     # logger.error("Invalid Project schema")
     # return json.dumps("Invalid Project schema")
     
   #try:
     #import pdb; pdb.set_trace()
     #CHANNEL_SCHEMA.validate(channels)
-  #except Exception, e:
+  #except Exception as e:
     #print("Invalid Channel schema")
     #return json.dumps("Invalid Channel schema")
 
@@ -140,7 +140,7 @@ def NDIngest(webargs, post_data):
         pd = ndproj.NDProjectsDB.getProjDB(pr)
         pd.newNDProject()
         PROJECT_CREATED = True
-      except Exception, e:
+      except Exception as e:
         if TOKEN_CREATED:
           tk.delete()
         if PROJECT_CREATED:
@@ -168,7 +168,7 @@ def NDIngest(webargs, post_data):
           pd = ndproj.NDProjectsDB.getProjDB(pr)
           pd.newNDChannel(ch.channel_name)
           CHANNEL_CREATED = True
-        except Exception, e:
+        except Exception as e:
           if TOKEN_CREATED:
             tk.delete()
           if CHANNEL_CREATED:
@@ -199,7 +199,7 @@ def NDIngest(webargs, post_data):
     # Posting to LIMS system
     postMetadataDict(metadata_dict, pr.project_name)
 
-  except Exception, e:
+  except Exception as e:
     # KL TODO Delete data from the LIMS systems
     try:
       pd
@@ -220,14 +220,14 @@ def createChannel(webargs, post_data):
   try:
     m = re.match("(\w+)/createChannel/$", webargs)
     token_name = m.group(1)
-  except Exception, e:
+  except Exception as e:
     print("Error in URL format")
     raise
   
   nd_dict = json.loads(post_data)
   try:
     channels = nd_dict['channels']
-  except Exception, e:
+  except Exception as e:
     print("Missing requred fields")
     return json.dumps("Missing channels field. Ensure that Channel field exists")
   
@@ -257,7 +257,7 @@ def createChannel(webargs, post_data):
       # Create channel database using the ndproj interface
       pd = ndproj.NDProjectsDB.getProjDB(pr.project_name)
       pd.newNDChannel(ch.channel_name)
-  except Exception, e:
+  except Exception as e:
     print("Error saving models")
     # return the JSON file with failed
     return json.dumps("Error saving models")
@@ -272,14 +272,14 @@ def deleteChannel(webargs, post_data):
   try:
     m = re.match("(\w+)/deleteChannel/$", webargs)
     token_name = m.group(1)
-  except Exception, e:
+  except Exception as e:
     print("Error in URL format")
     raise
   
   nd_dict = json.loads(post_data)
   try:
     channels = nd_dict['channels']
-  except Exception, e:
+  except Exception as e:
     print("Missing requred fields")
     raise
   
@@ -300,7 +300,7 @@ def deleteChannel(webargs, post_data):
           pd.deleteNDChannel(ch.channel_name)
           ch.delete()
     return_json = "SUCCESS"
-  except Exception, e:
+  except Exception as e:
     print("Error saving models")
     return_json = "FAILED"
 
@@ -314,7 +314,7 @@ def postMetadataDict(metadata_dict, project_name):
     req = urllib2.Request(url, json.dumps(metadata_dict))
     req.add_header('Content-Type', 'application/json')
     response = urllib2.urlopen(req)
-  except urllib2.URLError, e:
+  except urllib2.URLError as e:
     print("Failed URL {}".format(url))
     pass
 
@@ -328,7 +328,7 @@ def extractDatasetDict(ds_dict):
     ds.dataset_name = ds_dict['dataset_name']
     imagesize = [ds.ximagesize, ds.yimagesize, ds.zimagesize] = ds_dict['imagesize']
     [ds.xvoxelres, ds.yvoxelres, ds.zvoxelres] = ds_dict['voxelres']
-  except Exception, e:
+  except Exception as e:
     print("Missing required fields")
     raise
 
@@ -366,7 +366,7 @@ def extractProjectDict(pr_dict):
 
   try:
     pr.project_name = pr_dict['project_name']
-  except Exception, e:
+  except Exception as e:
     print("Missing required fields")
     raise
 
@@ -390,7 +390,7 @@ def extractChannelDict(ch_dict, channel_only=False):
       data_url = ch_dict['data_url']
       file_format = ch_dict['file_format']
       file_type = ch_dict['file_type']
-  except Exception, e:
+  except Exception as e:
     print("Missing requried fields")
     raise
     
@@ -433,7 +433,7 @@ def postMetadataDict(metadata_dict, project_name):
     req = urllib2.Request(url, json.dumps(metadata_dict))
     req.add_header('Content-Type', 'application/json')
     response = urllib2.urlopen(req)
-  except urllib2.URLError, e:
+  except urllib2.URLError as e:
     print("Failed URL {}".format(url))
     pass
 
@@ -447,7 +447,7 @@ def extractDatasetDict(ds_dict):
     ds.dataset_name = ds_dict['dataset_name']
     imagesize = [ds.ximagesize, ds.yimagesize, ds.zimagesize] = ds_dict['imagesize']
     [ds.xvoxelres, ds.yvoxelres, ds.zvoxelres] = ds_dict['voxelres']
-  except Exception, e:
+  except Exception as e:
     print("Missing required fields")
     raise
 

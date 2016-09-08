@@ -47,7 +47,7 @@ class UploadQueue(NDQueue):
       )
       return queue_name
     except Exception as e:
-      print e
+      print(e)
       raise
 
 
@@ -68,7 +68,7 @@ class UploadQueue(NDQueue):
       response = queue.delete()
       return response
     except Exception as e:
-      print e
+      print(e)
       raise
 
   @staticmethod

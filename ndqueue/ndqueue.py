@@ -27,7 +27,7 @@ class NDQueue(object):
           QueueName = queue_name
       )
     except botocore.exceptions.ClientError as e:
-      print e
+      print(e)
       raise
 
   
@@ -40,7 +40,7 @@ class NDQueue(object):
       )
       return response
     except Exception as e:
-      print e
+      print(e)
       raise
   
   
@@ -54,7 +54,7 @@ class NDQueue(object):
       # checking for empty responses
       return None if not message_list else message_list
     except Exception as e:
-      print e
+      print(e)
       raise
     
   
@@ -74,12 +74,12 @@ class NDQueue(object):
       )
       # TODO KL Better handling for 400 aka when delete fails
       if 'Failed' in response:
-        print response['Failed']['Message']
+        print(response['Failed']['Message'])
         raise
       else:
         return response
     except Exception as e:
-      print e
+      print(e)
       raise
 
 

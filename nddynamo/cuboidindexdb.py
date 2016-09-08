@@ -97,7 +97,7 @@ class CuboidIndexDB:
           }
       )
     except Exception as e:
-      print e
+      print(e)
       raise e
 
 
@@ -112,7 +112,7 @@ class CuboidIndexDB:
       table = dynamo.Table(table_name)
       table.delete()
     except Exception as e:
-      print e
+      print(e)
       raise e
   
   @staticmethod
@@ -144,7 +144,7 @@ class CuboidIndexDB:
           ReturnConsumedCapacity = 'INDEXES'
       )
     except botocore.exceptions.ClientError as e:
-      print e
+      print(e)
       raise e
  
 
@@ -167,7 +167,7 @@ class CuboidIndexDB:
           # KeyConditionExpression = Key('supercuboid_key').eq(supercuboid_key)
       # )
     except Exception as e:
-      print e
+      print(e)
       raise e
 
 
@@ -186,7 +186,7 @@ class CuboidIndexDB:
       for item in response['Items']:
         yield item
     except Exception as e:
-      print e
+      print(e)
       raise e
 
 
@@ -202,7 +202,7 @@ class CuboidIndexDB:
       for item in response['Items']:
         yield item
     except Exception as e:
-      print e
+      print(e)
       raise e
 
 
@@ -219,7 +219,7 @@ class CuboidIndexDB:
       for item in response['Items']:
         yield item
     except Exception as e:
-      print e
+      print(e)
       raise e
 
 
@@ -236,7 +236,7 @@ class CuboidIndexDB:
       for item in response['Items']:
         yield item
     except Exception as e:
-      print e
+      print(e)
       raise e
 
 
@@ -260,5 +260,5 @@ class CuboidIndexDB:
       )
       return response
     except botocore.exceptions.ClientError as e:
-      print e
+      print(e)
       raise e

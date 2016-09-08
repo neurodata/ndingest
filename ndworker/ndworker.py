@@ -57,9 +57,9 @@ class NDWorker():
             
             time_range = None if end_time - start_time == 0 else [time, time_interval]
             # generate a message for each one
-            print "inserting message:x{}y{}z{}".format(xtile, ytile, ztile)
+            print("inserting message:x{}y{}z{}".format(xtile, ytile, ztile))
             message = UploadMessage.encode(self.proj.getProjectName(), self.channel, self.resolution, xtile, ytile, ztile, time_range)
             response = upload_queue.sendMessage(message)
-            print response
+            print(response)
 
     return queue_name

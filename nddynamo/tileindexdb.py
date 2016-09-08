@@ -86,7 +86,7 @@ class TileIndexDB:
           }
       )
     except Exception as e:
-      print e
+      print(e)
       raise e
 
 
@@ -102,7 +102,7 @@ class TileIndexDB:
       table = dynamo.Table(table_name)
       table.delete()
     except Exception as e:
-      print e
+      print(e)
       raise e
   
 
@@ -142,7 +142,7 @@ class TileIndexDB:
       )
       return supercuboid_key, self.supercuboidReady(z_index, response['Attributes']['zindex_list'])
     except botocore.exceptions.ClientError as e:
-      print e  
+      print(e)
       raise e
   
   
@@ -163,7 +163,7 @@ class TileIndexDB:
       # TODO write a yield function to pop one item at a time
       return response['Item'] if 'Item' in response else None
     except Exception as e:
-      print e
+      print(e)
       raise e
 
 
@@ -182,7 +182,7 @@ class TileIndexDB:
         yield item
       # return response['Items'], response['Count']
     except Exception as e:
-      print e
+      print(e)
       raise e
 
 

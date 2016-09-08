@@ -45,7 +45,7 @@ class IngestQueue(NDQueue):
       )
       return queue_name
     except Exception as e:
-      print e
+      print(e)
       raise
 
 
@@ -65,7 +65,7 @@ class IngestQueue(NDQueue):
       # deleting the queue
       response = queue.delete()
     except Exception as e:
-      print e
+      print(e)
       raise
 
 

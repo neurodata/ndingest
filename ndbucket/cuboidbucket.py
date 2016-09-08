@@ -28,7 +28,7 @@ class CuboidBucket:
     try:
       self.bucket = self.s3.Bucket(bucket_name)
     except botocore.exceptions.ClientError as e:
-      print e
+      print(e)
       raise
 
 
@@ -45,7 +45,7 @@ class CuboidBucket:
           ACL = 'private'
       )
     except Exception as e:
-      print e
+      print(e)
       raise
 
 
@@ -60,7 +60,7 @@ class CuboidBucket:
       # deleting the bucket
       response = bucket.delete()
     except Exception as e:
-      print e
+      print(e)
       raise
   
   @staticmethod
@@ -87,7 +87,7 @@ class CuboidBucket:
       # )
       # return response
     # except Exception as e:
-      # print e
+      # print(e)
       # raise
   
 
@@ -99,7 +99,7 @@ class CuboidBucket:
       # response = s3_obj.get()
       # return response['Body'].read(), response['Metadata']['receipt_handle'], response['Metadata']['message_id']
     # except Exception as e:
-      # print e
+      # print(e)
       # raise e
  
 
@@ -111,5 +111,5 @@ class CuboidBucket:
       response = s3_obj.delete()
       return response
     except Exception as e:
-      print e
+      print(e)
       raise

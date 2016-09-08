@@ -71,7 +71,7 @@ def NDIngest(webargs, post_data):
     #import pdb; pdb.set_trace()
     #CHANNEL_SCHEMA.validate(channels)
   #except Exception, e:
-    #print "Invalid Channel schema"
+    #print("Invalid Channel schema")
     #return json.dumps("Invalid Channel schema")
 
   ds = extractDatasetDict(dataset_dict)
@@ -221,14 +221,14 @@ def createChannel(webargs, post_data):
     m = re.match("(\w+)/createChannel/$", webargs)
     token_name = m.group(1)
   except Exception, e:
-    print "Error in URL format"
+    print("Error in URL format")
     raise
   
   nd_dict = json.loads(post_data)
   try:
     channels = nd_dict['channels']
   except Exception, e:
-    print "Missing requred fields"
+    print("Missing requred fields")
     return json.dumps("Missing channels field. Ensure that Channel field exists")
   
   tk = Token.objects.get(token_name=token_name)
@@ -244,7 +244,7 @@ def createChannel(webargs, post_data):
     # First iterating over the channel list to check if all the channels don't exist
     for ch in ch_list:
       if Channel.objects.filter(channel_name = ch.channel_name, project = pr.project_name).exists():
-        print "Channel already exists"
+        print("Channel already exists")
         return json.dumps("Channel {} already exists for this project. Specify a different channel name".format(ch.channel_name))
     
     # Iterating over channel list to store channels
@@ -258,7 +258,7 @@ def createChannel(webargs, post_data):
       pd = ndproj.NDProjectsDB.getProjDB(pr.project_name)
       pd.newNDChannel(ch.channel_name)
   except Exception, e:
-    print "Error saving models"
+    print("Error saving models")
     # return the JSON file with failed
     return json.dumps("Error saving models")
 
@@ -273,14 +273,14 @@ def deleteChannel(webargs, post_data):
     m = re.match("(\w+)/deleteChannel/$", webargs)
     token_name = m.group(1)
   except Exception, e:
-    print "Error in URL format"
+    print("Error in URL format")
     raise
   
   nd_dict = json.loads(post_data)
   try:
     channels = nd_dict['channels']
   except Exception, e:
-    print "Missing requred fields"
+    print("Missing requred fields")
     raise
   
   tk = Token.objects.get(token_name=token_name)
@@ -301,7 +301,7 @@ def deleteChannel(webargs, post_data):
           ch.delete()
     return_json = "SUCCESS"
   except Exception, e:
-    print "Error saving models"
+    print("Error saving models")
     return_json = "FAILED"
 
   return json.dumps(return_json)
@@ -315,7 +315,7 @@ def postMetadataDict(metadata_dict, project_name):
     req.add_header('Content-Type', 'application/json')
     response = urllib2.urlopen(req)
   except urllib2.URLError, e:
-    print "Failed URL {}".format(url)
+    print("Failed URL {}".format(url))
     pass
 
 
@@ -329,7 +329,7 @@ def extractDatasetDict(ds_dict):
     imagesize = [ds.ximagesize, ds.yimagesize, ds.zimagesize] = ds_dict['imagesize']
     [ds.xvoxelres, ds.yvoxelres, ds.zvoxelres] = ds_dict['voxelres']
   except Exception, e:
-    print "Missing required fields"
+    print("Missing required fields")
     raise
 
   if 'offset' in ds_dict:
@@ -367,7 +367,7 @@ def extractProjectDict(pr_dict):
   try:
     pr.project_name = pr_dict['project_name']
   except Exception, e:
-    print "Missing required fields"
+    print("Missing required fields")
     raise
 
   if 'token_name' in pr_dict:
@@ -391,7 +391,7 @@ def extractChannelDict(ch_dict, channel_only=False):
       file_format = ch_dict['file_format']
       file_type = ch_dict['file_type']
   except Exception, e:
-    print "Missing requried fields"
+    print("Missing requried fields")
     raise
     
   if 'exceptions' in ch_dict:
@@ -434,7 +434,7 @@ def postMetadataDict(metadata_dict, project_name):
     req.add_header('Content-Type', 'application/json')
     response = urllib2.urlopen(req)
   except urllib2.URLError, e:
-    print "Failed URL {}".format(url)
+    print("Failed URL {}".format(url))
     pass
 
 
@@ -448,7 +448,7 @@ def extractDatasetDict(ds_dict):
     imagesize = [ds.ximagesize, ds.yimagesize, ds.zimagesize] = ds_dict['imagesize']
     [ds.xvoxelres, ds.yvoxelres, ds.zvoxelres] = ds_dict['voxelres']
   except Exception, e:
-    print "Missing required fields"
+    print("Missing required fields")
     raise
 
   if 'offset' in ds_dict:

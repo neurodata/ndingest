@@ -84,8 +84,11 @@ class IngestQueue(NDQueue):
     """Receive a message from the upload queue"""
 
     message_list = super(IngestQueue, self).receiveMessage(number_of_messages=number_of_messages)
-    for message in message_list:
-      yield message.message_id, message.receipt_handle, message.body
+    if message_list is None:
+      raise StopIteration
+    else:
+      for message in message_list:
+        yield message.message_id, message.receipt_handle, message.body
 
 
   def deleteMessage(self, message_id, receipt_handle, number_of_messages=1):

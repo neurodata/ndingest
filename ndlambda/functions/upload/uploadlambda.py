@@ -14,49 +14,44 @@
 
 from __future__ import print_function
 
-import os
-import sys
-sys.path += [os.path.abspath('../../../')]
-
+# import os
+# import sys
+# sys.path += [os.path.abspath('../../../../django')]
+# import ND.settings
+# os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
 import urllib
 import boto3
 import json
-
 from ndqueue.uploadqueue import UploadQueue
-from ndqueue.insertqueue import InsertQueue
+from ndqueue.ingestqueue import IngestQueue
 from nddynamo.tileindexdb import TileIndexDB
+from ndbucket.tilebucket import TileBucket
+from ndingestproj.ndingestproj import NDIngestProj 
 
 
 def lambda_handler(event, context):
   """Arrange data in the state database and ready it for ingest"""
-  
-  # setup for testing purposes
-  # IngestDB.createTable()
-  InsertQueue.createQueue()
-  UploadQueue.createQueue()
 
   # extract bucket name and object key from the event
   bucket = event['Records'][0]['s3']['bucket']['name']
-  supercuboid_key = urllib.unquote_plus(event['Records'][0]['s3']['object']['key']).decode('utf8')
+  tile_key = urllib.unquote_plus(event['Records'][0]['s3']['object']['key']).decode('utf8')
 
-  proj_info = extractProjInfo()
+  nd_proj, tile_args = NDIngestProj.fromTileKey(tile_key)
   
   # update value in the dynamo table
-  tileindex_db = TileIndexDB()
-  tileindex_db.putItem(key)
+  tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url='http://localhost:8000')
+  supercuboid_key, supercuboid_ready = tileindex_db.putItem(nd_proj.channel_name, nd_proj.resolution, *tile_args)
 
-  # TODO KL Check if we have all tiles
-
-  # insert a new job in the insert queue if we have all the tiles
-  ingest_queue = IngestQueue(proj_info)
-  ingest_queue.sendMessage(supercuboid_key)
+  # ingest the supercuboid if we have all the tiles
+  if supercuboid_ready:
+    # insert a new job in the insert queue if we have all the tiles
+    ingest_queue = IngestQueue(nd_proj, endpoint_url='http://localhost:4568')
+    ingest_queue.sendMessage(supercuboid_key)
+  
+  # fetch message_id and receipt_handle from the s3 object
+  tile_bucket = TileBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
+  message_id, receipt_handle = tile_bucket.getMetadata(tile_key)
 
   # delete message from upload queue
-  upload_queue = UploadQueue()
-  # KL TODO How do we get the message id in here
+  upload_queue = UploadQueue(nd_proj, endpoint_url='http://localhost:4568')
   upload_queue.deleteMessage(message_id, receipt_handle)
-  
-  # cleanup for testing purposes
-  tileindex_db.deleteTable()
-  InsertQueue.deleteQueue()
-  UploadQueue.deleteQueue()

@@ -9,3 +9,4 @@ pip install git+https://github.com/fugue/emulambda.git
 ```
 emulambda lambdapath eventfile
 ```
+* [Useful Link](https://serverlesscode.com/post/emulambda-testing-aws-lambda/)

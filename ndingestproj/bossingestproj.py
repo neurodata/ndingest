@@ -17,36 +17,9 @@ from ingestproj import IngestProj
 class NDIngestProj(IngestProj):
 
   def __init__(self, project_name, channel_name, resolution):
-    self._project_name = project_name
-    self._channel_name = channel_name
-    self._resolution = resolution
-  
+    pass 
+
   @classmethod
   def fromTileKey(cls, tile_key):
     """Create a ndproj from supercuboid_key"""
-    hash_value, project_name, channel_name, resolution, x_index, y_index, z_index, t_index = tile_key.split('&')
-    return cls(project_name, channel_name, resolution), (int(x_index), int(y_index), int(z_index), int(t_index))
-
-  @property
-  def project_name(self):
-    return self._project_name
-  
-  @project_name.setter
-  def project_name(self, value):
-    self._project_name = value
-
-  @property 
-  def channel_name(self):
-    return self._channel_name
-
-  @channel_name.setter
-  def channel_name(self, value):
-    self._channel_name = value
-
-  @property
-  def resolution(self):
-    return self._resolution
-
-  @resolution.setter
-  def resolution(self, value):
-    self._resolution = value
+    return NotImplemented

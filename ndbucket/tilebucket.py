@@ -114,7 +114,7 @@ class TileBucket:
     try:
       s3_obj = self.s3.Object(self.bucket.name, object_key)
       response = s3_obj.get()
-      return response['Body'].read(), response['Metadata']['receipt_handle'], response['Metadata']['message_id']
+      return response['Body'].read(), response['Metadata']['message_id'], response['Metadata']['receipt_handle']
     except Exception as e:
       print(e)
       raise e
@@ -123,14 +123,8 @@ class TileBucket:
   def getMetadata(self, object_key):
     """Get the object key from the upload bucket"""
 
-    try:
-      s3_obj = self.s3.Object(self.bucket.name, object_key)
-      response = s3_obj.metadata()
-      return response['message_id'], ['receipt_handle']
-    except Exception as e:
-      print(e)
-      raise e
-
+    message_body, message_id, receipt_handle = self.getObject(object_key)
+    return message_id, receipt_handle
 
   def deleteObject(self, object_key):
     """Delete object from the upload bucket"""

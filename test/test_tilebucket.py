@@ -58,7 +58,10 @@ class Test_Upload_Bucket():
       tile_handle.close()
       object_key = self.tile_bucket.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile)
       # fetching object
-      object_body, object_receipt_handle, object_message_id = self.tile_bucket.getObject(object_key)
+      object_body, object_message_id, object_receipt_handle = self.tile_bucket.getObject(object_key)
+      assert( object_message_id == message_id )
+      assert( object_receipt_handle == receipt_handle )
+      object_message_id, object_receipt_handle = self.tile_bucket.getMetadata(object_key)
       assert( object_message_id == message_id )
       assert( object_receipt_handle == receipt_handle )
       # delete the object

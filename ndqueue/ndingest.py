@@ -352,8 +352,8 @@ def computeScalingLevels(imagesize):
   scalinglevels = 0
   # When both x and y dimensions are below 1000 or one is below 100 then stop
   while (ximagesz>1000 or yimagesz>1000) and ximagesz>500 and yimagesz>500:
-    ximagesz = ximagesz / 2
-    yimagesz = yimagesz / 2
+    ximagesz = ximagesz // 2
+    yimagesz = yimagesz // 2
     scalinglevels += 1
 
   return scalinglevels
@@ -471,8 +471,8 @@ def computeScalingLevels(imagesize):
   scalinglevels = 0
   # When both x and y dimensions are below 1000 or one is below 100 then stop
   while (ximagesz>1000 or yimagesz>1000) and ximagesz>500 and yimagesz>500:
-    ximagesz = ximagesz / 2
-    yimagesz = yimagesz / 2
+    ximagesz = ximagesz // 2
+    yimagesz = yimagesz // 2
     scalinglevels += 1
 
   return scalinglevels

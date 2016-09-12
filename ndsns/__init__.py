@@ -12,12 +12,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class IngestProj(object):
-
-  @classmethod
-  def fromTileKey(cls, tile_key):
-    """Create a ndproj from supercuboid_key"""
-    return NotImplemented
-
-  def generateProjectInfo(self):
-    return self.__dict__.values()

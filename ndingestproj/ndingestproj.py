@@ -23,10 +23,16 @@ class NDIngestProj(IngestProj):
   
   @classmethod
   def fromTileKey(cls, tile_key):
-    """Create a ndproj from supercuboid_key"""
+    """Create a ndproj from tile key"""
     hash_value, project_name, channel_name, resolution, x_index, y_index, z_index, t_index = tile_key.split('&')
     return cls(project_name, channel_name, resolution), (int(x_index), int(y_index), int(z_index), int(t_index))
 
+  @classmethod
+  def fromSupercuboidKey(cls, supercuboid_key):
+    """Create a ndproj from supercuboid_key"""
+    hash_value, project_name, channel_name, resolution, morton_index, t_index = supercuboid_key.split('&')
+    return cls(project_name, channel_name, resolution), (int(morton_index), int(t_index))
+  
   @property
   def project_name(self):
     return self._project_name

@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 class NDSerializer:
     
   @staticmethod
   def encode(project_name, channel_name, resolution, x_tile, y_tile, z_tile, time_range=None):
     """Encode a message for the upload queue"""
-    return { 'project' : project_name,
+    return { 
+             'project' : project_name,
              'channel' : channel_name,
              'resolution' : resolution,
              'x_tile' : x_tile,
@@ -31,3 +34,17 @@ class NDSerializer:
     """Decode a message from the upload queue"""
 
     return message_body
+
+  @staticmethod
+  def encodeIngestMessage(supercuboid_key, message_id, receipt_handle):
+    """Enode a message for the ingest queue"""
+    message = {
+                'supercuboid_key' : supercuboid_key,
+                'message_id' : message_id,
+                'receipt_handle' : receipt_handle
+              }
+    return json.dumps(message)
+
+  @staticmethod
+  def decodeIngestMessage(message):
+    return json.loads(message)

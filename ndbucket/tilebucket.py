@@ -33,7 +33,6 @@ class TileBucket:
       print(e)
       raise
 
-
   @staticmethod
   def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
     """Create the upload bucket"""
@@ -50,7 +49,6 @@ class TileBucket:
       print(e)
       raise
 
-
   @staticmethod
   def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
     """Delete the upload bucket"""
@@ -65,37 +63,33 @@ class TileBucket:
       print(e)
       raise
   
-  
   @staticmethod
   def getBucketName():
     """Generate the bucket name"""
     return settings.S3_TILE_BUCKET
-
 
   def encodeObjectKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
     """Generate the key for the file in scratch space"""
     hashm = hashlib.md5()
     hashm.update('{}&{}&{}&{}&{}&{}&{}'.format(self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index))
     return '{}&{}&{}&{}&{}&{}&{}&{}'.format(hashm.hexdigest(), self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index)
-  
 
   @staticmethod
   def decodeObjectKey(object_key):
     """Decode an object key"""
     return object_key.split('&')
 
-
   def putObject(self, tile_handle, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle, time=0):
     """Put object in the upload bucket"""
     
     # generate the key
-    object_key = self.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile, time)
+    tile_key = self.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile, time)
 
     try:
       response = self.bucket.put_object(
           ACL = 'private',
           Body = tile_handle,
-          Key = object_key,
+          Key = tile_key,
           Metadata = {
             'message_id' : message_id,
             'receipt_handle' : receipt_handle
@@ -106,19 +100,21 @@ class TileBucket:
     except Exception as e:
       print(e)
       raise
-  
 
-  def getObject(self, object_key):
-    """Get object from the upload bucket"""
-
+  def getObjectByKey(self, tile_key):
+    """Get object by tile key"""
     try:
-      s3_obj = self.s3.Object(self.bucket.name, object_key)
+      s3_obj = self.s3.Object(self.bucket.name, tile_key)
       response = s3_obj.get()
       return response['Body'].read(), response['Metadata']['message_id'], response['Metadata']['receipt_handle']
     except Exception as e:
       print(e)
-      raise e
- 
+      raise
+
+  def getObject(self, channel_name, resolution, x_tile, y_tile, z_tile, time_index=0):
+    """Get object from the upload bucket"""
+    tile_key = self.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile, time_index)
+    return self.getObjectByKey(tile_key)
 
   def getMetadata(self, object_key):
     """Get the object key from the upload bucket"""

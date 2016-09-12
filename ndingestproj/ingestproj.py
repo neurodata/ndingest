@@ -20,4 +20,4 @@ class IngestProj(object):
     return NotImplemented
 
   def generateProjectInfo(self):
-    return self.__dict__.keys()
+    return self.__dict__.values()

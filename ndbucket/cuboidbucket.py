@@ -15,26 +15,27 @@
 import hashlib
 import boto3
 import botocore
+from s3util import generateS3Key
 from django.conf import settings
 
 
 class CuboidBucket:
 
-  def __init__(self, region_name=settings.REGION_NAME, endpoint_url=None):
-    """Create resource for the upload queue"""
+  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
+    """Create resource for the cuboid queue"""
     
     bucket_name = CuboidBucket.getBucketName()
+    self.project_name = project_name
     self.s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
     try:
       self.bucket = self.s3.Bucket(bucket_name)
     except botocore.exceptions.ClientError as e:
-      print e
+      print (e)
       raise
-
 
   @staticmethod
   def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
-    """Create the upload bucket"""
+    """Create the cuboid bucket"""
     
     bucket_name = CuboidBucket.getBucketName()
     s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
@@ -45,13 +46,12 @@ class CuboidBucket:
           ACL = 'private'
       )
     except Exception as e:
-      print e
+      print (e)
       raise
-
 
   @staticmethod
   def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
-    """Delete the upload bucket"""
+    """Delete the cuboid bucket"""
     
     bucket_name = CuboidBucket.getBucketName()
     s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
@@ -60,7 +60,7 @@ class CuboidBucket:
       # deleting the bucket
       response = bucket.delete()
     except Exception as e:
-      print e
+      print (e)
       raise
   
   @staticmethod
@@ -68,48 +68,54 @@ class CuboidBucket:
     """Generate the Bucket Name"""
     return settings.S3_CUBOID_BUCKET
   
-  # def putObject(self, tile_handle, project_name, channel_name, res, x_tile, y_tile, z_tile, message_id, receipt_handle):
-    # """Put object in the upload bucket"""
+
+  def putObject(self, channel_name, resolution, morton_index, cube_data, time_index=0):
+    """Put object in the cuboid bucket"""
+    supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index)
+    return self.putObjectByKey(supercuboid_key, cube_data)
     
-    # # generate the key
-    # object_key = self.generateObjectKey(project_name, channel_name, res, x_tile, y_tile, z_tile)
+  def putObjectByKey(self, supercuboid_key, cube_data):
+    """Put object in the cuboid bucket by key"""
     
-    # try:
-      # response = self.bucket.put_object(
-          # ACL = 'private',
-          # Body = tile_handle,
-          # Key = object_key,
-          # Metadata = {
-            # 'message_id' : message_id,
-            # 'receipt_handle' : receipt_handle
-          # },
-          # StorageClass = 'STANDARD'
-      # )
-      # return response
-    # except Exception as e:
-      # print e
-      # raise
-  
+    try:
+      response = self.bucket.put_object(
+          ACL = 'private',
+          Body = cube_data,
+          Key = supercuboid_key,
+          StorageClass = 'STANDARD'
+      )
+      return response
+    except Exception as e:
+      print (e)
+      raise
+   
+  def getObjectByKey(self, supercuboid_key):
+    """Get an object from the cuboid bucket based on key"""
 
-  # def getObject(self, object_key):
-    # """Get object from the upload bucket"""
+    try:
+      s3_obj = self.s3.Object(self.bucket.name, supercuboid_key)
+      response = s3_obj.get()
+      return response['Body'].read()
+    except Exception as e:
+      print (e)
+      raise
 
-    # try:
-      # s3_obj = self.s3.Object(self.bucket.name, object_key)
-      # response = s3_obj.get()
-      # return response['Body'].read(), response['Metadata']['receipt_handle'], response['Metadata']['message_id']
-    # except Exception as e:
-      # print e
-      # raise e
- 
+  def getObject(self, channel_name, resolution, morton_index, time_index=0):
+    """Get object from the cuboid bucket based on parameters"""
+    supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index)
+    return self.getObjectByKey(supercuboid_key)
 
-  def deleteObject(self, object_key):
+  def generateSupercuboidKey(self, channel_name, resolution, morton_index, time_index=0):
+    """Generate the supercuboid key"""
+    return generateS3Key(self.project_name, channel_name, resolution, morton_index, time_index)
+
+  def deleteObject(self, supercuboid_key):
     """Delete object from the upload bucket"""
     
     try:
-      s3_obj = self.s3.Object(self.bucket.name, object_key)
+      s3_obj = self.s3.Object(self.bucket.name, supercuboid_key)
       response = s3_obj.delete()
       return response
     except Exception as e:
-      print e
+      print (e)
       raise

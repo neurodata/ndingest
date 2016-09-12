@@ -77,7 +77,7 @@ class IngestQueue(NDQueue):
   
   def sendMessage(self, supercuboid_key):
     """Send a message to upload queue"""
-    super(IngestQueue, self).sendMessage(supercuboid_key)
+    return super(IngestQueue, self).sendMessage(supercuboid_key)
 
 
   def receiveMessage(self, number_of_messages=1):

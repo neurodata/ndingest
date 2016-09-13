@@ -17,7 +17,7 @@ from __future__ import absolute_import
 import sys
 sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import urllib
 import boto3
 import json
@@ -33,7 +33,7 @@ from ndbucket.cuboidbucket import CuboidBucket
 from nddynamo.cuboidindexdb import CuboidIndexDB
 from ndqueue.ndserializer import NDSerializer
 from ndingestproj.ingestproj import IngestProj
-ProjClass = IngestProj.load('Neurodata')
+ProjClass = IngestProj.load()
 
 def lambda_handler(event, context):
   """Arrange data in the state database and ready it for ingest"""

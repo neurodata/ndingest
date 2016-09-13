@@ -17,7 +17,7 @@ from __future__ import absolute_import
 import sys
 sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import cStringIO
 import pytest
 import emulambda
@@ -29,7 +29,8 @@ from ndbucket.tilebucket import TileBucket
 from ndbucket.cuboidbucket import CuboidBucket
 from ndqueue.ndserializer import NDSerializer
 from ndingestproj.ingestproj import IngestProj
-nd_proj = IngestProj.load('Neurodata')('kasthuri11', 'image', '0')
+ProjClass = IngestProj.load()
+nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_IngestLambda:

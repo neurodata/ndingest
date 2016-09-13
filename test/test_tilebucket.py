@@ -17,11 +17,12 @@ from __future__ import print_function
 import sys
 sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import cStringIO
-from ndingestproj.ndingestproj import NDIngestProj
 from ndbucket.tilebucket import TileBucket
-nd_proj = NDIngestProj('kasthuri11', 'image', 0)
+from ndingestproj.ingestproj import IngestProj
+ProjClass = IngestProj.load()
+nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_Upload_Bucket():

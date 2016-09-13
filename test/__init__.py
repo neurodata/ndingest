@@ -11,17 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import boto3
-from serializer import Serializer
-
-class NDMessage(object):
-
-  def __init__(self):
-    return NotImplemented
-  
-  def encode(self):
-    return NotImplemented
-  
-  def decode(self):
-    return NotImplemented

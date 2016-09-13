@@ -17,13 +17,14 @@ from __future__ import print_function
 import sys
 sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import json
 from ndqueue.uploadqueue import UploadQueue
 from ndqueue.serializer import Serializer
-serializer = Serializer.load('Neurodata')
-from ndingestproj.ndingestproj import NDIngestProj
-nd_proj = NDIngestProj('kasthuri11', 'image', '0')
+serializer = Serializer.load()
+from ndingestproj.ingestproj import IngestProj
+ProjClass = IngestProj.load()
+nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_UploadQueue():

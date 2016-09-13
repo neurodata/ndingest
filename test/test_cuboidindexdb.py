@@ -17,20 +17,23 @@ from __future__ import absolute_import
 import sys
 sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 from nddynamo.cuboidindexdb import CuboidIndexDB
+from ndingestproj.ingestproj import IngestProj
+ProjClass = IngestProj.load()
+nd_proj = ProjClass('kasthuri11', 'image', '0')
+nd_proj2 = ProjClass('kasthuri11', 'image2', '0')
 
-project_name = 'kasthuri11'
-channel_name = 'image'
-channel_name2 = 'image2'
-resolution = 0
 
 class Test_CuboidIndexDB():
 
   def setup_class(self):
     """Setup parameters"""
-    CuboidIndexDB.createTable(endpoint_url='http://localhost:8000')
-    self.cuboid_index = CuboidIndexDB(project_name, endpoint_url='http://localhost:8000')
+    try:
+      CuboidIndexDB.createTable(endpoint_url='http://localhost:8000')
+    except Exception as e:
+      pass
+    self.cuboid_index = CuboidIndexDB(nd_proj.project_name, endpoint_url='http://localhost:8000')
     
 
   def teardown_class(self):
@@ -45,23 +48,23 @@ class Test_CuboidIndexDB():
     x_value = 0
     y_value = 0
     for z_value in range(0, 2, 1):
-      self.cuboid_index.putItem(channel_name, resolution, x_value, y_value, z_value)
+      self.cuboid_index.putItem(nd_proj.channel_name, nd_proj.resolution, x_value, y_value, z_value)
   
     # checking if the items were inserted
     for z_value in range(0, 2, 1):
-      item_value = self.cuboid_index.getItem(channel_name, resolution, x_value, y_value, z_value)
-      assert( item_value['project_name'] == project_name )
-      assert( item_value['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name, resolution, 0) )
+      item_value = self.cuboid_index.getItem(nd_proj.channel_name, nd_proj.resolution, x_value, y_value, z_value)
+      assert( item_value['project_name'] == nd_proj.project_name )
+      assert( item_value['channel_resolution_taskid'] == '{}&{}&{}'.format(nd_proj.channel_name, nd_proj.resolution, 0) )
     
     # inserting two values for task 1, zvalues 0-1
     for z_value in range(0, 1, 1):
-      self.cuboid_index.putItem(channel_name, resolution, x_value, y_value, z_value, task_id=1)
+      self.cuboid_index.putItem(nd_proj.channel_name, nd_proj.resolution, x_value, y_value, z_value, task_id=1)
     
     # checking if the items were updated
     for z_value in range(0, 1, 1):
-      item_value = self.cuboid_index.getItem(channel_name, resolution, x_value, y_value, z_value)
-      assert( item_value['project_name'] == project_name )
-      assert( item_value['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name, resolution, 1) )
+      item_value = self.cuboid_index.getItem(nd_proj.channel_name, nd_proj.resolution, x_value, y_value, z_value)
+      assert( item_value['project_name'] == nd_proj.project_name )
+      assert( item_value['channel_resolution_taskid'] == '{}&{}&{}'.format(nd_proj.channel_name, nd_proj.resolution, 1) )
     
   
   def test_queryProjectItems(self):
@@ -71,16 +74,16 @@ class Test_CuboidIndexDB():
     x_value = 0
     y_value = 0
     for z_value in range(0, 2, 1):
-      self.cuboid_index.putItem(channel_name, resolution, x_value, y_value, z_value)
+      self.cuboid_index.putItem(nd_proj.channel_name, nd_proj.resolution, x_value, y_value, z_value)
     
     for item in self.cuboid_index.queryProjectItems():
-      assert( item['project_name'] == project_name )
+      assert( item['project_name'] == nd_proj.project_name )
     
-    for item in self.cuboid_index.queryChannelItems(channel_name2):
-      assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name2, resolution, 0) )
+    for item in self.cuboid_index.queryChannelItems(nd_proj2.channel_name):
+      assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(nd_proj2.channel_name, nd_proj.resolution, 0) )
       
-    for item in self.cuboid_index.queryTaskItems(channel_name, resolution, 1):
-      assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name2, resolution, 0) )
+    for item in self.cuboid_index.queryTaskItems(nd_proj.channel_name, nd_proj.resolution, 1):
+      assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(nd_proj2.channel_name, nd_proj.resolution, 0) )
 
 
   def test_deleteXYZ(self):
@@ -89,6 +92,6 @@ class Test_CuboidIndexDB():
     x_value = 0
     y_value = 0
     for z_value in range(0, 2, 1):
-      value = self.cuboid_index.deleteXYZ(channel_name, resolution, x_value, y_value, z_value)
-      item = self.cuboid_index.getItem(channel_name, resolution, x_value, y_value, z_value)
+      value = self.cuboid_index.deleteXYZ(nd_proj.channel_name, nd_proj.resolution, x_value, y_value, z_value)
+      item = self.cuboid_index.getItem(nd_proj.channel_name, nd_proj.resolution, x_value, y_value, z_value)
       assert(item == None)

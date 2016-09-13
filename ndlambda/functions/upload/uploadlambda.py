@@ -15,7 +15,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import urllib
 import boto3
 import json

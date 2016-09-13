@@ -17,12 +17,13 @@ from __future__ import print_function
 import sys
 sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
-from ndingestproj.ndingestproj import NDIngestProj
+settings = Settings.load()
 from ndqueue.serializer import Serializer
-serializer = Serializer.load('Neurodata')
+serializer = Serializer.load()
 from ndsns.ndsns import NDSns
-nd_proj = NDIngestProj('kasthuri11', 'image', '0')
+from ndingestproj.ingestproj import IngestProj
+ProjClass = IngestProj.load()
+nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_SNS:

@@ -15,7 +15,7 @@
 import sys
 sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import cStringIO
 import pytest
 import emulambda
@@ -25,10 +25,10 @@ from nddynamo.tileindexdb import TileIndexDB
 from ndingestproj.ndingestproj import NDIngestProj
 from ndbucket.tilebucket import TileBucket
 from ndqueue.serializer import Serializer
-serializer = Serializer.load('Neurodata')
+serializer = Serializer.load()
 from ndingestproj.ingestproj import IngestProj
-
-nd_proj = NDIngestProj('kasthuri11', 'image', '0')
+ProjClass = IngestProj.load()
+nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 class Test_UploadLambda:
 

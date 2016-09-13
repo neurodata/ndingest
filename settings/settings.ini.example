@@ -1,3 +1,5 @@
+[proj]
+PROJECT_NAME = Neurodata
 [aws]
 REGION_NAME = us-east-1
 AWS_ACCESS_KEY_ID = 

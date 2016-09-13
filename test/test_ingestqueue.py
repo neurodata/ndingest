@@ -17,11 +17,12 @@ from __future__ import absolute_import
 import sys
 sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import pytest
 from ndqueue.ingestqueue import IngestQueue
-from ndingestproj.ndingestproj import NDIngestProj
-nd_proj = NDIngestProj('kasthuri11', 'image', '0')
+from ndingestproj.ingestproj import IngestProj
+ProjClass = IngestProj.load()
+nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_Ingest_Queue():

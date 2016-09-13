@@ -24,6 +24,10 @@ class NDSettings(Settings):
     super(NDSettings, self).__init__(file_name)
   
   @property
+  def PROJECT_NAME(self):
+    return self.parser.get('proj', 'PROJECT_NAME')
+  
+  @property
   def REGION_NAME(self):
     return self.parser.get('aws', 'REGION_NAME')
 

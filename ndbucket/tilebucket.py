@@ -15,13 +15,13 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import hashlib
 import boto3
 import botocore
 import hashlib
 from util.util import Util
-UtilClass = Util.load('Neurodata')
+UtilClass = Util.load()
 
 class TileBucket:
 

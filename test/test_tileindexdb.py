@@ -15,20 +15,21 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import sys
+sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 from nddynamo.tileindexdb import TileIndexDB
+from ndingestproj.ingestproj import IngestProj
+ProjClass = IngestProj.load()
+nd_proj = ProjClass('kasthuri11', 'image', '0')
 
-project_name = 'kasthuri11'
-channel_name = 'image'
-resolution = 0
 
 class Test_TileIndexDB():
 
   def setup_class(self):
     """Setup parameters"""
     TileIndexDB.createTable(endpoint_url='http://localhost:8000')
-    self.tileindex_db = TileIndexDB(project_name, endpoint_url='http://localhost:8000')
+    self.tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url='http://localhost:8000')
     
   def teardown_class(self):
     """Teardown parameters"""
@@ -41,20 +42,20 @@ class Test_TileIndexDB():
     y_tile = 0
     # inserting three values for task 0
     for z_tile in range(0, 3, 1):
-      self.tileindex_db.putItem(channel_name, resolution, x_tile, y_tile, z_tile, task_id=0)
+      self.tileindex_db.putItem(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, task_id=0)
     
     # inserting 2 values for task 1
     for z_tile in range(66, 68, 1):
-      self.tileindex_db.putItem(channel_name, resolution, x_tile, y_tile, z_tile, task_id=1)
+      self.tileindex_db.putItem(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, task_id=1)
 
     # checking if the items were inserted
     z_tile = 0
-    supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+    supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
     item_value = self.tileindex_db.getItem(supercuboid_key)
     assert( item_value['zindex_list'] == set([0, 1, 2]) )
     
     z_tile = 65
-    supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+    supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
     item_value = self.tileindex_db.getItem(supercuboid_key)
     assert( item_value['zindex_list'] == set([66, 67]) )
   
@@ -70,7 +71,7 @@ class Test_TileIndexDB():
     x_tile = 0
     y_tile = 0
     for z_tile in range(129, 129+settings.SUPER_CUBOID_SIZE[2], 1):
-      supercuboid_key, supercuboid_ready = self.tileindex_db.putItem(channel_name, resolution, x_tile, y_tile, z_tile, task_id=0)
+      supercuboid_key, supercuboid_ready = self.tileindex_db.putItem(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, task_id=0)
       if z_tile < 129+settings.SUPER_CUBOID_SIZE[2]:
         assert(supercuboid_ready is False)
       else:
@@ -84,22 +85,22 @@ class Test_TileIndexDB():
     y_tile = 0
     # inserting three values for task 0
     for z_tile in range(0, 3, 1):
-      supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+      supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
       self.tileindex_db.deleteItem(supercuboid_key)
     
     # inserting 2 values for task 1
     for z_tile in range(66, 68, 1):
-      supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+      supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
       self.tileindex_db.deleteItem(supercuboid_key)
     
     # inserting three values for task 0
     for z_tile in range(0, 3, 1):
-      supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+      supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
       item = self.tileindex_db.getItem(supercuboid_key)
       assert(item == None)
     
     # inserting 2 values for task 1
     for z_tile in range(66, 68, 1):
-      supercuboid_key = self.tileindex_db.generatePrimaryKey(channel_name, resolution, x_tile, y_tile, z_tile)
+      supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
       item = self.tileindex_db.getItem(supercuboid_key)
       assert(item == None)

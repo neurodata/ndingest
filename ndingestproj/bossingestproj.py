@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+from __future__ import absolute_import
 from ingestproj import IngestProj
 
-class NDIngestProj(IngestProj):
+class BossIngestProj(IngestProj):
 
   def __init__(self, project_name, channel_name, resolution):
-    pass 
+    return NotImplemented
 
   @classmethod
   def fromTileKey(cls, tile_key):

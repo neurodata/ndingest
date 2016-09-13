@@ -21,7 +21,9 @@ import pytest
 import emulambda
 from ndqueue.uploadqueue import UploadQueue
 from ndqueue.ingestqueue import IngestQueue
+from ndqueue.cleanupqueue import CleanupQueue
 from nddynamo.tileindexdb import TileIndexDB
+from nddynamo.cuboidindexdb import CuboidIndexDB
 from ndingestproj.ndingestproj import NDIngestProj
 from ndbucket.tilebucket import TileBucket
 from ndqueue.serializer import Serializer
@@ -41,19 +43,20 @@ class Test_UploadLambda:
     except Exception as e:
       pass
     self.tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)
-    tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
+    self.tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
     [self.x_tile, self.y_tile, self.z_tile] = [0, 0, 0]
     supercuboid_key = 'testing' 
-    message = serializer.encodeDeleteMessage(supercuboid_key)
+    message_id = '123456'
+    receipt_handle = 'testing123456'
+    message = serializer.encodeDeleteMessage(supercuboid_key, message_id, receipt_handle)
     # insert message in the upload queue
+    CleanupQueue.createQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
     self.cleanup_queue = CleanupQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
     self.cleanup_queue.sendMessage(message)
     # receive message and upload object
-    message_id = '123456'
-    receipt_handle = 'testing123456'
-    for z_index in range(self.z_tile, settings.SUPER_CUBOID_SIZE, 1):
+    for z_index in range(self.z_tile, settings.SUPER_CUBOID_SIZE[2], 1):
       tile_handle = cStringIO.StringIO()
-      tile_bucket.putObject(tile_handle, nd_proj.channel_name, nd_proj.resolution, self.x_tile, self.y_tile, z_index, message_id, receipt_handle)
+      self.tile_bucket.putObject(tile_handle, nd_proj.channel_name, nd_proj.resolution, self.x_tile, self.y_tile, z_index, message_id, receipt_handle)
 
   def teardown_class(self):
     """Teardown class parameters"""
@@ -70,11 +73,18 @@ class Test_UploadLambda:
     # calling the emulambda function to invoke a lambda
     emulambda.invoke_lambda(func, event, None, 0, None)
 
-    # testing if the index was updated in tileindexdb
+    # test if there are any tiles leftover in tile bucket
+    for z_index in range(self.z_tile, settings.SUPER_CUBOID_SIZE[2], 1):
+      tile = self.tile_bucket.getObject(nd_proj.channel_name, nd_proj.resolution, self.x_tile, self.y_tile, z_index)
+      assert(tile is None)
+
+    # check if there are any entires left in the tileindex table
     supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, self.x_tile, self.y_tile, self.z_tile)
     item = self.tileindex_db.getItem(supercuboid_key)
-    assert(item['zindex_list'] == set([0]))
+    assert(item is None)
 
-    # testing if the message was deleted from the upload queue or not
-    for message in self.upload_queue.receiveMessage():
-      assert False
+    # testing if the message was deleted from the cleanup queue or not
+    for message in self.cleanup_queue.receiveMessage():
+      # KL TODO write the message id into the JSON event file directly
+      print message
+      # assert False

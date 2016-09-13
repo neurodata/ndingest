@@ -93,7 +93,10 @@ class Test_IngestLambda:
     IngestQueue.deleteQueue(nd_proj, endpoint_url='http://localhost:4568')
     CleanupQueue.deleteQueue(nd_proj, endpoint_url='http://localhost:4568')
     TileBucket.deleteBucket(endpoint_url='http://localhost:4567')
-    CuboidBucket.deleteBucket(endpoint_url='http://localhost:4567')
+    try:
+      CuboidBucket.deleteBucket(endpoint_url='http://localhost:4567')
+    except Exception as e:
+      pass
 
   def test_Uploadevent(self):
     """Testing the event"""
@@ -110,5 +113,6 @@ class Test_IngestLambda:
 
     # testing if the message was removed from the ingest queue
     for message in self.ingest_queue.receiveMessage():
+      # KL TODO write the message id into the JSON event file directly
       print (message)
       # assert False

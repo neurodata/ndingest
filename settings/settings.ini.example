@@ -15,7 +15,7 @@ DYNAMO_TILEINDEX_TABLE = tileindexdb
 DYNAMO_DEV_ENDPOINT = http://localhost:8000
 [sqs]
 SQS_DEV_ENDPOINT = http://localhost:4568
-[SNS]
+[sns]
 SNS_DEV_ENDPOINT = http://localhost:9292
 [cuboid]
 SUPER_CUBOID_SIZE = 512, 512, 64

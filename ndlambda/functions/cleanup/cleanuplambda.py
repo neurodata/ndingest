@@ -14,42 +14,43 @@
 
 from __future__ import print_function
 
+from settings.settings import Settings
+settings = Settings.load()
 import urllib
 import boto3
 import json
 import cStringIO
 from PIL import Image
-from django.conf import settings
-import ndlib
+from ndlib.ndlib import MortonXYZ
 from ndqueue.ingestqueue import IngestQueue
 from ndqueue.cleanupqueue import CleanupQueue
 from nddynamo.tileindexdb import TileIndexDB
 from ndbucket.tilebucket import TileBucket
 from ndbucket.cuboidbucket import CuboidBucket
 from nddynamo.cuboidindexdb import CuboidIndexDB
-from ndingestproj.ndingestproj import NDIngestProj 
+from ndingestproj.ingestproj import IngestProj
+ProjClass = IngestProj.load()
 from ndqueue.serializer import Serializer
+serializer = Serializer.load()
 
 def lambda_handler(event, context):
   """Arrange data in the state database and ready it for ingest"""
   
   # receive SNS notification event
   # message_id, receipt_handle, supercuboid_key = ???
-  import pdb; pdb.set_trace()
   message = event['Records'][0]['Sns']['Message']
-  supercuboid_key, message_id, receipt_handle = NDSerializer.decodeDeleteMessage(message)
+  supercuboid_key, message_id, receipt_handle = serializer.decodeDeleteMessage(message)
   
   # create ndproj from SNS notification
-  nd_proj, (morton_index, time_index) = NDIngestProj.fromSupercuboidKey(supercuboid_key)
-  [x_index, y_index, z_index] = ndlib.MortonXYZ(morton_index)
+  nd_proj, (morton_index, time_index) = ProjClass.fromSupercuboidKey(supercuboid_key)
+  [x_index, y_index, z_index] = MortonXYZ(morton_index)
 
   # delete tiles from tile_bucket
   tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
-  for z in range(z_index, SUPER_CUBOID_SIZE, 1):
+  for z in range(z_index, settings.SUPER_CUBOID_SIZE[2], 1):
     object_key = tile_bucket.encodeObjectKey(nd_proj.channel_name, nd_proj.resolution, x_index, y_index, z)
     tile_bucket.deleteObject(object_key) 
 
-  # delete tiles from tileindex_db
   tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)
   tileindex_db.deleteItem(supercuboid_key)
 

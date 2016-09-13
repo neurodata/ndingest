@@ -75,7 +75,6 @@ def lambda_handler(event, context):
   ingest_queue = IngestQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
   ingest_queue.deleteMessage(message_id, receipt_handle)
 
-  import pdb; pdb.set_trace()
   # insert message to cleanup queue
   cleanup_queue = CleanupQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
   cleanup_queue.sendMessage(supercuboid_key)

@@ -166,7 +166,6 @@ class TileIndexDB:
       print (e)
       raise
 
-
   def getTaskItems(self, task_id):
     """Get all the items for a given task from the ingest table"""
     

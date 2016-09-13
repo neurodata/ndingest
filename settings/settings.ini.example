@@ -1,5 +1,6 @@
 [proj]
 PROJECT_NAME = Neurodata
+DEV_MODE = True
 [aws]
 REGION_NAME = us-east-1
 AWS_ACCESS_KEY_ID = 
@@ -7,9 +8,15 @@ AWS_SECRET_ACCESS_KEY =
 [s3]
 S3_CUBOID_BUCKET = neurodata-cuboid-store
 S3_TILE_BUCKET = neurodata-tile-store
+S3_DEV_ENDPOINT = http://localhost:4567
 [dynamo]
 DYNAMO_CUBOIDINDEX_TABLE = s3indexdb
 DYNAMO_TILEINDEX_TABLE = tileindexdb
+DYNAMO_DEV_ENDPOINT = http://localhost:8000
+[sqs]
+SQS_DEV_ENDPOINT = http://localhost:4568
+[SNS]
+SNS_DEV_ENDPOINT = http://localhost:9292
 [cuboid]
 SUPER_CUBOID_SIZE = 512, 512, 64
 [path]

@@ -44,15 +44,15 @@ def lambda_handler(event, context):
   [x_index, y_index, z_index] = ndlib.MortonXYZ(morton_index)
 
   # delete tiles from tile_bucket
-  tile_bucket = TileBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
+  tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
   for z in range(z_index, SUPER_CUBOID_SIZE, 1):
     object_key = tile_bucket.encodeObjectKey(nd_proj.channel_name, nd_proj.resolution, x_index, y_index, z)
     tile_bucket.deleteObject(object_key) 
 
   # delete tiles from tileindex_db
-  tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url='http://localhost:8000')
+  tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)
   tileindex_db.deleteItem(supercuboid_key)
 
   # delete message from cleanup queue
-  cleanup_queue = CleanupQueue(nd_proj, endpoint_url='http://localhost:4568')
+  cleanup_queue = CleanupQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
   cleanup_queue.deleteMessage(message_id, receipt_handle)

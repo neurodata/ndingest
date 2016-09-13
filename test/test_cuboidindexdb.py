@@ -30,15 +30,15 @@ class Test_CuboidIndexDB():
   def setup_class(self):
     """Setup parameters"""
     try:
-      CuboidIndexDB.createTable(endpoint_url='http://localhost:8000')
+      CuboidIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
     except Exception as e:
       pass
-    self.cuboid_index = CuboidIndexDB(nd_proj.project_name, endpoint_url='http://localhost:8000')
+    self.cuboid_index = CuboidIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)
     
 
   def teardown_class(self):
     """Teardown parameters"""
-    CuboidIndexDB.deleteTable(endpoint_url='http://localhost:8000')
+    CuboidIndexDB.deleteTable(endpoint_url=settings.DYNAMO_ENDPOINT)
     
 
   def test_putItem(self):

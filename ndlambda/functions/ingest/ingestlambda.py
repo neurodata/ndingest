@@ -19,6 +19,7 @@ sys.path.append('..')
 from settings.settings import Settings
 settings = Settings.load()
 import urllib
+import blosc
 import boto3
 import json
 import cStringIO
@@ -27,6 +28,7 @@ from ndlib.ndlib import MortonXYZ
 from ndlib.ndtype import *
 from spdb.cube import Cube
 from ndqueue.ingestqueue import IngestQueue
+from ndqueue.cleanupqueue import CleanupQueue
 from nddynamo.tileindexdb import TileIndexDB
 from ndbucket.tilebucket import TileBucket
 from ndbucket.cuboidbucket import CuboidBucket
@@ -51,10 +53,10 @@ def lambda_handler(event, context):
   cube = Cube.getCube(settings.SUPER_CUBOID_SIZE, IMAGE, UINT8)
   cube.zeros()
   
-  cuboidindex_db = CuboidIndexDB(nd_proj.project_name, endpoint_url='http://localhost:8000')
-  cuboid_bucket = CuboidBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
+  cuboidindex_db = CuboidIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)
+  cuboid_bucket = CuboidBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
 
-  tile_bucket = TileBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
+  tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
   # read all 64 tiles from bucket into a slab
   for z_index in range(z_tile, settings.SUPER_CUBOID_SIZE[2], 1):
     try:
@@ -64,16 +66,16 @@ def lambda_handler(event, context):
       print ("Executing exception")
       pass
 
-  # import pdb; pdb.set_trace()
   # insert supercuboid if it has data
   if cube.isNotZeros() or True:
     cuboidindex_db.putItem(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
-    cuboid_bucket.putCube(nd_proj.channel_name, nd_proj.resolution, morton_index, blosc.pack_array(data))
+    cuboid_bucket.putObject(nd_proj.channel_name, nd_proj.resolution, morton_index, cube.toBlosc())
   
   # remove message from ingest queue
-  ingest_queue = IngestQueue(nd_proj, endpoint_url='http://localhost:4568')
+  ingest_queue = IngestQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
   ingest_queue.deleteMessage(message_id, receipt_handle)
 
+  import pdb; pdb.set_trace()
   # insert message to cleanup queue
-  cleanup_queue = CleanupQueue(nd_proj, endpoint_url='htp://localhost:4568')
+  cleanup_queue = CleanupQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
   cleanup_queue.sendMessage(supercuboid_key)

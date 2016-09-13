@@ -36,19 +36,19 @@ def lambda_handler(event, context):
   nd_proj, tile_args = NDIngestProj.fromTileKey(tile_key)
   
   # update value in the dynamo table
-  tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url='http://localhost:8000')
+  tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)
   supercuboid_key, supercuboid_ready = tileindex_db.putItem(nd_proj.channel_name, nd_proj.resolution, *tile_args)
 
   # ingest the supercuboid if we have all the tiles
   if supercuboid_ready:
     # insert a new job in the insert queue if we have all the tiles
-    ingest_queue = IngestQueue(nd_proj, endpoint_url='http://localhost:4568')
+    ingest_queue = IngestQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
     ingest_queue.sendMessage(supercuboid_key)
   
   # fetch message_id and receipt_handle from the s3 object
-  tile_bucket = TileBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
+  tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
   message_id, receipt_handle = tile_bucket.getMetadata(tile_key)
 
   # delete message from upload queue
-  upload_queue = UploadQueue(nd_proj, endpoint_url='http://localhost:4568')
+  upload_queue = UploadQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
   upload_queue.deleteMessage(message_id, receipt_handle)

@@ -27,7 +27,7 @@ class CleanupQueue(NDQueue):
   def __init__(self, nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resources for the queue"""
     
-    self.queue_name = UploadQueue.generateQueueName(nd_proj)
+    self.queue_name = CleanupQueue.generateQueueName(nd_proj)
     return super(CleanupQueue, self).__init__(self.queue_name, region_name, endpoint_url)
 
 
@@ -36,7 +36,7 @@ class CleanupQueue(NDQueue):
     """Create the upload queue"""
     
     # creating the resource
-    queue_name = UploadQueue.generateQueueName(nd_proj)
+    queue_name = CleanupQueue.generateQueueName(nd_proj)
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
@@ -59,7 +59,7 @@ class CleanupQueue(NDQueue):
     """Delete the upload queue"""
 
     # creating the resource
-    queue_name = UploadQueue.generateQueueName(nd_proj)
+    queue_name = CleanupQueue.generateQueueName(nd_proj)
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
@@ -78,7 +78,7 @@ class CleanupQueue(NDQueue):
   @staticmethod
   def generateQueueName(nd_proj):
     """Generate the queue name based on project information"""
-    return '&'.join(nd_proj.getProjectInfo()+['CLEANUP'])
+    return '&'.join(nd_proj.generateProjectInfo()+['CLEANUP'])
 
 
   def sendMessage(self, tile_info):

@@ -29,13 +29,13 @@ class Test_Upload_Bucket():
 
   def setup_class(self):
     """Setup Parameters"""
-    TileBucket.createBucket(endpoint_url='http://localhost:4567')
-    self.tile_bucket = TileBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
+    TileBucket.createBucket(endpoint_url=settings.S3_ENDPOINT)
+    self.tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
 
 
   def teardown_class(self):
     """Teardown Parameters"""
-    TileBucket.deleteBucket(endpoint_url='http://localhost:4567')
+    TileBucket.deleteBucket(endpoint_url=settings.S3_ENDPOINT)
 
 
   def test_put_object(self):

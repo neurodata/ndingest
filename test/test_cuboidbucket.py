@@ -31,12 +31,12 @@ class Test_Cuboid_Bucket():
 
   def setup_class(self):
     """Setup Parameters"""
-    CuboidBucket.createBucket(endpoint_url='http://localhost:4567')
-    self.cuboid_bucket = CuboidBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
+    CuboidBucket.createBucket(endpoint_url=settings.S3_ENDPOINT)
+    self.cuboid_bucket = CuboidBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
 
   def teardown_class(self):
     """Teardown Parameters"""
-    CuboidBucket.deleteBucket(endpoint_url='http://localhost:4567')
+    CuboidBucket.deleteBucket(endpoint_url=settings.S3_ENDPOINT)
 
   def test_put_object(self):
     """Testing put object"""

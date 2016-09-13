@@ -29,12 +29,12 @@ class Test_Ingest_Queue():
 
   def setup_class(self):
     """Setup class parameters"""
-    IngestQueue.createQueue(nd_proj, endpoint_url='http://localhost:4568')
-    self.ingest_queue = IngestQueue(nd_proj, endpoint_url='http://localhost:4568')
+    IngestQueue.createQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+    self.ingest_queue = IngestQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
   
   def teardown_class(self):
     """Teardown parameters"""
-    IngestQueue.deleteQueue(nd_proj, endpoint_url='http://localhost:4568')
+    IngestQueue.deleteQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
 
   def test_Message(self):
     """Testing the upload queue"""

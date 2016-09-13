@@ -36,30 +36,30 @@ class Test_UploadLambda:
     """Setup class parameters"""
     # create the tile index table. skip if it exists
     try:
-      TileIndexDB.createTable(endpoint_url='http://localhost:8000')
+      TileIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
+      CuboidIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
     except Exception as e:
       pass
-    self.tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url='http://localhost:8000')
-    # create the ingest queue
-    IngestQueue.createQueue(nd_proj, endpoint_url='http://localhost:4568')
-    # create the upload queue
-    UploadQueue.createQueue(nd_proj, endpoint_url='http://localhost:4568')
-    self.upload_queue = UploadQueue(nd_proj, endpoint_url='http://localhost:4568')
-    tile_bucket = TileBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
+    self.tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)
+    tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
     [self.x_tile, self.y_tile, self.z_tile] = [0, 0, 0]
-    message = serializer.encode(nd_proj.project_name, nd_proj.channel_name, nd_proj.resolution, self.x_tile, self.y_tile, self.z_tile)
+    supercuboid_key = 'testing' 
+    message = serializer.encodeDeleteMessage(supercuboid_key)
     # insert message in the upload queue
-    self.upload_queue.sendMessage(message)
+    self.cleanup_queue = CleanupQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+    self.cleanup_queue.sendMessage(message)
     # receive message and upload object
-    for message_id, receipt_handle, message_body in self.upload_queue.receiveMessage():
+    message_id = '123456'
+    receipt_handle = 'testing123456'
+    for z_index in range(self.z_tile, settings.SUPER_CUBOID_SIZE, 1):
       tile_handle = cStringIO.StringIO()
-      tile_bucket.putObject(tile_handle, nd_proj.channel_name, nd_proj.resolution, self.x_tile, self.y_tile, self.z_tile, message_id, receipt_handle)
+      tile_bucket.putObject(tile_handle, nd_proj.channel_name, nd_proj.resolution, self.x_tile, self.y_tile, z_index, message_id, receipt_handle)
 
   def teardown_class(self):
     """Teardown class parameters"""
-    TileIndexDB.deleteTable(endpoint_url='http://localhost:8000')
-    IngestQueue.deleteQueue(nd_proj, endpoint_url='http://localhost:4568')
-    UploadQueue.deleteQueue(nd_proj, endpoint_url='http://localhost:4568')
+    TileIndexDB.deleteTable(endpoint_url=settings.DYNAMO_ENDPOINT)
+    CuboidIndexDB.deleteTable(endpoint_url=settings.DYNAMO_ENDPOINT)
+    CleanupQueue.deleteQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
 
   def test_Uploadevent(self):
     """Testing the event"""

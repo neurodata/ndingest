@@ -20,10 +20,11 @@ from abc import ABCMeta, abstractmethod
 @six.add_metaclass(ABCMeta)
 class IngestProj(object):
 
-  @staticmethod(project_type):
+  @staticmethod
+  def load(project_type):
     """Factory to load the correct ndproj type"""
     if project_type == 'Neurodata':
-      from ingestproj.ndingestproj import NDIngestProj
+      from ndingestproj.ndingestproj import NDIngestProj
       return NDIngestProj
     elif project_type == 'Boss':
       from ndingestproj.bossingestproj import BossIngestProj

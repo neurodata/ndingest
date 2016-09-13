@@ -12,13 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import blosc
+from __future__ import print_function
+from __future__ import absolute_import
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import boto3
 import botocore
 from boto3.dynamodb.conditions import Key, Attr
-from django.conf import settings
-import ndlib
-from s3util import generateS3Key
+import blosc
+from ndlib.ndlib import XYZMorton
+from util.util import Util
+UtilClass = Util.load('Neurodata')
 
 class CuboidIndexDB:
 
@@ -97,8 +101,8 @@ class CuboidIndexDB:
           }
       )
     except Exception as e:
-      print(e)
-      raise e
+      print (e)
+      raise
 
 
   @staticmethod
@@ -112,8 +116,8 @@ class CuboidIndexDB:
       table = dynamo.Table(table_name)
       table.delete()
     except Exception as e:
-      print(e)
-      raise e
+      print (e)
+      raise
   
   @staticmethod
   def getTableName():
@@ -122,8 +126,8 @@ class CuboidIndexDB:
 
   def generatePrimaryKey(self, channel_name, resolution, x, y, z, time_index=0):
     """Generate key for each supercuboid"""
-    morton_index = ndlib.XYZMorton([x, y, z])
-    return generateS3Key(self.project, channel_name, resolution, morton_index, time_index)
+    morton_index = XYZMorton([x, y, z])
+    return UtilClass.generateCuboidKey(self.project, channel_name, resolution, morton_index, time_index)
 
 
   def putItem(self, channel_name, resolution, x, y, z, time=0, task_id=0):
@@ -144,8 +148,8 @@ class CuboidIndexDB:
           ReturnConsumedCapacity = 'INDEXES'
       )
     except botocore.exceptions.ClientError as e:
-      print(e)
-      raise e
+      print (e)
+      raise 
  
 
   def getItem(self, channel_name, resolution, x, y, z):
@@ -167,8 +171,8 @@ class CuboidIndexDB:
           # KeyConditionExpression = Key('supercuboid_key').eq(supercuboid_key)
       # )
     except Exception as e:
-      print(e)
-      raise e
+      print (e)
+      raise
 
 
   def queryProjectItems(self):
@@ -186,8 +190,8 @@ class CuboidIndexDB:
       for item in response['Items']:
         yield item
     except Exception as e:
-      print(e)
-      raise e
+      print (e)
+      raise
 
 
   def queryChannelItems(self, channel_name):
@@ -202,8 +206,8 @@ class CuboidIndexDB:
       for item in response['Items']:
         yield item
     except Exception as e:
-      print(e)
-      raise e
+      print (e)
+      raise
 
 
   def queryResolutionItems(self, channel_name, resolution):
@@ -219,8 +223,8 @@ class CuboidIndexDB:
       for item in response['Items']:
         yield item
     except Exception as e:
-      print(e)
-      raise e
+      print (e)
+      raise
 
 
   def queryTaskItems(self, channel_name, resolution, task_id):
@@ -236,8 +240,8 @@ class CuboidIndexDB:
       for item in response['Items']:
         yield item
     except Exception as e:
-      print(e)
-      raise e
+      print (e)
+      raise
 
 
   def deleteXYZ(self, channel_name, resolution, x, y, z):
@@ -260,5 +264,5 @@ class CuboidIndexDB:
       )
       return response
     except botocore.exceptions.ClientError as e:
-      print(e)
-      raise e
+      print (e)
+      raise

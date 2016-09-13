@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import json
 import boto3
 import botocore
-from django.conf import settings
-from ndqueue import NDQueue
+from ndqueue.ndqueue import NDQueue
 
 class UploadQueue(NDQueue):
 
@@ -47,7 +50,11 @@ class UploadQueue(NDQueue):
       )
       return queue_name
     except Exception as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
 
 
@@ -68,7 +75,11 @@ class UploadQueue(NDQueue):
       response = queue.delete()
       return response
     except Exception as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
 
   @staticmethod
@@ -78,7 +89,7 @@ class UploadQueue(NDQueue):
 
   def sendMessage(self, tile_info):
     """Send a message to upload queue"""
-    return super(UploadQueue, self).sendMessage(json.dumps(tile_info))
+    return super(UploadQueue, self).sendMessage(tile_info)
 
   def receiveMessage(self, number_of_messages=1):
     """Receive a message from the upload queue"""

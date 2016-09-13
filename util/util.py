@@ -14,14 +14,27 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-from ingestproj import IngestProj
+from abc import ABCMeta, abstractmethod
+import six
 
-class BossIngestProj(IngestProj):
+@six.add_metaclass(ABCMeta)
+class Util(object):
 
-  def __init__(self, project_name, channel_name, resolution):
-    return NotImplemented
+  @staticmethod
+  def load(project_name):
+    """Factory method to load the correct util file"""
+    if project_name == 'Neurodata':
+      from .ndutil import NDUtil
+      return NDUtil
+    elif project_name == 'Boss':
+      from .bossutil import BossUtil
+      return BossUtil
+    else:
+      print('Unknown project name {}'.format(project_name))
+      raise
 
-  @classmethod
-  def fromTileKey(cls, tile_key):
-    """Create a ndproj from supercuboid_key"""
+  @staticmethod
+  @abstractmethod
+  def generateCuboidKey(project_name, channel_name, resolution, morton_index, time_index=0):
+    """Generate the cuboid key"""
     return NotImplemented

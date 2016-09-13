@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
-import os
-sys.path += [os.path.abspath('../../django/')]
-import ND.settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
-
+sys.path.append('..')
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import json
 from ndqueue.uploadqueue import UploadQueue
-from ndqueue.ndserializer import NDSerializer
+from ndqueue.serializer import Serializer
+serializer = Serializer.load('Neurodata')
 from ndingestproj.ndingestproj import NDIngestProj
 nd_proj = NDIngestProj('kasthuri11', 'image', '0')
 
@@ -45,7 +46,7 @@ class Test_UploadQueue():
 
     for z_tile in range(0, 2, 1):
       # encode the message
-      message = NDSerializer.encode(nd_proj.project_name, nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
+      message = serializer.encodeUploadMessage(nd_proj.project_name, nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
       # send message to the queue
       self.upload_queue.sendMessage(message)
     

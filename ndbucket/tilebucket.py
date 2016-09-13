@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+from __future__ import absolute_import
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import hashlib
 import boto3
 import botocore
-from django.conf import settings
 import hashlib
-from s3util import generateS3Key
+from util.util import Util
+UtilClass = Util.load('Neurodata')
 
 class TileBucket:
 
@@ -30,7 +34,11 @@ class TileBucket:
     try:
       self.bucket = self.s3.Bucket(bucket_name)
     except botocore.exceptions.ClientError as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
 
   @staticmethod
@@ -46,7 +54,11 @@ class TileBucket:
           ACL = 'private'
       )
     except Exception as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
 
   @staticmethod
@@ -60,7 +72,11 @@ class TileBucket:
       # deleting the bucket
       response = bucket.delete()
     except Exception as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
   
   @staticmethod
@@ -98,7 +114,11 @@ class TileBucket:
       )
       return response
     except Exception as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
 
   def getObjectByKey(self, tile_key):
@@ -108,8 +128,13 @@ class TileBucket:
       response = s3_obj.get()
       return response['Body'].read(), response['Metadata']['message_id'], response['Metadata']['receipt_handle']
     except Exception as e:
+<<<<<<< HEAD
       print(e)
       raise
+=======
+      print (e)
+      raise 
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
 
   def getObject(self, channel_name, resolution, x_tile, y_tile, z_tile, time_index=0):
     """Get object from the upload bucket"""
@@ -119,7 +144,7 @@ class TileBucket:
   def getMetadata(self, object_key):
     """Get the object key from the upload bucket"""
 
-    message_body, message_id, receipt_handle = self.getObject(object_key)
+    message_body, message_id, receipt_handle = self.getObjectByKey(object_key)
     return message_id, receipt_handle
 
   def deleteObject(self, object_key):
@@ -140,5 +165,9 @@ class TileBucket:
           # }
       # )
     except Exception as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise

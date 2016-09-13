@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
-import os
-sys.path += [os.path.abspath('../../django/')]
-import ND.settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
+sys.path.append('..')
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 from ndingestproj.ndingestproj import NDIngestProj
-from ndqueue.serializer import NDSerializer
+from ndqueue.serializer import Serializer
+serializer = Serializer.load('Neurodata')
 from ndsns.ndsns import NDSns
 nd_proj = NDIngestProj('kasthuri11', 'image', '0')
 
@@ -40,6 +42,6 @@ class Test_SNS:
     supercuboid_key = 'acd123'
     message_id = '123456'
     receipt_handle = 'a1b2c3d4'
-    message = NDSerializer.encodeIngestMessage(supercuboid_key, message_id, receipt_handle)
+    message = serializer.encodeIngestMessage(supercuboid_key, message_id, receipt_handle)
     self.sns.publish(self.topic_arn, message)
     message = self.sns.subscribe(self.topic_arn)

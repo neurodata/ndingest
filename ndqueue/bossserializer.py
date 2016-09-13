@@ -10,9 +10,13 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License.
+# limitations under the License.\
 
-class BossSerializer:
+from __future__ import absolute_import
+from __future__ import print_function
+from ndqueue.serializer import Serializer
+
+class BossSerializer(Serializer):
     
   @staticmethod
   def encode(project_name, channel_name, resolution, x_tile, y_tile, z_tile, time_range=None):

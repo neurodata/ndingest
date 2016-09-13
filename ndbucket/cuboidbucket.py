@@ -12,11 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+from __future__ import absolute_import
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import hashlib
 import boto3
 import botocore
-from s3util import generateS3Key
-from django.conf import settings
+from util.util import Util
+UtilClass = Util.load('Neurodata')
 
 
 class CuboidBucket:
@@ -107,7 +111,7 @@ class CuboidBucket:
 
   def generateSupercuboidKey(self, channel_name, resolution, morton_index, time_index=0):
     """Generate the supercuboid key"""
-    return generateS3Key(self.project_name, channel_name, resolution, morton_index, time_index)
+    return UtilClass.generateCuboidKey(self.project_name, channel_name, resolution, morton_index, time_index)
 
   def deleteObject(self, supercuboid_key):
     """Delete object from the upload bucket"""

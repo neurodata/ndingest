@@ -12,16 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import print_function
-from __future__ import absolute_import
-from ingestproj import IngestProj
+import hashlib
+from util.util import Util
 
-class BossIngestProj(IngestProj):
+class BossUtil(Util):
 
-  def __init__(self, project_name, channel_name, resolution):
-    return NotImplemented
-
-  @classmethod
-  def fromTileKey(cls, tile_key):
-    """Create a ndproj from supercuboid_key"""
-    return NotImplemented
+  @staticmethod
+  def generateCuboidKey(project_name, channel_name, resolution, morton_index, time_index=0):
+    """Generate the key for the supercube"""
+  return NotImplemented

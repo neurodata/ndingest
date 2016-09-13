@@ -12,21 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
-import os
-sys.path += [os.path.abspath('../../django')]
-import ND.settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
-
+sys.path.append('..')
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import cStringIO
+from ndingestproj.ndingestproj import NDIngestProj
 from ndbucket.tilebucket import TileBucket
-
-project_name = 'kasthuri11'
-channel_name = 'image'
-resolution = 0
-
-# proj_info format == [project, channel, resolution]
-proj_info = [project_name, channel_name, str(resolution)]
+nd_proj = NDIngestProj('kasthuri11', 'image', 0)
 
 
 class Test_Upload_Bucket():
@@ -34,7 +29,7 @@ class Test_Upload_Bucket():
   def setup_class(self):
     """Setup Parameters"""
     TileBucket.createBucket(endpoint_url='http://localhost:4567')
-    self.tile_bucket = TileBucket(project_name, endpoint_url='http://localhost:4567')
+    self.tile_bucket = TileBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
 
 
   def teardown_class(self):
@@ -54,11 +49,11 @@ class Test_Upload_Bucket():
       # creating a tile handle for test
       tile_handle = cStringIO.StringIO()
       # uploading object
-      response = self.tile_bucket.putObject(tile_handle, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle)
+      response = self.tile_bucket.putObject(tile_handle, nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, message_id, receipt_handle)
       tile_handle.close()
-      object_key = self.tile_bucket.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile)
+      object_key = self.tile_bucket.encodeObjectKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
       # fetching object
-      object_body, object_message_id, object_receipt_handle = self.tile_bucket.getObject(object_key)
+      object_body, object_message_id, object_receipt_handle = self.tile_bucket.getObject(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
       assert( object_message_id == message_id )
       assert( object_receipt_handle == receipt_handle )
       object_message_id, object_receipt_handle = self.tile_bucket.getMetadata(object_key)

@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
-import os
-sys.path += [os.path.abspath('../../django')]
-import ND.settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
+sys.path.append('..')
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import numpy as np
 import blosc
-from django.conf import settings
 import cStringIO
 from ndbucket.cuboidbucket import CuboidBucket
 from ndingestproj.ndingestproj import NDIngestProj

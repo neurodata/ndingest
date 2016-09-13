@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+from __future__ import print_function
+from __future__ import absolute_import
 import sys
-sys.path += [os.path.abspath('../../django')]
-import ND.settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
-
+sys.path.append('..')
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 from nddynamo.cuboidindexdb import CuboidIndexDB
 
 project_name = 'kasthuri11'
@@ -80,7 +80,6 @@ class Test_CuboidIndexDB():
       assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name2, resolution, 0) )
       
     for item in self.cuboid_index.queryTaskItems(channel_name, resolution, 1):
-      # import pdb; pdb.set_trace()
       assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name2, resolution, 0) )
 
 

@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import boto3
 import botocore
-from django.conf import settings
 
 class NDQueue(object):
 
@@ -27,7 +30,11 @@ class NDQueue(object):
           QueueName = queue_name
       )
     except botocore.exceptions.ClientError as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
 
   
@@ -40,7 +47,11 @@ class NDQueue(object):
       )
       return response
     except Exception as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
   
   
@@ -54,7 +65,11 @@ class NDQueue(object):
       # checking for empty responses
       return None if not message_list else message_list
     except Exception as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
     
   
@@ -74,12 +89,20 @@ class NDQueue(object):
       )
       # TODO KL Better handling for 400 aka when delete fails
       if 'Failed' in response:
+<<<<<<< HEAD
         print(response['Failed']['Message'])
+=======
+        print (response['Failed']['Message'])
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
         raise
       else:
         return response
     except Exception as e:
+<<<<<<< HEAD
       print(e)
+=======
+      print (e)
+>>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
 
 

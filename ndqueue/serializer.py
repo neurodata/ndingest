@@ -21,13 +21,13 @@ from abc import ABCMeta, abstractmethod
 class Serializer(object):
 
   @staticmethod
-  def setSerializer(serializer_name):
+  def load(serializer_name):
     """Factory method to fetch the correct serializer"""
     if serializer_name == 'Neurodata':
-      from serializer.ndserializer import NDSerializer
+      from ndqueue.ndserializer import NDSerializer
       return NDSerializer()
     elif serializer_name == 'Boss':
-      from bossserializer import BossSerializer
+      from ndqueue.bossserializer import BossSerializer
       return BossSerializer()
     else:
       print ("Incorrect Serializer {}".format(serializer_name))

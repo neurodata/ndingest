@@ -11,10 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+  
+from __future__ import print_function
+from __future__ import absolute_import
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import boto3
 import botocore
-from django.conf import settings
+
 
 class NDSns():
 
@@ -28,7 +32,7 @@ class NDSns():
       self.topic = sns.Topic(topic_arn)
     except Exception as e:
       print (e)
-      raise e
+      raise
 
   @staticmethod
   def createTopic(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
@@ -42,7 +46,7 @@ class NDSns():
       return topic.arn
     except Exception as e:
       print (e)
-      raise e
+      raise
 
   @staticmethod
   def deleteTopic(topic_arn, region_name=settings.REGION_NAME, endpoint_url=None):
@@ -54,7 +58,7 @@ class NDSns():
       topic.delete()
     except Exception as e:
       print (e)
-      raise e
+      raise
     
   @staticmethod
   def getTopicName(nd_proj):
@@ -72,7 +76,7 @@ class NDSns():
       return response
     except Exception as e:
       print (e)
-      raise e
+      raise
   
   def subscribe(self, lambda_arn):
     """Subscribe to a topic"""
@@ -83,4 +87,4 @@ class NDSns():
       )
     except Exception as e:
       print (e)
-      raise e
+      raise

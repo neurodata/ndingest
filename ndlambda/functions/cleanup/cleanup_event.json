@@ -10,7 +10,7 @@
         "Signature": "EXAMPLE",
         "SigningCertUrl": "EXAMPLE",
         "MessageId": "95df01b4-ee98-5cb9-9903-4c221d41eb5e",
-        "Message": '{"supercuboid_key": "acd123", "receipt_handle": "a1b2c3d4", "message_id": "123456"}',
+        "Message": "{\"supercuboid_key\": \"dd7cfa3741893cb732dd052722c6cc1e&kasthuri11&image&0&0&0\", \"receipt_handle\": \"a1b2c3d4\", \"message_id\": \"123456\"}",
         "MessageAttributes": {
           "Test": {
             "Type": "String",

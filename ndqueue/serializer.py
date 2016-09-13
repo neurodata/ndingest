@@ -16,17 +16,19 @@ from __future__ import absolute_import
 from __future__ import print_function
 import six
 from abc import ABCMeta, abstractmethod
+from settings.settings import Settings
+settings = Settings.load()
 
 @six.add_metaclass(ABCMeta)
 class Serializer(object):
 
   @staticmethod
-  def load(serializer_name):
+  def load():
     """Factory method to fetch the correct serializer"""
-    if serializer_name == 'Neurodata':
+    if settings.PROJECT_NAME == 'Neurodata':
       from ndqueue.ndserializer import NDSerializer
       return NDSerializer()
-    elif serializer_name == 'Boss':
+    elif settings.Project_Name == 'Boss':
       from ndqueue.bossserializer import BossSerializer
       return BossSerializer()
     else:

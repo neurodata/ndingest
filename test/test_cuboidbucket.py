@@ -17,25 +17,26 @@ from __future__ import print_function
 import sys
 sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import numpy as np
 import blosc
 import cStringIO
 from ndbucket.cuboidbucket import CuboidBucket
-from ndingestproj.ndingestproj import NDIngestProj
-nd_proj = NDIngestProj('kasthuri11', 'image', 0)
+from ndingestproj.ingestproj import IngestProj
+ProjClass = IngestProj.load()
+nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_Cuboid_Bucket():
 
   def setup_class(self):
     """Setup Parameters"""
-    CuboidBucket.createBucket(endpoint_url='http://localhost:4567')
-    self.cuboid_bucket = CuboidBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
+    CuboidBucket.createBucket(endpoint_url=settings.S3_ENDPOINT)
+    self.cuboid_bucket = CuboidBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
 
   def teardown_class(self):
     """Teardown Parameters"""
-    CuboidBucket.deleteBucket(endpoint_url='http://localhost:4567')
+    CuboidBucket.deleteBucket(endpoint_url=settings.S3_ENDPOINT)
 
   def test_put_object(self):
     """Testing put object"""

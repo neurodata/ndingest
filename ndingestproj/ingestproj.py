@@ -16,17 +16,19 @@ from __future__ import print_function
 from __future__ import absolute_import
 import six
 from abc import ABCMeta, abstractmethod
+from settings.settings import Settings
+settings = Settings.load()
 
 @six.add_metaclass(ABCMeta)
 class IngestProj(object):
 
   @staticmethod
-  def load(project_type):
+  def load():
     """Factory to load the correct ndproj type"""
-    if project_type == 'Neurodata':
+    if settings.PROJECT_NAME == 'Neurodata':
       from ndingestproj.ndingestproj import NDIngestProj
       return NDIngestProj
-    elif project_type == 'Boss':
+    elif settings.PROJECT_NAME == 'Boss':
       from ndingestproj.bossingestproj import BossIngestProj
       return BossIngestProj
     else:

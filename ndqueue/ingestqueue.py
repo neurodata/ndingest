@@ -17,7 +17,7 @@ from __future__ import print_function
 import boto3
 import botocore
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 from ndqueue.ndqueue import NDQueue
 
 class IngestQueue(NDQueue):

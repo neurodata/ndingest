@@ -15,7 +15,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import botocore
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
@@ -165,7 +165,6 @@ class TileIndexDB:
     except Exception as e:
       print (e)
       raise
-
 
   def getTaskItems(self, task_id):
     """Get all the items for a given task from the ingest table"""

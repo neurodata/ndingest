@@ -15,13 +15,13 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import hashlib
 import boto3
 import botocore
 import hashlib
 from util.util import Util
-UtilClass = Util.load('Neurodata')
+UtilClass = Util.load()
 
 class TileBucket:
 
@@ -114,11 +114,7 @@ class TileBucket:
       )
       return response
     except Exception as e:
-<<<<<<< HEAD
-      print(e)
-=======
       print (e)
->>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
 
   def getObjectByKey(self, tile_key):
@@ -128,13 +124,11 @@ class TileBucket:
       response = s3_obj.get()
       return response['Body'].read(), response['Metadata']['message_id'], response['Metadata']['receipt_handle']
     except Exception as e:
-<<<<<<< HEAD
-      print(e)
-      raise
-=======
-      print (e)
-      raise 
->>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
+      if e.response['Error']['Code'] == 'NoSuchKey':
+        return None
+      else:
+        print (e)
+        raise
 
   def getObject(self, channel_name, resolution, x_tile, y_tile, z_tile, time_index=0):
     """Get object from the upload bucket"""
@@ -165,9 +159,5 @@ class TileBucket:
           # }
       # )
     except Exception as e:
-<<<<<<< HEAD
-      print(e)
-=======
       print (e)
->>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise

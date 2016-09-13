@@ -12,37 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import absolute_import
 import sys
 sys.path.append('..')
 from settings.settings import Settings
 settings = Settings.load()
-from ndqueue.serializer import Serializer
-serializer = Serializer.load()
-from ndsns.ndsns import NDSns
+import pytest
+from ndqueue.cleanupqueue import CleanupQueue
 from ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
-class Test_SNS:
+class Test_Cleanup_Queue():
 
   def setup_class(self):
-    """Setup the class"""
-    self.topic_arn = NDSns.createTopic(nd_proj, endpoint_url=settings.SNS_ENDPOINT)
-    self.sns = NDSns(self.topic_arn, endpoint_url=settings.SNS_ENDPOINT)
-
+    """Setup class parameters"""
+    CleanupQueue.createQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+    self.cleanup_queue = CleanupQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+  
   def teardown_class(self):
-    """Teardown the class"""
-    NDSns.deleteTopic(self.topic_arn, endpoint_url=settings.SNS_ENDPOINT)
+    """Teardown parameters"""
+    CleanupQueue.deleteQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
 
-  def test_publish(self):
-    """Test publishing a message"""
-    target_arn = 'testing'
-    supercuboid_key = 'acd123'
-    message_id = '123456'
-    receipt_handle = 'a1b2c3d4'
-    message = serializer.encodeIngestMessage(supercuboid_key, message_id, receipt_handle)
-    self.sns.publish(self.topic_arn, message)
-    message = self.sns.subscribe(self.topic_arn)
+  def test_Message(self):
+    """Testing the upload queue"""
+    
+    supercuboid_key = 'kasthuri11&image&0&0'
+    self.cleanup_queue.sendMessage(supercuboid_key)
+    for message_id, receipt_handle, message_body in self.cleanup_queue.receiveMessage():
+      assert(supercuboid_key == message_body)
+      response = self.cleanup_queue.deleteMessage(message_id, receipt_handle)
+      assert('Successful' in response)

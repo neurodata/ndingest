@@ -17,7 +17,7 @@ from __future__ import absolute_import
 import sys
 sys.path.append('..')
 from settings.settings import Settings
-settings = Settings.load('Neurodata')
+settings = Settings.load()
 import cStringIO
 import pytest
 import emulambda
@@ -26,9 +26,9 @@ from ndqueue.ingestqueue import IngestQueue
 from nddynamo.tileindexdb import TileIndexDB
 from ndbucket.tilebucket import TileBucket
 from ndqueue.serializer import Serializer
-serializer = Serializer.load('Neurodata')
+serializer = Serializer.load()
 from ndingestproj.ingestproj import IngestProj
-ProjClass = IngestProj.load('Neurodata')
+ProjClass = IngestProj.load()
 nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 class Test_UploadLambda:
@@ -37,16 +37,16 @@ class Test_UploadLambda:
     """Setup class parameters"""
     # create the tile index table. skip if it exists
     try:
-      TileIndexDB.createTable(endpoint_url='http://localhost:8000')
+      TileIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
     except Exception as e:
       pass
-    self.tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url='http://localhost:8000')
+    self.tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)
     # create the ingest queue
-    IngestQueue.createQueue(nd_proj, endpoint_url='http://localhost:4568')
+    IngestQueue.createQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
     # create the upload queue
-    UploadQueue.createQueue(nd_proj, endpoint_url='http://localhost:4568')
-    self.upload_queue = UploadQueue(nd_proj, endpoint_url='http://localhost:4568')
-    tile_bucket = TileBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
+    UploadQueue.createQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+    self.upload_queue = UploadQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+    tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
     [self.x_tile, self.y_tile, self.z_tile] = [0, 0, 0]
     message = serializer.encodeUploadMessage(nd_proj.project_name, nd_proj.channel_name, nd_proj.resolution, self.x_tile, self.y_tile, self.z_tile)
     # insert message in the upload queue
@@ -58,9 +58,9 @@ class Test_UploadLambda:
 
   def teardown_class(self):
     """Teardown class parameters"""
-    TileIndexDB.deleteTable(endpoint_url='http://localhost:8000')
-    IngestQueue.deleteQueue(nd_proj, endpoint_url='http://localhost:4568')
-    UploadQueue.deleteQueue(nd_proj, endpoint_url='http://localhost:4568')
+    TileIndexDB.deleteTable(endpoint_url=settings.DYNAMO_ENDPOINT)
+    IngestQueue.deleteQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+    UploadQueue.deleteQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
 
   def test_Uploadevent(self):
     """Testing the event"""

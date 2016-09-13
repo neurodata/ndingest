@@ -40,18 +40,25 @@ class Settings(object):
     sys.path.append(self.parser.get('path', 'SPDB_PATH'))
 
   @staticmethod
-  def load(stack_name, file_name='settings.ini'):
+  def load(file_name='settings.ini'):
     """Factory method to load the correct settings file"""
     file_name = os.path.join(os.path.dirname(__file__), file_name)
-    if stack_name == 'Neurodata':
+    parser = SafeConfigParser()
+    parser.read(file_name)
+    if parser.get('proj', 'PROJECT_NAME') == 'Neurodata':
       from .ndsettings import NDSettings
       return NDSettings(file_name)
-    elif stack_name == 'Boss':
+    elif parser.get('proj', 'PROJECT_NAME') == 'Boss':
       from .bosssettings import BossSettings
       return BossSettings(file_name)
     else:
       print("Unknown stack {}".format(stack_name))
       raise
+  
+  @property
+  @abstractmethod
+  def PROJECT_NAME(self):
+    return NotImplemented
   
   @property
   @abstractmethod

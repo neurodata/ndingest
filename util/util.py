@@ -16,17 +16,19 @@ from __future__ import print_function
 from __future__ import absolute_import
 from abc import ABCMeta, abstractmethod
 import six
+from settings.settings import Settings
+settings = Settings.load()
 
 @six.add_metaclass(ABCMeta)
 class Util(object):
 
   @staticmethod
-  def load(project_name):
+  def load():
     """Factory method to load the correct util file"""
-    if project_name == 'Neurodata':
+    if settings.PROJECT_NAME == 'Neurodata':
       from .ndutil import NDUtil
       return NDUtil
-    elif project_name == 'Boss':
+    elif settings.PROJECT_NAME == 'Boss':
       from .bossutil import BossUtil
       return BossUtil
     else:

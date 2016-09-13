@@ -24,6 +24,10 @@ class NDSettings(Settings):
     super(NDSettings, self).__init__(file_name)
   
   @property
+  def PROJECT_NAME(self):
+    return self.parser.get('proj', 'PROJECT_NAME')
+  
+  @property
   def REGION_NAME(self):
     return self.parser.get('aws', 'REGION_NAME')
 
@@ -54,3 +58,35 @@ class NDSettings(Settings):
   @property
   def SUPER_CUBOID_SIZE(self):
     return [int(i) for i in self.parser.get('cuboid', 'SUPER_CUBOID_SIZE').split(',')]
+
+  @property
+  def DEV_MODE(self):
+    return self.parser.getboolean('proj', 'DEV_MODE') 
+
+  @property
+  def S3_ENDPOINT(self):
+    if self.DEV_MODE:
+      return self.parser.get('s3', 'S3_DEV_ENDPOINT')
+    else:
+      return None
+
+  @property
+  def DYNAMO_ENDPOINT(self):
+    if self.DEV_MODE:
+      return self.parser.get('dynamo', 'DYNAMO_DEV_ENDPOINT')
+    else:
+      return None
+  
+  @property
+  def SQS_ENDPOINT(self):
+    if self.DEV_MODE:
+      return self.parser.get('sqs', 'SQS_DEV_ENDPOINT')
+    else:
+      return None
+  
+  @property
+  def SNS_ENDPOINT(self):
+    if self.DEV_MODE:
+      return self.parser.get('sns', 'SNS_DEV_ENDPOINT')
+    else:
+      return None

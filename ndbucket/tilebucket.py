@@ -20,7 +20,8 @@ import hashlib
 import boto3
 import botocore
 import hashlib
-from ndlib.s3util import generateS3Key
+from util.util import Util
+UtilClass = Util.load('Neurodata')
 
 class TileBucket:
 

@@ -21,7 +21,8 @@ import botocore
 from boto3.dynamodb.conditions import Key, Attr
 import blosc
 from ndlib.ndlib import XYZMorton
-from ndlib.s3util import generateS3Key
+from util.util import Util
+UtilClass = Util.load('Neurodata')
 
 class CuboidIndexDB:
 
@@ -126,7 +127,7 @@ class CuboidIndexDB:
   def generatePrimaryKey(self, channel_name, resolution, x, y, z, time_index=0):
     """Generate key for each supercuboid"""
     morton_index = XYZMorton([x, y, z])
-    return generateS3Key(self.project, channel_name, resolution, morton_index, time_index)
+    return UtilClass.generateCuboidKey(self.project, channel_name, resolution, morton_index, time_index)
 
 
   def putItem(self, channel_name, resolution, x, y, z, time=0, task_id=0):

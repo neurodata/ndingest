@@ -19,7 +19,8 @@ settings = Settings.load('Neurodata')
 import hashlib
 import boto3
 import botocore
-from ndlib.s3util import generateS3Key
+from util.util import Util
+UtilClass = Util.load('Neurodata')
 
 
 class CuboidBucket:
@@ -110,7 +111,7 @@ class CuboidBucket:
 
   def generateSupercuboidKey(self, channel_name, resolution, morton_index, time_index=0):
     """Generate the supercuboid key"""
-    return generateS3Key(self.project_name, channel_name, resolution, morton_index, time_index)
+    return UtilClass.generateCuboidKey(self.project_name, channel_name, resolution, morton_index, time_index)
 
   def deleteObject(self, supercuboid_key):
     """Delete object from the upload bucket"""

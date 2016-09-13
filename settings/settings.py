@@ -31,16 +31,13 @@ class Settings(object):
   def __init__(self, file_name):
     self.parser = SafeConfigParser()
     self.parser.read(file_name)
-    Settings.setPath()
+    self.setPath()
   
-  @staticmethod
-  def setPath():
+  def setPath(self):
     sys.path.append('..')
-    # DK TODO
-    # assume ndlib and spadb are outside, 
-    # maybe we can decide a mutual place for this based on our settings
-    sys.path.append('../../ndlib/')
-    sys.path.append('../../spdb/')
+    # loading path from the ini file
+    sys.path.append(self.parser.get('path', 'NDLIB_PATH'))
+    sys.path.append(self.parser.get('path', 'SPDB_PATH'))
 
   @staticmethod
   def load(stack_name, file_name='settings.ini'):

@@ -10,3 +10,6 @@ DYNAMO_CUBOIDINDEX_TABLE = s3indexdb
 DYNAMO_TILEINDEX_TABLE = tileindexdb
 [cuboid]
 SUPER_CUBOID_SIZE = 512, 512, 64
+[path]
+NDLIB_PATH = ../../ndlib/
+SPDB_PATH = ../../spdb/

@@ -64,7 +64,7 @@ def lambda_handler(event, context):
       print ("Executing exception")
       pass
 
-  import pdb; pdb.set_trace()
+  # import pdb; pdb.set_trace()
   # insert supercuboid if it has data
   if cube.isNotZeros() or True:
     cuboidindex_db.putItem(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)

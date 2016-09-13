@@ -15,11 +15,8 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import sys
-import os
-sys.path += [os.path.abspath('../../django')]
-import ND.settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
-from django.conf import settings
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 from nddynamo.tileindexdb import TileIndexDB
 
 project_name = 'kasthuri11'

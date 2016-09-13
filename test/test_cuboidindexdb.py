@@ -80,7 +80,6 @@ class Test_CuboidIndexDB():
       assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name2, resolution, 0) )
       
     for item in self.cuboid_index.queryTaskItems(channel_name, resolution, 1):
-      # import pdb; pdb.set_trace()
       assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(channel_name2, resolution, 0) )
 
 

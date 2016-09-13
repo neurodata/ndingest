@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+from __future__ import absolute_import
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import hashlib
 import boto3
 import botocore
-from s3util import generateS3Key
-from django.conf import settings
+from ndlib.s3util import generateS3Key
 
 
 class CuboidBucket:

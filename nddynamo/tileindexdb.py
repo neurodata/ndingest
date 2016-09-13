@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from operator import div
+from __future__ import print_function
+from __future__ import absolute_import
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
+import botocore
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
-import botocore
-from django.conf import settings
-import ndlib
-from s3util import generateS3Key
+from operator import div
+from ndlib.ndlib import XYZMorton
+from ndlib.s3util import generateS3Key
 
-
-# TODO KL Import this from settings/parameter file
-table_name = 'ingest_db'
 
 class TileIndexDB:
 
@@ -86,8 +86,8 @@ class TileIndexDB:
           }
       )
     except Exception as e:
-      print e
-      raise e
+      print (e)
+      raise
 
 
   @staticmethod
@@ -102,8 +102,8 @@ class TileIndexDB:
       table = dynamo.Table(table_name)
       table.delete()
     except Exception as e:
-      print e
-      raise e
+      print (e)
+      raise
   
 
   @staticmethod
@@ -115,7 +115,7 @@ class TileIndexDB:
   def generatePrimaryKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
     """Generate key for each supercuboid"""
     # TODO KL divide by SC size
-    morton_index = ndlib.XYZMorton(map(div, [x_index, y_index, z_index], settings.SUPER_CUBOID_SIZE))
+    morton_index = XYZMorton(map(div, [x_index, y_index, z_index], settings.SUPER_CUBOID_SIZE))
     return generateS3Key(self.project_name, channel_name, resolution, morton_index, t_index)
 
   def supercuboidReady(self, z_index, zindex_list):
@@ -142,8 +142,8 @@ class TileIndexDB:
       )
       return supercuboid_key, self.supercuboidReady(z_index, response['Attributes']['zindex_list'])
     except botocore.exceptions.ClientError as e:
-      print e  
-      raise e
+      print (e)
+      raise
   
   
   def getItem(self, supercuboid_key):
@@ -163,8 +163,8 @@ class TileIndexDB:
       # TODO write a yield function to pop one item at a time
       return response['Item'] if 'Item' in response else None
     except Exception as e:
-      print e
-      raise e
+      print (e)
+      raise
 
 
   def getTaskItems(self, task_id):
@@ -182,8 +182,8 @@ class TileIndexDB:
         yield item
       # return response['Items'], response['Count']
     except Exception as e:
-      print e
-      raise e
+      print (e)
+      raise
 
 
   def deleteItem(self, supercuboid_key):
@@ -197,4 +197,5 @@ class TileIndexDB:
       )
       return response
     except botocore.exceptions.ClientError as e:
-      raise e
+      print (e)
+      raise

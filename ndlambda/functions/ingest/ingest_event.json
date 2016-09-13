@@ -2,7 +2,7 @@
   "Records": [
     {
       "EventVersion": "1.0",
-      "EventSubscriptionArn": eventsubscriptionarn,
+      "EventSubscriptionArn": "eventsubscriptionarn",
       "EventSource": "aws:sns",
       "Sns": {
         "SignatureVersion": "1",
@@ -10,7 +10,7 @@
         "Signature": "EXAMPLE",
         "SigningCertUrl": "EXAMPLE",
         "MessageId": "95df01b4-ee98-5cb9-9903-4c221d41eb5e",
-        "Message": "Hello from SNS!",
+        "Message": "{\"supercuboid_key\": \"dd7cfa3741893cb732dd052722c6cc1e&kasthuri11&image&0&0&0\", \"message_id\": \"abc123\", \"receipt_handle\": \"123456fghj\"}",
         "MessageAttributes": {
           "Test": {
             "Type": "String",
@@ -23,7 +23,7 @@
         },
         "Type": "Notification",
         "UnsubscribeUrl": "EXAMPLE",
-        "TopicArn": topicarn,
+        "TopicArn": "topicarn",
         "Subject": "TestInvoke"
       }
     }

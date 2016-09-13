@@ -13,12 +13,9 @@
 # limitations under the License.
 
 from __future__ import print_function
-
-# import os
-# import sys
-# sys.path += [os.path.abspath('../../../../django')]
-# import ND.settings
-# os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
+from __future__ import absolute_import
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import urllib
 import boto3
 import json

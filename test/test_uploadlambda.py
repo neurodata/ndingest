@@ -12,22 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+from __future__ import print_function
+from __future__ import absolute_import
 import sys
-sys.path += [os.path.abspath('../../django')]
-import ND.settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ND.settings'
+sys.path.append('..')
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
 import cStringIO
 import pytest
 import emulambda
 from ndqueue.uploadqueue import UploadQueue
 from ndqueue.ingestqueue import IngestQueue
 from nddynamo.tileindexdb import TileIndexDB
-from ndingestproj.ndingestproj import NDIngestProj
 from ndbucket.tilebucket import TileBucket
 from ndqueue.ndserializer import NDSerializer
-
-nd_proj = NDIngestProj('kasthuri11', 'image', '0')
+from ndingestproj.ingestproj import IngestProj
+ProjClass = IngestProj.load('Neurodata')
+nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 class Test_UploadLambda:
 
@@ -46,7 +47,7 @@ class Test_UploadLambda:
     self.upload_queue = UploadQueue(nd_proj, endpoint_url='http://localhost:4568')
     tile_bucket = TileBucket(nd_proj.project_name, endpoint_url='http://localhost:4567')
     [self.x_tile, self.y_tile, self.z_tile] = [0, 0, 0]
-    message = NDSerializer.encode(nd_proj.project_name, nd_proj.channel_name, nd_proj.resolution, self.x_tile, self.y_tile, self.z_tile)
+    message = NDSerializer.encodeUploadMessage(nd_proj.project_name, nd_proj.channel_name, nd_proj.resolution, self.x_tile, self.y_tile, self.z_tile)
     # insert message in the upload queue
     self.upload_queue.sendMessage(message)
     # receive message and upload object

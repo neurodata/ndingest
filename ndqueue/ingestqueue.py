@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import boto3
 import botocore
-from django.conf import settings
-from ndqueue import NDQueue
+from settings.settings import Settings
+settings = Settings.load('Neurodata')
+from ndqueue.ndqueue import NDQueue
 
 class IngestQueue(NDQueue):
 
@@ -45,7 +48,7 @@ class IngestQueue(NDQueue):
       )
       return queue_name
     except Exception as e:
-      print e
+      print (e)
       raise
 
 
@@ -65,7 +68,7 @@ class IngestQueue(NDQueue):
       # deleting the queue
       response = queue.delete()
     except Exception as e:
-      print e
+      print (e)
       raise
 
 

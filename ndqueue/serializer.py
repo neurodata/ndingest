@@ -12,14 +12,59 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ndserializer import NDSerializer
-from bossserializer import BossSerializer
+from __future__ import absolute_import
+from __future__ import print_function
+import six
+from abc import ABCMeta, abstractmethod
 
-class Serializer:
+@six.add_metaclass(ABCMeta)
+class Serializer(object):
 
   @staticmethod
   def setSerializer(serializer_name):
+    """Factory method to fetch the correct serializer"""
     if serializer_name == 'Neurodata':
-      return NDSerializer
+      from serializer.ndserializer import NDSerializer
+      return NDSerializer()
     elif serializer_name == 'Boss':
-      return BossSerializer
+      from bossserializer import BossSerializer
+      return BossSerializer()
+    else:
+      print ("Incorrect Serializer {}".format(serializer_name))
+      raise
+
+  @staticmethod
+  @abstractmethod
+  def encodeUploadMessage(project_name, channel_name, resolution, x_tile, y_tile, z_tile, time_range=None):
+    """Encode a message for the upload queue"""
+    return NotImplemented
+
+  @staticmethod
+  @abstractmethod
+  def decode(message_body):
+    """Decode a message from the upload queue"""
+    return NotImplemented
+
+  @staticmethod
+  @abstractmethod
+  def encodeIngestMessage(supercuboid_key, message_id, receipt_handle):
+    """Enode a message for the ingest queue"""
+    return NotImplemented
+
+  @staticmethod
+  @abstractmethod
+  def decodeIngestMessage(message):
+    """Delete a decode message"""
+    return NotImplemented
+
+  @staticmethod 
+  @abstractmethod
+  def encodeDeleteMessage(supercuboid_key, message_id, receipt_handle):
+    """Encode a delete message"""
+    return NotImplemented
+
+  @staticmethod
+  @abstractmethod
+  def decodeDeleteMessage(message):
+    """Delete a decode message"""
+    return NotImplemented

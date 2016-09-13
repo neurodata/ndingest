@@ -12,27 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import json
+from ndqueue.serializer import Serializer
 
-class NDSerializer:
+class NDSerializer(Serializer):
     
   @staticmethod
-  def encode(project_name, channel_name, resolution, x_tile, y_tile, z_tile, time_range=None):
+  def encodeUploadMessage(project_name, channel_name, resolution, x_tile, y_tile, z_tile, time_range=None):
     """Encode a message for the upload queue"""
-    return { 
-             'project' : project_name,
-             'channel' : channel_name,
-             'resolution' : resolution,
-             'x_tile' : x_tile,
-             'y_tile' : y_tile,
-             'z_tile' : z_tile,
-             'time_range' : time_range
-           }
+    message = { 
+                 'project' : project_name,
+                 'channel' : channel_name,
+                 'resolution' : resolution,
+                 'x_tile' : x_tile,
+                 'y_tile' : y_tile,
+                 'z_tile' : z_tile,
+                 'time_range' : time_range
+              }
+    return json.dumps(message)
 
   @staticmethod
   def decode(message_body):
     """Decode a message from the upload queue"""
-
     return message_body
 
   @staticmethod
@@ -47,4 +50,22 @@ class NDSerializer:
 
   @staticmethod
   def decodeIngestMessage(message):
-    return json.loads(message)
+    """Delete a decode message"""
+    message_dict = json.loads(message)
+    return message_dict['supercuboid_key'], message_dict['message_id'], message_dict['receipt_handle']
+
+  @staticmethod 
+  def encodeDeleteMessage(supercuboid_key, message_id, receipt_handle):
+    """Encode a delete message"""
+    message = {
+                'supercuboid_key' : supercuboid_key,
+                'message_id' : message_id,
+                'receipt_handle' : receipt_handle
+              }
+    return json.dumps(message)
+
+  @staticmethod
+  def decodeDeleteMessage(message):
+    """Delete a decode message"""
+    message_dict = json.loads(message)
+    return message_dict['supercuboid_key'], message_dict['message_id'], message_dict['receipt_handle']

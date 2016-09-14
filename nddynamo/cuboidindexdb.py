@@ -13,14 +13,14 @@
 # limitations under the License.
 
 from __future__ import print_function
-from __future__ import absolute_import
+# from __future__ import absolute_import
 from settings.settings import Settings
 settings = Settings.load()
 import boto3
 import botocore
 from boto3.dynamodb.conditions import Key, Attr
 import blosc
-from ndlib.ndlib import XYZMorton
+from ndctypelib import XYZMorton
 from util.util import Util
 UtilClass = Util.load()
 

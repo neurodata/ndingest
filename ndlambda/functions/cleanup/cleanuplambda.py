@@ -21,7 +21,7 @@ import boto3
 import json
 import cStringIO
 from PIL import Image
-from ndlib.ndlib import MortonXYZ
+from ndctypelib import MortonXYZ
 from ndqueue.ingestqueue import IngestQueue
 from ndqueue.cleanupqueue import CleanupQueue
 from nddynamo.tileindexdb import TileIndexDB

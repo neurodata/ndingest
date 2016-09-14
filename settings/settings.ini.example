@@ -20,5 +20,6 @@ SNS_DEV_ENDPOINT = http://localhost:9292
 [cuboid]
 SUPER_CUBOID_SIZE = 512, 512, 64
 [path]
-NDLIB_PATH = ../../ndlib/
-SPDB_PATH = ../../spdb/
+BASE_PATH = ../..
+NDLIB_PATH = ndlib
+SPDB_PATH = spdb

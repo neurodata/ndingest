@@ -21,7 +21,7 @@ settings = Settings.load()
 import cStringIO
 import pytest
 import emulambda
-from ndlib.ndlib import XYZMorton
+from ndctypelib import XYZMorton
 from ndqueue.uploadqueue import UploadQueue
 from ndqueue.ingestqueue import IngestQueue
 from ndqueue.cleanupqueue import CleanupQueue

@@ -12,16 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
+# from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from .settings import Settings
 
+import os
+import sys
+
 class NDSettings(Settings):
 
   def __init__(self, file_name):
     super(NDSettings, self).__init__(file_name)
+    self.setPath()
+
+  def setPath(self):
+    """Add path to other libraries"""
+    # sys.path.append('..')
+    BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), self.parser.get('path', 'BASE_PATH')))
+    NDLIB_PATH = os.path.join(BASE_PATH, self.parser.get('path', 'NDLIB_PATH'))
+    SPDB_PATH = os.path.join(BASE_PATH, self.parser.get('path', 'SPDB_PATH'))
+    sys.path += ([NDLIB_PATH, SPDB_PATH])
   
   @property
   def PROJECT_NAME(self):

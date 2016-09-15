@@ -31,13 +31,11 @@ class Settings(object):
   def __init__(self, file_name):
     self.parser = SafeConfigParser()
     self.parser.read(file_name)
-    self.setPath()
   
+  @abstractmethod
   def setPath(self):
-    sys.path.append('..')
-    # loading path from the ini file
-    sys.path.append(self.parser.get('path', 'NDLIB_PATH'))
-    sys.path.append(self.parser.get('path', 'SPDB_PATH'))
+    """Add path to other libraries"""
+    return NotImplemented
 
   @staticmethod
   def load(file_name='settings.ini'):

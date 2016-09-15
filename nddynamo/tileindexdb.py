@@ -20,8 +20,9 @@ import botocore
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from operator import div
-from ndlib.ndlib import XYZMorton
-from ndlib.s3util import generateS3Key
+from ndctypelib import XYZMorton
+from util.util import Util
+UtilClass = Util.load()
 
 
 class TileIndexDB:
@@ -89,7 +90,6 @@ class TileIndexDB:
       print (e)
       raise
 
-
   @staticmethod
   def deleteTable(region_name=settings.REGION_NAME, endpoint_url=None):
     """Delete the ingest database in dynamodb"""
@@ -104,7 +104,6 @@ class TileIndexDB:
     except Exception as e:
       print (e)
       raise
-  
 
   @staticmethod
   def getTableName():
@@ -114,9 +113,8 @@ class TileIndexDB:
 
   def generatePrimaryKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
     """Generate key for each supercuboid"""
-    # TODO KL divide by SC size
     morton_index = XYZMorton(map(div, [x_index, y_index, z_index], settings.SUPER_CUBOID_SIZE))
-    return generateS3Key(self.project_name, channel_name, resolution, morton_index, t_index)
+    return UtilClass.generateCuboidKey(self.project_name, channel_name, resolution, morton_index, t_index)
 
   def supercuboidReady(self, z_index, zindex_list):
     """Verify if we have all tiles for a given supercuboid"""
@@ -125,7 +123,6 @@ class TileIndexDB:
   def putItem(self, channel_name, resolution, x_index, y_index, z_index, t_index=0, task_id=0):
     """Updating item for a give slice number"""
     
-    # x, y, z = [int(i) for i in file_name.split('.')[0].split('_')]
     supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x_index, y_index, z_index, t_index)
     
     try:
@@ -157,9 +154,6 @@ class TileIndexDB:
           ConsistentRead = True,
           ReturnConsumedCapacity = 'INDEXES'
       )
-      # response = self.table.query(
-          # KeyConditionExpression = Key('cuboid_key').eq(key)
-      # )
       # TODO write a yield function to pop one item at a time
       return response['Item'] if 'Item' in response else None
     except Exception as e:
@@ -179,7 +173,6 @@ class TileIndexDB:
       )
       for item in response['Items']:
         yield item
-      # return response['Items'], response['Count']
     except Exception as e:
       print (e)
       raise

@@ -24,8 +24,8 @@ import boto3
 import json
 import cStringIO
 from PIL import Image
-from ndlib.ndlib import MortonXYZ
-from ndlib.ndtype import *
+from ndctypelib import MortonXYZ
+from ndtype import *
 from spdb.cube import Cube
 from ndqueue.ingestqueue import IngestQueue
 from ndqueue.cleanupqueue import CleanupQueue

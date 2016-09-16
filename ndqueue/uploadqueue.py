@@ -12,6 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from __future__ import absolute_import
 from __future__ import print_function
 from settings.settings import Settings
@@ -77,7 +91,8 @@ class UploadQueue(NDQueue):
   @staticmethod
   def generateQueueName(nd_proj):
     """Generate the queue name based on project information"""
-    return '&'.join(nd_proj.generateProjectInfo()+['UPLOAD'])
+    # ToDo: come up with new naming scheme.  Limited to 80 chars.
+    return '-'.join(nd_proj.generateProjectInfo()+['UPLOAD']).replace('&', '-')
 
   def sendMessage(self, tile_info):
     """Send a message to upload queue"""

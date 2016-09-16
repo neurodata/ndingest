@@ -12,6 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from __future__ import absolute_import
 from __future__ import print_function
 import six
@@ -28,12 +42,13 @@ class Serializer(object):
     if settings.PROJECT_NAME == 'Neurodata':
       from ndqueue.ndserializer import NDSerializer
       return NDSerializer()
-    elif settings.Project_Name == 'Boss':
+    elif settings.PROJECT_NAME == 'Boss':
       from ndqueue.bossserializer import BossSerializer
       return BossSerializer()
     else:
-      print ("Incorrect Serializer {}".format(serializer_name))
-      raise
+      err = "Incorrect Serializer {}".format(settings.PROJECT_NAME)
+      print (err)
+      raise RuntimeError(err)
 
   @staticmethod
   @abstractmethod

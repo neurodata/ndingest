@@ -41,7 +41,7 @@ class IngestProj(object):
     return NotImplemented
 
   def generateProjectInfo(self):
-    return self.__dict__.values()
+    return list(six.itervalues(self.__dict__))
   
   @classmethod
   @abstractmethod

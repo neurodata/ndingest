@@ -23,14 +23,26 @@ from abc import ABCMeta, abstractmethod
 try:
   from ConfigParser import SafeConfigParser
 except:
-  from configparser import SafeConfigParser
+  from configparser import ConfigParser as SafeConfigParser
 
 @six.add_metaclass(ABCMeta)
 class Settings(object):
 
-  def __init__(self, file_name):
+  def __init__(self, file_name, fp=None):
+    """Load settings from a config file or a file-like object.
+    Args:
+        file_name (string): Load config from the named file.
+        fp (file-like object): If not None, load config from this.
+    """
     self.parser = SafeConfigParser()
-    self.parser.read(file_name)
+    if fp is None:
+        self.parser.read(file_name)
+        return
+
+    if 'read_file' in dir(self.parser):
+        self.parser.read_file(fp)
+    else:
+        self.parser.readfp(fp)
   
   @abstractmethod
   def setPath(self):

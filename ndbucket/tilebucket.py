@@ -34,11 +34,7 @@ class TileBucket:
     try:
       self.bucket = self.s3.Bucket(bucket_name)
     except botocore.exceptions.ClientError as e:
-<<<<<<< HEAD
-      print(e)
-=======
       print (e)
->>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
 
   @staticmethod
@@ -54,11 +50,7 @@ class TileBucket:
           ACL = 'private'
       )
     except Exception as e:
-<<<<<<< HEAD
-      print(e)
-=======
       print (e)
->>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
       raise
 
   @staticmethod
@@ -72,12 +64,7 @@ class TileBucket:
       # deleting the bucket
       response = bucket.delete()
     except Exception as e:
-<<<<<<< HEAD
-      print(e)
-=======
       print (e)
->>>>>>> f11bec995ed76f9952a2a128b9c8f4f5870a02eb
-      raise
   
   @staticmethod
   def getBucketName():

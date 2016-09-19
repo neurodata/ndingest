@@ -65,6 +65,7 @@ class TileBucket:
       response = bucket.delete()
     except Exception as e:
       print (e)
+      raise
   
   @staticmethod
   def getBucketName():
@@ -74,7 +75,7 @@ class TileBucket:
   def encodeObjectKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
     """Generate the key for the file in scratch space"""
     hashm = hashlib.md5()
-    hashm.update('{}&{}&{}&{}&{}&{}&{}'.format(self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index))
+    hashm.update('{}&{}&{}&{}&{}&{}&{}'.format(self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index).encode('utf-8'))
     return '{}&{}&{}&{}&{}&{}&{}&{}'.format(hashm.hexdigest(), self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index)
 
   @staticmethod
@@ -148,3 +149,13 @@ class TileBucket:
     except Exception as e:
       print (e)
       raise
+
+  def getAllObjects(self):
+    """Get a collection of ObjectSummary for all objects in the bucket."""
+
+    try:
+      return self.bucket.objects.all()
+    except Exception as e:
+      print (e)
+      raise
+

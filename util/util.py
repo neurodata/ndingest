@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +33,7 @@ class Util(object):
       from .bossutil import BossUtil
       return BossUtil
     else:
-      print('Unknown project name {}'.format(project_name))
+      print('Unknown project name {}'.format(settings.PROJECT_NAME ))
       raise
 
   @staticmethod

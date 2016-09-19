@@ -18,7 +18,7 @@ import sys
 sys.path.append('..')
 from settings.settings import Settings
 settings = Settings.load()
-import cStringIO
+from io import BytesIO
 from ndbucket.tilebucket import TileBucket
 from ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
@@ -29,13 +29,22 @@ class Test_Upload_Bucket():
 
   def setup_class(self):
     """Setup Parameters"""
-    TileBucket.createBucket(endpoint_url=settings.S3_ENDPOINT)
-    self.tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
+    if 'S3_ENDPOINT' in dir(settings):
+      self.endpoint_url = settings.S3_ENDPOINT
+    else:
+      self.endpoint_url = None
+    TileBucket.createBucket(endpoint_url=self.endpoint_url)
+    self.tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=self.endpoint_url)
 
 
   def teardown_class(self):
     """Teardown Parameters"""
-    TileBucket.deleteBucket(endpoint_url=settings.S3_ENDPOINT)
+
+    # Ensure bucket empty before deleting.
+    for objs in self.tile_bucket.getAllObjects():
+      self.tile_bucket.deleteObject(objs.key)
+
+    TileBucket.deleteBucket(endpoint_url=self.endpoint_url)
 
 
   def test_put_object(self):
@@ -48,7 +57,7 @@ class Test_Upload_Bucket():
 
     for z_tile in range(0, 2, 1):
       # creating a tile handle for test
-      tile_handle = cStringIO.StringIO()
+      tile_handle = BytesIO()
       # uploading object
       response = self.tile_bucket.putObject(tile_handle, nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, message_id, receipt_handle)
       tile_handle.close()

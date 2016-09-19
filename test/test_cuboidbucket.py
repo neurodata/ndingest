@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,9 +21,11 @@ from settings.settings import Settings
 settings = Settings.load()
 import numpy as np
 import blosc
-import cStringIO
+#import cStringIO
+import hashlib
 from ndbucket.cuboidbucket import CuboidBucket
 from ndingestproj.ingestproj import IngestProj
+import pytest
 ProjClass = IngestProj.load()
 nd_proj = ProjClass('kasthuri11', 'image', '0')
 
@@ -31,16 +34,25 @@ class Test_Cuboid_Bucket():
 
   def setup_class(self):
     """Setup Parameters"""
-    CuboidBucket.createBucket(endpoint_url=settings.S3_ENDPOINT)
-    self.cuboid_bucket = CuboidBucket(nd_proj.project_name, endpoint_url=settings.S3_ENDPOINT)
+    if 'S3_ENDPOINT' in dir(settings):
+      self.endpoint_url = settings.S3_ENDPOINT
+    else:
+      self.endpoint_url = None
+    CuboidBucket.createBucket(endpoint_url=self.endpoint_url)
+    self.cuboid_bucket = CuboidBucket(nd_proj.project_name, endpoint_url=self.endpoint_url)
 
   def teardown_class(self):
     """Teardown Parameters"""
-    CuboidBucket.deleteBucket(endpoint_url=settings.S3_ENDPOINT)
 
+    # Ensure bucket empty before deleting.
+    for objs in self.cuboid_bucket.getAllObjects():
+      self.cuboid_bucket.deleteObject(objs.key)
+
+    CuboidBucket.deleteBucket(endpoint_url=self.endpoint_url)
+
+  @pytest.mark.skipif(settings.PROJECT_NAME == 'Boss', reason='putObject() not supported by the Boss')
   def test_put_object(self):
     """Testing put object"""
-    
     cube_data = blosc.pack_array(np.zeros(settings.SUPER_CUBOID_SIZE))
     for morton_index in range(0, 10, 1):
       self.cuboid_bucket.putObject(nd_proj.channel_name, nd_proj.resolution, morton_index, cube_data)
@@ -48,3 +60,17 @@ class Test_Cuboid_Bucket():
     for morton_index in range(0, 10, 1):
       supercuboid_key = self.cuboid_bucket.generateSupercuboidKey(nd_proj.channel_name, nd_proj.resolution, morton_index)
       self.cuboid_bucket.deleteObject(supercuboid_key)
+
+  def test_put_object_by_key(self):
+    hashm = hashlib.md5()
+    hashm.update(b'test_cuboidbucket_data')
+    cube_data = blosc.pack_array(np.zeros(settings.SUPER_CUBOID_SIZE))
+
+    for morton_index in range(0, 10, 1):
+      key = '{}&{}'.format(hashm.hexdigest(), morton_index)
+      self.cuboid_bucket.putObjectByKey(key, cube_data)
+
+    for morton_index in range(0, 10, 1):
+      key = '{}&{}'.format(hashm.hexdigest(), morton_index)
+      self.cuboid_bucket.deleteObject(key)
+

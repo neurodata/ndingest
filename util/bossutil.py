@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +18,8 @@ from util.util import Util
 
 class BossUtil(Util):
 
-  @staticmethod
-  def generateCuboidKey(project_name, channel_name, resolution, morton_index, time_index=0):
-    """Generate the key for the supercube"""
-  return NotImplemented
+    @staticmethod
+    def generateCuboidKey(project_name, channel_name, resolution, morton_index, time_index=0):
+        """Generate the key for the supercube.  Not used by the Boss.
+        """
+        return NotImplemented

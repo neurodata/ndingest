@@ -31,12 +31,17 @@ class Test_UploadQueue():
 
   def setup_class(self):
     """Setup the class"""
-    UploadQueue.createQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
-    self.upload_queue = UploadQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+    if 'SQS_ENDPOINT' in dir(settings):
+      self.endpoint_url = settings.SQS_ENDPOINT
+    else:
+      self.endpoint_url = None
+    UploadQueue.createQueue(nd_proj, endpoint_url=self.endpoint_url)
+    self.upload_queue = UploadQueue(nd_proj, endpoint_url=self.endpoint_url)
+
 
   def teardown_class(self):
     """Teardown parameters"""
-    UploadQueue.deleteQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+    UploadQueue.deleteQueue(nd_proj, endpoint_url=self.endpoint_url)
 
   
   def test_Message(self):

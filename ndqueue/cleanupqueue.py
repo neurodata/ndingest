@@ -30,6 +30,13 @@ class CleanupQueue(NDQueue):
     self.queue_name = CleanupQueue.generateQueueName(nd_proj)
     return super(CleanupQueue, self).__init__(self.queue_name, region_name, endpoint_url)
 
+  @staticmethod 
+  def generateNeurodataQueueName(nd_proj):
+    return '&'.join(nd_proj.generateProjectInfo()+['CLEANUP']).replace('&', '-')
+    
+  @staticmethod 
+  def generateBossQueueName(nd_proj):
+    return NotImplemented
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
@@ -78,8 +85,7 @@ class CleanupQueue(NDQueue):
   @staticmethod
   def generateQueueName(nd_proj):
     """Generate the queue name based on project information"""
-    return '&'.join(nd_proj.generateProjectInfo()+['CLEANUP'])
-
+    return CleanupQueue.getNameGenerator()(nd_proj)
 
   def sendMessage(self, tile_info):
     """Send a message to upload queue"""

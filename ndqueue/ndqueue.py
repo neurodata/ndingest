@@ -45,7 +45,7 @@ class NDQueue(object):
     return NotImplemented
   
   @classmethod
-  def setNameGenerator(cls):
+  def getNameGenerator(cls):
     if settings.PROJECT_NAME == 'Neurodata':
       return cls.generateNeurodataQueueName
     elif settings.PROJECT_NAME == 'Bpss':

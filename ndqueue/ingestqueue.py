@@ -29,6 +29,13 @@ class IngestQueue(NDQueue):
     queue_name = IngestQueue.generateQueueName(nd_proj)
     super(IngestQueue, self).__init__(queue_name, region_name=region_name, endpoint_url=endpoint_url)
 
+  @staticmethod 
+  def generateNeurodataQueueName(nd_proj):
+    return '-'.join(nd_proj.generateProjectInfo()+['INSERT']).replace('&', '-')
+    
+  @staticmethod 
+  def generateBossQueueName(nd_proj):
+    return NotImplemented
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
@@ -76,7 +83,7 @@ class IngestQueue(NDQueue):
   @staticmethod
   def generateQueueName(nd_proj):
     """Generate the queue name based on project information"""
-    return '-'.join(nd_proj.generateProjectInfo()+['INSERT']).replace('&', '-')
+    return IngestQueue.getNameGenerator()(nd_proj)
   
   
   def sendMessage(self, supercuboid_key):

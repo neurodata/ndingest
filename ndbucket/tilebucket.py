@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +31,9 @@ class TileBucket:
     
     bucket_name = TileBucket.getBucketName()
     self.project_name = project_name
-    self.s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
+    self.s3 = boto3.resource(
+        's3', region_name=region_name, endpoint_url=endpoint_url, 
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
       self.bucket = self.s3.Bucket(bucket_name)
     except botocore.exceptions.ClientError as e:
@@ -42,7 +45,9 @@ class TileBucket:
     """Create the upload bucket"""
     
     bucket_name = TileBucket.getBucketName()
-    s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
+    s3 = boto3.resource(
+        's3', region_name=region_name, endpoint_url=endpoint_url,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     bucket = s3.Bucket(bucket_name)
     try:
       # creating the bucket
@@ -58,7 +63,9 @@ class TileBucket:
     """Delete the upload bucket"""
     
     bucket_name = TileBucket.getBucketName()
-    s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
+    s3 = boto3.resource(
+        's3', region_name=region_name, endpoint_url=endpoint_url,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     bucket = s3.Bucket(bucket_name)
     try:
       # deleting the bucket

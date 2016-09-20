@@ -16,6 +16,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from settings.settings import Settings
 settings = Settings.load()
+from abc import abstractmethod
 import boto3
 import botocore
 
@@ -32,7 +33,25 @@ class NDQueue(object):
     except botocore.exceptions.ClientError as e:
       print (e)
       raise
+  
+  @staticmethod
+  @abstractmethod
+  def generateNeurodataQueueName():
+    return NotImplemented
 
+  @staticmethod
+  @abstractmethod
+  def generateBossQueueName():
+    return NotImplemented
+  
+  @classmethod
+  def setNameGenerator(cls):
+    if settings.PROJECT_NAME == 'Neurodata':
+      return cls.generateNeurodataQueueName
+    elif settings.PROJECT_NAME == 'Bpss':
+      return cls.generateBossQueueName
+    else:
+      print ("Unknown Project Name {}".format(settings.PROJECT_NAME))
   
   def sendMessage(self, message_body, delay_seconds=0):
     """Send message to the queue"""

@@ -31,6 +31,13 @@ class UploadQueue(NDQueue):
     self.queue_name = UploadQueue.generateQueueName(nd_proj)
     return super(UploadQueue, self).__init__(self.queue_name, region_name=region_name, endpoint_url=endpoint_url)
 
+  @staticmethod 
+  def generateNeurodataQueueName(nd_proj):
+    return '-'.join(nd_proj.generateProjectInfo()+['UPLOAD']).replace('&', '-')
+    
+  @staticmethod 
+  def generateBossQueueName(nd_proj):
+    return NotImplemented
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
@@ -78,8 +85,8 @@ class UploadQueue(NDQueue):
   @staticmethod
   def generateQueueName(nd_proj):
     """Generate the queue name based on project information"""
-    # ToDo: come up with new naming scheme.  Limited to 80 chars.
-    return '-'.join(nd_proj.generateProjectInfo()+['UPLOAD']).replace('&', '-')
+    # TODO come up with new naming scheme.  Limited to 80 chars.
+    return UploadQueue.setNameGenerator()(nd_proj)
 
   def sendMessage(self, tile_info):
     """Send a message to upload queue"""

@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,12 +29,13 @@ class Serializer(object):
     if settings.PROJECT_NAME == 'Neurodata':
       from ndqueue.ndserializer import NDSerializer
       return NDSerializer()
-    elif settings.Project_Name == 'Boss':
+    elif settings.PROJECT_NAME == 'Boss':
       from ndqueue.bossserializer import BossSerializer
       return BossSerializer()
     else:
-      print ("Incorrect Serializer {}".format(serializer_name))
-      raise
+      err = "Incorrect Serializer {}".format(settings.PROJECT_NAME)
+      print (err)
+      raise RuntimeError(err)
 
   @staticmethod
   @abstractmethod

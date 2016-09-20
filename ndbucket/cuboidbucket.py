@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +31,9 @@ class CuboidBucket:
     
     bucket_name = CuboidBucket.getBucketName()
     self.project_name = project_name
-    self.s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
+    self.s3 = boto3.resource(
+        's3', region_name=region_name, endpoint_url=endpoint_url,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
       self.bucket = self.s3.Bucket(bucket_name)
     except botocore.exceptions.ClientError as e:
@@ -42,7 +45,9 @@ class CuboidBucket:
     """Create the cuboid bucket"""
     
     bucket_name = CuboidBucket.getBucketName()
-    s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
+    s3 = boto3.resource(
+        's3', region_name=region_name, endpoint_url=endpoint_url,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     bucket = s3.Bucket(bucket_name)
     try:
       # creating the bucket
@@ -58,7 +63,9 @@ class CuboidBucket:
     """Delete the cuboid bucket"""
     
     bucket_name = CuboidBucket.getBucketName()
-    s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url)
+    s3 = boto3.resource(
+        's3', region_name=region_name, endpoint_url=endpoint_url,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     bucket = s3.Bucket(bucket_name)
     try:
       # deleting the bucket
@@ -74,7 +81,10 @@ class CuboidBucket:
   
 
   def putObject(self, channel_name, resolution, morton_index, cube_data, time_index=0):
-    """Put object in the cuboid bucket"""
+    """Put object in the cuboid bucket.
+
+    Not supported by the Boss.  Use putObjectByKey() instead.
+    """
     supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index)
     return self.putObjectByKey(supercuboid_key, cube_data)
     
@@ -94,7 +104,7 @@ class CuboidBucket:
       raise
    
   def getObjectByKey(self, supercuboid_key):
-    """Get an object from the cuboid bucket based on key"""
+    """Get an object from the cuboid bucket based on key. """
 
     try:
       s3_obj = self.s3.Object(self.bucket.name, supercuboid_key)
@@ -105,7 +115,11 @@ class CuboidBucket:
       raise
 
   def getObject(self, channel_name, resolution, morton_index, time_index=0):
-    """Get object from the cuboid bucket based on parameters"""
+    """Get object from the cuboid bucket based on parameters.
+
+    Not supported by the Boss.  Use getObjectByKey() instead.
+    """
+
     supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index)
     return self.getObjectByKey(supercuboid_key)
 
@@ -123,3 +137,13 @@ class CuboidBucket:
     except Exception as e:
       print (e)
       raise
+
+  def getAllObjects(self):
+    """Get a collection of ObjectSummary for all objects in the bucket."""
+
+    try:
+      return self.bucket.objects.all()
+    except Exception as e:
+      print (e)
+      raise
+

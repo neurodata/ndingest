@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,7 +78,8 @@ class UploadQueue(NDQueue):
   @staticmethod
   def generateQueueName(nd_proj):
     """Generate the queue name based on project information"""
-    return '&'.join(nd_proj.generateProjectInfo()+['UPLOAD'])
+    # ToDo: come up with new naming scheme.  Limited to 80 chars.
+    return '-'.join(nd_proj.generateProjectInfo()+['UPLOAD']).replace('&', '-')
 
   def sendMessage(self, tile_info):
     """Send a message to upload queue"""

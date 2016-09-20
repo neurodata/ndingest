@@ -15,3 +15,12 @@
 *.swp
 .cache
 __pycache__/
+
+# PyCharm Files
+###############
+.idea/
+
+# MSVS Files
+ndingest.sln
+ndingest.pyproj
+

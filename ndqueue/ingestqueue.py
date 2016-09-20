@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -75,7 +76,7 @@ class IngestQueue(NDQueue):
   @staticmethod
   def generateQueueName(nd_proj):
     """Generate the queue name based on project information"""
-    return '-'.join(nd_proj.generateProjectInfo()+['INSERT'])
+    return '-'.join(nd_proj.generateProjectInfo()+['INSERT']).replace('&', '-')
   
   
   def sendMessage(self, supercuboid_key):

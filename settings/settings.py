@@ -110,3 +110,12 @@ class Settings(object):
   @abstractmethod
   def SUPER_CUBOID_SIZE(self):
     return NotImplemented
+
+  @property
+  @abstractmethod
+  def IAM_POLICY_PATH(self):
+    """Path to use when creating an IAM policy.
+
+    Must return '/' or a string beginning and ending with '/'.
+    """
+    return NotImplemented

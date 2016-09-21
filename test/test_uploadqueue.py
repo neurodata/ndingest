@@ -25,7 +25,7 @@ serializer = Serializer.load()
 from ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 if settings.PROJECT_NAME == 'Boss':
-    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 12, 'test.boss.io')
+    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 124, 'test.boss.io')
 else:
     nd_proj = ProjClass('kasthuri11', 'image', '0')
 
@@ -67,3 +67,43 @@ class Test_UploadQueue():
       response = self.upload_queue.deleteMessage(message_id, receipt_handle)
       # check if the message was sucessfully deleted
       assert('Successful' in response)
+
+
+  def test_createPolicy(self):
+    """Test policy creation"""
+
+    statements = [{
+      'Sid': 'ReceiveAccessStatement',
+      'Effect': 'Allow',
+      'Action': ['sqs:ReceiveMessage'] 
+    }]
+
+    expName = self.upload_queue.generateQueueName(nd_proj)
+    expDesc = 'Test policy creation'
+
+    actual = self.upload_queue.createPolicy(statements, description=expDesc)
+
+    try:
+        assert(expName == actual.policy_name)
+        assert(expDesc == actual.description)
+        assert(settings.IAM_POLICY_PATH == actual.path)
+
+        # Doesn't appear to be a way to programatically test that the
+        # contents of the policy's statements.
+
+    finally:
+        actual.delete()
+
+  def test_deletePolicy(self):
+    """Test policy deletion"""
+
+    statements = [{
+      'Sid': 'ReceiveAccessStatement',
+      'Effect': 'Allow',
+      'Action': ['sqs:ReceiveMessage'] 
+    }]
+
+    expName = self.upload_queue.generateQueueName(nd_proj)
+    policy = self.upload_queue.createPolicy(statements)
+    self.upload_queue.deletePolicy(expName)
+    assert(self.upload_queue.getPolicyArn(expName) is None)

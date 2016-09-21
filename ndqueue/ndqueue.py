@@ -48,7 +48,7 @@ class NDQueue(object):
   def getNameGenerator(cls):
     if settings.PROJECT_NAME == 'Neurodata':
       return cls.generateNeurodataQueueName
-    elif settings.PROJECT_NAME == 'Bpss':
+    elif settings.PROJECT_NAME == 'Boss':
       return cls.generateBossQueueName
     else:
       print ("Unknown Project Name {}".format(settings.PROJECT_NAME))

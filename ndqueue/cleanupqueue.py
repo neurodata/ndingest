@@ -36,11 +36,11 @@ class CleanupQueue(NDQueue):
     
   @staticmethod 
   def generateBossQueueName(nd_proj):
-    return NotImplemented
+    return '{}-delete-{}'.format(nd_proj.domain, nd_proj.job_id)
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
-    """Create the upload queue"""
+    """Create the cleanup queue"""
     
     # creating the resource
     queue_name = CleanupQueue.generateQueueName(nd_proj)

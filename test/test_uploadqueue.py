@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +26,7 @@ serializer = Serializer.load()
 from ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 if settings.PROJECT_NAME == 'Boss':
-    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 124, 'test.boss.io')
+    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 123, 'test.boss.io')
 else:
     nd_proj = ProjClass('kasthuri11', 'image', '0')
 
@@ -88,8 +89,11 @@ class Test_UploadQueue():
         assert(expDesc == actual.description)
         assert(settings.IAM_POLICY_PATH == actual.path)
 
-        # Doesn't appear to be a way to programatically test that the
-        # contents of the policy's statements.
+        # Confirm resource set correctly to the upload queue.
+        statements = actual.default_version.document['Statement']
+        arn = self.upload_queue.queue.attributes['QueueArn']
+        for stmt in statements:
+            assert(stmt['Resource'] == arn)
 
     finally:
         actual.delete()

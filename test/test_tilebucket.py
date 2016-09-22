@@ -22,7 +22,10 @@ from io import BytesIO
 from ndbucket.tilebucket import TileBucket
 from ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
-nd_proj = ProjClass('kasthuri11', 'image', '0')
+if settings.PROJECT_NAME == 'Boss':
+    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 124, 'test.boss.io')
+else:
+    nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_Upload_Bucket():

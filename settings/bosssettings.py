@@ -98,3 +98,11 @@ class BossSettings(Settings):
     @property
     def UPLOAD_TASK_DEADLETTER_QUEUE(self):
         return self.parser.get('aws', 'upload_task_deadletter_queue_url')
+
+    @property
+    def IAM_POLICY_PATH(self):
+        """Path to use when creating an IAM policy.
+
+        Must return '/' or a string beginning and ending with '/'.
+        """
+        return '/ingest/'

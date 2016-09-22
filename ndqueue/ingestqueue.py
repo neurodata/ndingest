@@ -35,7 +35,7 @@ class IngestQueue(NDQueue):
     
   @staticmethod 
   def generateBossQueueName(nd_proj):
-    return NotImplemented
+    return '{}-ingest-{}'.format(nd_proj.domain, nd_proj.job_id)
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):

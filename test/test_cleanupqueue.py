@@ -22,19 +22,26 @@ import pytest
 from ndqueue.cleanupqueue import CleanupQueue
 from ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
-nd_proj = ProjClass('kasthuri11', 'image', '0')
+if settings.PROJECT_NAME == 'Boss':
+    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 12, 'test.boss.io')
+else:
+    nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_Cleanup_Queue():
 
   def setup_class(self):
     """Setup class parameters"""
-    CleanupQueue.createQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
-    self.cleanup_queue = CleanupQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+    if 'SQS_ENDPOINT' in dir(settings):
+      self.endpoint_url = settings.SQS_ENDPOINT
+    else:
+      self.endpoint_url = None
+    CleanupQueue.createQueue(nd_proj, endpoint_url=self.endpoint_url)
+    self.cleanup_queue = CleanupQueue(nd_proj, endpoint_url=self.endpoint_url)
   
   def teardown_class(self):
     """Teardown parameters"""
-    CleanupQueue.deleteQueue(nd_proj, endpoint_url=settings.SQS_ENDPOINT)
+    CleanupQueue.deleteQueue(nd_proj, endpoint_url=self.endpoint_url)
 
   def test_Message(self):
     """Testing the upload queue"""

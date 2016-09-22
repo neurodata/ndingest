@@ -20,31 +20,26 @@ from ndingestproj.ingestproj import IngestProj
 class BossIngestProj(IngestProj):
 
     def __init__(
-        self, collection_name, channel_name, 
-        resolution, experiment_name=None, domain_name='test.boss.io'):
+        self, collection_name, experiment_name, channel_name, resolution, 
+        job_id, domain_name):
         """Constructor.
 
         Collection name and experiment name are joined with an & to form the
-        project name.  If experiment name isn't provided, the project_name is
-        '{}&{}'.format(collection_name, collection_name).  
-        
-        Both experiment_name and domain_name are optional to maintain 
-        compatibility with Neurodata.
+        project name.  
 
         Args:
             collection_name (string): Collection name.
+            experiment_name (string): Experiment name.
             channel_name (string): Channel name.
             resolution (string): '0' indicates native resolution.
-            experiment_name (optional[string]): Defaults to None.
-            domain_name (optional[string]): Defaults to 'test.boss.io'.  Domain ndingest running in.  Note, periods will be replaced with dashes for compatibility with AWS.
+            job_id (string): Id for this ingest job.
+            domain_name (string): Domain ndingest running in.  Note, periods will be replaced with dashes for compatibility with AWS.
         """
         self._domain_name = domain_name.replace('.', '-')
-        if experiment_name is not None:
-            self._project_name = collection_name + '&' + experiment_name
-        else:
-            self._project_name = collection_name + '&' + collection_name
+        self._project_name = collection_name + '&' + experiment_name
         self._channel_name = channel_name
         self._resolution = resolution
+        self._job_id = job_id
 
     @classmethod
     def fromTileKey(cls, tile_key):
@@ -58,6 +53,8 @@ class BossIngestProj(IngestProj):
   
     @property
     def project_name(self):
+        """For the Boss, this is the collection name and the experiment name, combined.
+        """
         return self._project_name
   
     @project_name.setter
@@ -83,4 +80,8 @@ class BossIngestProj(IngestProj):
     @property
     def domain(self):
         return self._domain_name
+
+    @property
+    def job_id(self):
+        return self._job_id
 

@@ -22,7 +22,10 @@ import pytest
 from ndqueue.ingestqueue import IngestQueue
 from ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
-nd_proj = ProjClass('kasthuri11', 'image', '0')
+if settings.PROJECT_NAME == 'Boss':
+    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 12, 'test.boss.io')
+else:
+    nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_Ingest_Queue():

@@ -17,19 +17,10 @@ import six
 from ndingestproj.bossingestproj import BossIngestProj
 
 class TestBossIngestProj(unittest.TestCase):
-    def test_generateProjectInfo(self):
-        prj = BossIngestProj('col1', 'chanA', '0', 'exp1', 'test.boss.io')
-        expected = ['test-boss-io', 'col1&exp1', 'chanA', '0']
-        six.assertCountEqual(self, expected, prj.generateProjectInfo())
-
     def test_project_name(self):
-        prj = BossIngestProj('col1', 'chanA', '0', 'exp1', 'test.boss.io')
+        """Project name should be collection name & experiment name."""
+        prj = BossIngestProj('col1', 'exp1', 'chanA', '0', '123', 'test.boss.io')
         expected = 'col1&exp1'
-        self.assertEqual(expected, prj.project_name)
-
-    def test_project_name_defaults(self):
-        prj = BossIngestProj('col1', 'chanA', '0')
-        expected = 'col1&col1'
         self.assertEqual(expected, prj.project_name)
 
 if __name__ == '__main__':

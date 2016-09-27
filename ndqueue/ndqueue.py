@@ -23,6 +23,14 @@ import botocore
 import json
 
 class NDQueue(object):
+  """Base class for SQS queues that support ingest.
+
+  Attributes:
+    queue (SQS.Queue): Interface to the queue.
+    region_name (string): AWS region queue lives in.
+    endpoint_url (string|None): Alternative URL boto3 should use for testing instead of connecting to AWS.
+    queue_name (string): The friendly name of the queue.
+  """
 
   def __init__(self, queue_name, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resource for the queue"""
@@ -39,6 +47,15 @@ class NDQueue(object):
     except botocore.exceptions.ClientError as e:
       print (e)
       raise
+
+  @property
+  def url(self):
+      """Gets the URL of the queue.
+
+      Returns:
+        (string)
+      """
+      return self.queue.url
   
   @staticmethod
   @abstractmethod

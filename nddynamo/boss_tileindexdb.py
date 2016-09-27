@@ -72,8 +72,6 @@ class BossTileIndexDB:
   @staticmethod
   def wait_table_create(table_name, region_name=settings.REGION_NAME, endpoint_url=None):
       """Poll dynamodb at a 2s interval until the table creates."""
-      print('Waiting for creation of table {}'.format(
-            table_name), end='', flush=True)
       client = boto3.client('dynamodb', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
       cnt = 0
       while True:
@@ -83,10 +81,8 @@ class BossTileIndexDB:
               # Give up waiting.
               return
           try:
-              print('.', end='', flush=True)
               resp = client.describe_table(TableName=table_name)
               if resp['Table']['TableStatus'] == 'ACTIVE':
-                  print('')
                   return
           except:
               # May get an exception if table doesn't currently exist.

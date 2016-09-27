@@ -106,3 +106,17 @@ class BossSettings(Settings):
         Must return '/' or a string beginning and ending with '/'.
         """
         return '/ingest/'
+
+    @property
+    def DYNAMO_TEST_ENDPOINT(self):
+        """URL of local DynamoDB instance for testing."""
+        try:
+            return self.parser.get('testing', 'dynamo_endpoint')
+        except Error:
+            return None
+
+    @property
+    def DYNAMO_ENDPOINT(self):
+        """Alias to match what Neurodata uses in case of developer confusion."""
+        return self.DYNAMO_TEST_ENDPOINT
+

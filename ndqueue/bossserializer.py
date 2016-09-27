@@ -19,6 +19,10 @@ from ndqueue.serializer import Serializer
 import json
 
 class BossSerializer(Serializer):
+  """This class will likely not be used by the Boss.
+
+    The Boss endpoint will encode and decode messages within its own code base.
+  """
     
   @staticmethod
   def encodeUploadMessage(project_name, channel_name, resolution, x_tile, y_tile, z_tile, time_range=None):

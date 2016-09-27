@@ -23,6 +23,7 @@ from nddynamo.boss_tileindexdb import BossTileIndexDB
 from ndingestproj.bossingestproj import BossIngestProj
 job_id = '123'
 nd_proj = BossIngestProj('testCol', 'kasthuri11', 'image', 0, job_id, 'test.boss.io')
+import json
 import six
 import unittest
 try:
@@ -32,51 +33,15 @@ except:
 import warnings
 
 
-schema = {"KeySchema": [
-        {
-          "AttributeName": "chunk_key",
-          "KeyType": "HASH"
-        }
-      ],
-      "AttributeDefinitions" : [
-        {
-          "AttributeName": "chunk_key",
-          "AttributeType": "S"
-        },
-        {
-          "AttributeName": "task_id",
-          "AttributeType": "N"
-        }
-      ],
-      "GlobalSecondaryIndexes": [
-        {
-          "IndexName": "task_index",
-          "KeySchema": [
-            {
-              "AttributeName": "task_id",
-              "KeyType": "HASH"
-            }
-          ],
-          "Projection": {
-            "ProjectionType": "ALL"
-          },
-          "ProvisionedThroughput": {
-            "ReadCapacityUnits": 10,
-            "WriteCapacityUnits": 10
-          }
-        },
-      ],
-      "ProvisionedThroughput": {
-        "ReadCapacityUnits": 10,
-        "WriteCapacityUnits": 10
-      }
-}
 
 class Test_BossTileIndexDB(unittest.TestCase):
 
     def setUp(self):
         # Suppress ResourceWarning messages about unclosed connections.
         warnings.simplefilter('ignore')
+
+        with open('nddynamo/schemas/boss_tile_index.json') as fp:
+            schema = json.load(fp)
 
         BossTileIndexDB.createTable(schema, endpoint_url=settings.DYNAMO_TEST_ENDPOINT)
         
@@ -163,72 +128,3 @@ class Test_BossTileIndexDB(unittest.TestCase):
         six.assertCountEqual(self, expected, actual)
 
    
-  #def test_putItem(self):
-  #  """Test data insertion"""
-    
-  #  x_tile = 0
-  #  y_tile = 0
-  #  # inserting three values for task 0
-  #  for z_tile in range(0, 3, 1):
-  #    self.tileindex_db.putItem(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, task_id=0)
-    
-  #  # inserting 2 values for task 1
-  #  for z_tile in range(66, 68, 1):
-  #    self.tileindex_db.putItem(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, task_id=1)
-
-  #  # checking if the items were inserted
-  #  z_tile = 0
-  #  supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
-  #  item_value = self.tileindex_db.getItem(supercuboid_key)
-  #  assert( item_value['zindex_list'] == set([0, 1, 2]) )
-    
-  #  z_tile = 65
-  #  supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
-  #  item_value = self.tileindex_db.getItem(supercuboid_key)
-  #  assert( item_value['zindex_list'] == set([66, 67]) )
-  
-  #def test_queryTaskItems(self):
-  #  """Test the query over SI"""
-    
-  #  for item in self.tileindex_db.getTaskItems(0):
-  #    assert( item['zindex_list'] == set([0, 1, 2]) )
-
-  #def test_supercuboidReady(self):
-  #  """Test if the supercuboid is ready"""
-    
-  #  x_tile = 0
-  #  y_tile = 0
-  #  for z_tile in range(129, 129+settings.SUPER_CUBOID_SIZE[2], 1):
-  #    supercuboid_key, supercuboid_ready = self.tileindex_db.putItem(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, task_id=0)
-  #    if z_tile < 129+settings.SUPER_CUBOID_SIZE[2]:
-  #      assert(supercuboid_ready is False)
-  #    else:
-  #      assert(supercuboid_ready is True)
-
-
-  #def test_deleteItem(self):
-  #  """Test item deletion"""
-    
-  #  x_tile = 0
-  #  y_tile = 0
-  #  # inserting three values for task 0
-  #  for z_tile in range(0, 3, 1):
-  #    supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
-  #    self.tileindex_db.deleteItem(supercuboid_key)
-    
-  #  # inserting 2 values for task 1
-  #  for z_tile in range(66, 68, 1):
-  #    supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
-  #    self.tileindex_db.deleteItem(supercuboid_key)
-    
-  #  # inserting three values for task 0
-  #  for z_tile in range(0, 3, 1):
-  #    supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
-  #    item = self.tileindex_db.getItem(supercuboid_key)
-  #    assert(item == None)
-    
-  #  # inserting 2 values for task 1
-  #  for z_tile in range(66, 68, 1):
-  #    supercuboid_key = self.tileindex_db.generatePrimaryKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
-  #    item = self.tileindex_db.getItem(supercuboid_key)
-  #    assert(item == None)

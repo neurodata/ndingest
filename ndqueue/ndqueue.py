@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,7 +58,135 @@ class NDQueue(object):
       return cls.generateBossQueueName
     else:
       print ("Unknown Project Name {}".format(settings.PROJECT_NAME))
-  
+
+
+  @staticmethod
+  def deleteQueueByName(name, region_name=settings.REGION_NAME, endpoint_url=None, delete_deadletter_queue=False):
+    """Delete the named queue.
+    
+    Also delete the dead letter queue if delete_deadletter_queue is true.
+
+    Args:
+        name (string): Name of queue to delete.
+        region_name (optional[string]): AWS region queue lives in.  Extracted from settings.ini if not provided.
+        endpoint_url (optional[string]): Provide if using a mock or fake Boto3 service.
+        delete_deadletter_queue (optional[bool]): Also delete the dead letter queue.  Defaults to False.
+    """
+
+    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    
+    try:
+      # try fetching queue first
+      queue = sqs.get_queue_by_name(QueueName=name)
+
+      if delete_deadletter_queue:
+          NDQueue.deleteDeadLetterQueue(sqs, queue)
+
+      # delete the queue
+      queue.delete()
+    except Exception as e:
+      print (e)
+      raise
+
+
+  def addDeadLetterQueue(self, max_receive_count, queue_arn=None):
+      """Sets the dead letter queue.
+
+      A dead letter queue will be created if queue_arn is not supplied.  If
+      creating, the dead letter queue will have the same name as the queue it
+      supports, but with '_dead_letter' appended.
+
+      Args:
+        max_receive_count (int): Max times a message may be received before sending to the dead letter queue.
+        queue_arn (optional[string]): ARN of existing queue to use for the dead letter queue.
+
+      Return:
+        (SQS.Queue): The dead letter queue.
+      """
+
+      sqs = boto3.resource(
+          'sqs',
+          region_name=self.region_name, endpoint_url=self.endpoint_url, 
+          aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
+          aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+
+      if queue_arn is not None:
+          arn = queue_arn
+          queue = NDQueue.findQueueByArn(sqs, arn)
+          if queue is None:
+              msg = 'Queue {} not found.'.format(arn)
+              print(msg)
+              raise RuntimeError(msg)
+      else:
+          # Create dead letter queue.
+          name = self.queue_name + '_dead_letter'
+          sqs = boto3.resource(
+              'sqs',
+              region_name=self.region_name, endpoint_url=self.endpoint_url, 
+              aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
+              aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+          try:
+              queue = sqs.create_queue(
+                  QueueName=name,
+                  Attributes = {
+                      'DelaySeconds': '0',
+                      'MaximumMessageSize': '262144'
+                  }
+              )
+              arn = queue.attributes['QueueArn']
+          except Exception as e:
+              print(e)
+              raise
+
+      policy = {'maxReceiveCount': max_receive_count, 'deadLetterTargetArn': arn}
+
+      # Set dead letter policy on the queue.
+      self.queue.set_attributes(Attributes={'RedrivePolicy': json.dumps(policy)})
+
+      # Return the dead letter queue.
+      return queue
+
+
+  @staticmethod
+  def deleteDeadLetterQueue(sqs, queue):
+      """Delete the dead letter queue associated with the given queue.
+
+      Args:
+        sqs (SQS.ServiceResource): Live resource used for queue operations.
+        queue (SQS.Queue): The queue that "owns" the dead letter queue.
+      """
+
+      if 'RedrivePolicy' not in queue.attributes:
+          print('Delete failed - queue {} does not have a dead letter queue.'.format(queue.url))
+          return
+
+      policy = json.loads(queue.attributes['RedrivePolicy'])
+      arn = policy['deadLetterTargetArn']
+
+      dlet_queue = NDQueue.findQueueByArn(sqs, arn)
+      if dlet_queue is None:
+          print('Delete failed for {} - not found.'.format(arn))
+          return
+
+      dlet_queue.delete()
+
+
+  @staticmethod
+  def findQueueByArn(sqs, arn):
+      """Find a queue by its ARN.
+
+      Args:
+        sqs (SQS.ServiceResource): Live resource used for queue operations.
+        arn (string): ARN of queue.
+
+      Returns:
+        (SQS.Queue|None): None if queue not found.
+      """
+
+      (_, name) = arn.rsplit(':', 1)
+      return sqs.get_queue_by_name(QueueName=name)
+
+
   def createPolicy(self, policy, name=None, description=''):
     """Create a policy for this queue.
 

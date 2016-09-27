@@ -27,7 +27,10 @@ from ndbucket.cuboidbucket import CuboidBucket
 from ndingestproj.ingestproj import IngestProj
 import pytest
 ProjClass = IngestProj.load()
-nd_proj = ProjClass('kasthuri11', 'image', '0')
+if settings.PROJECT_NAME == 'Boss':
+    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 124, 'test.boss.io')
+else:
+    nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_Cuboid_Bucket():

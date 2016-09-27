@@ -63,24 +63,22 @@ class UploadQueue(NDQueue):
 
 
   @staticmethod  
-  def deleteQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
-    """Delete the upload queue"""
+  def deleteQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None, delete_deadletter_queue=False):
+    """Delete the upload queue.
+    
+    Also delete the dead letter queue if delete_deadletter_queue is true.
+
+    Args:
+        nd_proj (IngestProj): Project settings used to generate queue's name.
+        region_name (optional[string]): AWS region queue lives in.  Extracted from settings.ini if not provided.
+        endpoint_url (optional[string]): Provide if using a mock or fake Boto3 service.
+        delete_deadletter_queue (optional[bool]): Also delete the dead letter queue.  Defaults to False.
+    """
 
     # creating the resource
     queue_name = UploadQueue.generateQueueName(nd_proj)
-    sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    
-    try:
-      # try fetching queue first
-      queue = sqs.get_queue_by_name(
-          QueueName = queue_name
-      )
-      # deleting the queue
-      response = queue.delete()
-      return response
-    except Exception as e:
-      print (e)
-      raise
+    NDQueue.deleteQueueByName(queue_name, region_name, endpoint_url, delete_deadletter_queue)
+
 
   @staticmethod
   def generateQueueName(nd_proj):

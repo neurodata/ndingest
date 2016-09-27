@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +23,10 @@ from io import BytesIO
 from ndbucket.tilebucket import TileBucket
 from ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
-nd_proj = ProjClass('kasthuri11', 'image', '0')
+if settings.PROJECT_NAME == 'Boss':
+    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 124, 'test.boss.io')
+else:
+    nd_proj = ProjClass('kasthuri11', 'image', '0')
 
 
 class Test_Upload_Bucket():
@@ -71,3 +75,109 @@ class Test_Upload_Bucket():
       assert( object_receipt_handle == receipt_handle )
       # delete the object
       response = self.tile_bucket.deleteObject(object_key)
+
+
+  def test_buildArn_no_folder(self):
+    """Test buildArn with folder's default value."""
+
+    expected = 'arn:aws:s3:::my_bucket/*'
+    actual = TileBucket.buildArn('my_bucket')
+    assert(expected == actual)
+    
+
+  def test_buildArn_with_folder_no_slashes(self):
+    """Test buildArn with a folder."""
+
+    expected = 'arn:aws:s3:::my_bucket/some/folder/*'
+    actual = TileBucket.buildArn('my_bucket', 'some/folder')
+    assert(expected == actual)
+    
+
+  def test_buildArn_with_folder_with_slashes(self):
+    """Test buildArn with folder with slashes at beginning and end."""
+
+    expected = 'arn:aws:s3:::my_bucket/some/folder/*'
+    actual = TileBucket.buildArn('my_bucket', '/some/folder/')
+    assert(expected == actual)
+
+
+  def test_createPolicy(self):
+    """Test policy creation"""
+
+    statements = [{
+      'Sid': 'WriteAccess',
+      'Effect': 'Allow',
+      'Action': ['s3:PutObject'] 
+    }]
+
+    expName = 'ndingest_test_tile_bucket_policy'
+    expDesc = 'Test policy creation'
+
+    actual = self.tile_bucket.createPolicy(statements, expName, description=expDesc)
+
+    try:
+        assert(expName == actual.policy_name)
+        assert(expDesc == actual.description)
+        assert(settings.IAM_POLICY_PATH == actual.path)
+        assert(actual.default_version is not None)
+
+        # Test that the statements' resource set to this bucket.
+        statements = actual.default_version.document['Statement']
+        bucket_name = TileBucket.getBucketName()
+        arn = 'arn:aws:s3:::{}/*'.format(bucket_name)
+        for stmt in statements:
+            assert(stmt['Resource'] == arn)
+    finally:
+        actual.delete()
+
+
+  def test_createPolicy_with_folder(self):
+    """Test policy creation with a folder"""
+
+    statements = [{
+      'Sid': 'WriteAccess',
+      'Effect': 'Allow',
+      'Action': ['s3:PutObject'] 
+    }]
+
+    expName = 'ndingest_test_tile_bucket_policy'
+    folder = 'some/folder'
+
+    actual = self.tile_bucket.createPolicy(statements, expName, folder)
+
+    try:
+        assert(expName == actual.policy_name)
+        assert(settings.IAM_POLICY_PATH == actual.path)
+        assert(actual.default_version is not None)
+
+        # Test that the statements' resource set to this bucket and folder.
+        statements = actual.default_version.document['Statement']
+        bucket_name = TileBucket.getBucketName()
+        arn = 'arn:aws:s3:::{}/{}/*'.format(bucket_name, folder)
+        for stmt in statements:
+            assert(stmt['Resource'] == arn)
+    finally:
+        actual.delete()
+
+
+  def test_deletePolicy(self):
+    """Test policy deletion"""
+
+    statements = [{
+      'Sid': 'WriteAccess',
+      'Effect': 'Allow',
+      'Action': ['s3:PutObject'] 
+    }]
+
+    expName = 'ndingest_test_tile_bucket_policy'
+    policy = self.tile_bucket.createPolicy(statements, expName)
+    assert(expName == policy.policy_name)
+    self.tile_bucket.deletePolicy(expName)
+    assert(self.tile_bucket.getPolicyArn(expName) is None)
+
+
+if __name__ == '__main__':
+    sut = Test_Upload_Bucket()
+    sut.setup_class()
+    sut.test_createPolicy()
+    sut.teardown_class()

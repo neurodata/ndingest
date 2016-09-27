@@ -120,8 +120,55 @@ class BossTileIndexDB:
     return UtilClass.generateCuboidKey(self.project_name, channel_name, resolution, morton_index, t_index)
 
 
+  def createCuboidEntry(self, channel_name, resolution, x_index, y_index, z_index, t_index=0, task_id=0):
+    """Create the initial entry for tracking tiles uploaded for a cuboid.
+
+    Call this before using markTileAsUploaded().
+
+    Args:
+        channel_name (string): Name of the channel the cuboid belongs to.
+        resolution (int): 0 for native resolution.
+        x_index (int): Starting x value of the cuboid.
+        y_index (int): Starting y value of the cuboid.
+        z_index (int): Starting z value of the cuboid.
+        t_index (optional[int]): Starting time index.  Defaults to 0.
+        task_id (optional[int]): Task or job id that this cuboid belongs to.  Defaults to 0.
+
+    Returns:
+        (string): Chunk key that holds the cuboid's entry in the table.
+    """
+    chunk_key = self.generatePrimaryKey(channel_name, resolution, x_index, y_index, z_index, t_index)
+
+    try:
+        response = self.table.put_item(
+            Item = {
+                'chunk_key': chunk_key,
+                'tile_uploaded_map': {},
+                'task_id': task_id
+            })
+        return chunk_key
+    except botocore.exceptions.ClientError as e:
+        print (e)
+        raise
+
   def markTileAsUploaded(self, tile_key, channel_name, resolution, x_index, y_index, z_index, t_index=0, task_id=0):
-    """Updating item for a give slice number"""
+    """Mark the tile as uploaded.
+
+    Marks the tile belonging to the cuboid specified by the channel name, resolution, and coordinates as uploaded.
+
+    Args:
+        tile_key (string): Key to retrieve tile from S3 bucket.
+        channel_name (string): Name of the channel the cuboid belongs to.
+        resolution (int): 0 for native resolution.
+        x_index (int): Starting x value of the cuboid.
+        y_index (int): Starting y value of the cuboid.
+        z_index (int): Starting z value of the cuboid.
+        t_index (optional[int]): Starting time index.  Defaults to 0.
+        task_id (optional[int]): Task or job id that this cuboid belongs to.  Defaults to 0.
+
+    Returns:
+        (string, dict): Chunk key (cuboid's key) and the map of uploaded tiles.
+    """
     
     chunk_key = self.generatePrimaryKey(channel_name, resolution, x_index, y_index, z_index, t_index)
     
@@ -130,13 +177,14 @@ class BossTileIndexDB:
           Key = {
             'chunk_key': chunk_key
           },
-          UpdateExpression = 'SET tile_uploaded_map.{} = 1 SET task_id = :task_id'.format(tile_key),
+          UpdateExpression = 'ADD tile_uploaded_map.{} :uploaded SET task_id = :task_id'.format(tile_key),
           ExpressionAttributeValues = {
+              ':uploaded': 1,
               ':task_id': task_id
           },
           ReturnValues = 'ALL_NEW'
       )
-      return chunk_key, self.cuboidReady(z_index, response['Attributes']['tile_uploaded_map'])
+      return chunk_key, self.cuboidReady(response['Attributes']['tile_uploaded_map'])
     except botocore.exceptions.ClientError as e:
       print (e)
       raise

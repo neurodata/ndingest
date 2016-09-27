@@ -96,6 +96,15 @@ class Test_BossTileIndexDB(unittest.TestCase):
             fake_generator.return_value = '23'
             assert(self.tileindex_db.cuboidReady(fake_map))
 
+    def test_markTileAsUploaded(self):
+        with patch.object(self.tileindex_db, 'generatePrimaryKey') as fake_generator:
+            fake_generator.return_value = '23'
+            self.tileindex_db.createCuboidEntry('chanA', 0, 1, 1, 1)
+            self.tileindex_db.markTileAsUploaded('fakekey', 'chanA', 0, 1, 1, 1)
+
+            resp = self.tileindex_db.getItem('23')
+            print(resp)
+
    
   #def test_putItem(self):
   #  """Test data insertion"""

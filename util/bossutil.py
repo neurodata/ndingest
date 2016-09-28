@@ -24,3 +24,31 @@ class BossUtil(Util):
         """Generate the key for the supercube.  Not used by the Boss.
         """
         return NotImplemented
+
+    @staticmethod
+    def decode_chunk_key(key):
+        """A method to decode the chunk key
+
+        The tile key is the key used for each individual tile file.
+
+        This should match chunk key encoding/decoding done by the ingest client.
+
+        Args:
+            key(str): The key to decode
+
+        Returns:
+            (dict): A dictionary containing the components of the key
+        """
+        result = {}
+        parts = key.split('&')
+        result["num_tiles"] = int(parts[1])
+        result["collection"] = int(parts[2])
+        result["experiment"] = int(parts[3])
+        result["channel_layer"] = int(parts[4])
+        result["resolution"] = int(parts[5])
+        result["x_index"] = int(parts[6])
+        result["y_index"] = int(parts[7])
+        result["z_index"] = int(parts[8])
+        result["t_index"] = int(parts[9])
+
+        return result

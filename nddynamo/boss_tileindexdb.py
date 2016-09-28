@@ -21,8 +21,7 @@ import botocore
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from operator import floordiv
-from util.util import Util
-UtilClass = Util.load()
+from util.bossutil import BossUtil
 import time
 #try:
 #    # Temp try-catch while developing on Windows.
@@ -178,9 +177,9 @@ class BossTileIndexDB:
         (bool)
     """
 
-    # Last part of chunk key should be num_tiles.
-    (_, num_tiles_str) = chunk_key.rsplit('&', 1)
-    num_tiles = int(num_tiles_str)
+    key_parts = BossUtil.decode_chunk_key(chunk_key)
+    num_tiles = key_parts['num_tiles']
+
     if num_tiles < settings.SUPER_CUBOID_SIZE[2]:
         return len(tile_uploaded_map) >= num_tiles
 

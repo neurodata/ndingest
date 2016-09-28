@@ -26,15 +26,15 @@ nd_proj = BossIngestProj('testCol', 'kasthuri11', 'image', 0, job_id, 'test.boss
 import json
 import six
 import unittest
-#try:
-#    from unittest.mock import patch
-#except:
-#    from mock import patch
 import warnings
 
 
 
 class Test_BossTileIndexDB(unittest.TestCase):
+    """
+    Note that the chunk keys used, for testing, do not have real hash keys.
+    The rest of the chunk key is valid.
+    """
 
     def setUp(self):
         # Suppress ResourceWarning messages about unclosed connections.
@@ -56,7 +56,7 @@ class Test_BossTileIndexDB(unittest.TestCase):
     def test_cuboidReady_false(self):
         fake_map = { 'o': 1 }
         num_tiles = settings.SUPER_CUBOID_SIZE[2]
-        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        chunk_key = '<hash>&{}&111&222&333&0&0&0&0&0'.format(num_tiles)
         self.assertFalse(self.tileindex_db.cuboidReady(chunk_key, fake_map))
 
 
@@ -66,7 +66,7 @@ class Test_BossTileIndexDB(unittest.TestCase):
             's9': 1, 's10': 1, 's11': 1, 's12': 1, 's13': 1, 's14': 1, 's15': 1, 's16': 1
         }
         num_tiles = settings.SUPER_CUBOID_SIZE[2]
-        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        chunk_key = '<hash>&{}&111&222&333&0&0&0&0&0'.format(num_tiles)
         self.assertTrue(self.tileindex_db.cuboidReady(chunk_key, fake_map))
 
 
@@ -77,7 +77,7 @@ class Test_BossTileIndexDB(unittest.TestCase):
         }
 
         num_tiles = 8
-        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        chunk_key = '<hash>&{}&111&222&333&0&0&0&0&0'.format(num_tiles)
         self.assertTrue(self.tileindex_db.cuboidReady(chunk_key, fake_map))
 
 
@@ -88,12 +88,12 @@ class Test_BossTileIndexDB(unittest.TestCase):
         }
 
         num_tiles = 8
-        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        chunk_key = '<hash>&{}&111&222&333&0&0&0&0&0'.format(num_tiles)
         self.assertFalse(self.tileindex_db.cuboidReady(chunk_key, fake_map))
 
     def test_createCuboidEntry(self):
         num_tiles = settings.SUPER_CUBOID_SIZE[2]
-        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        chunk_key = '<hash>&{}&111&222&333&0&0&0&0&0'.format(num_tiles)
         task_id = 21
         self.tileindex_db.createCuboidEntry(chunk_key, task_id)
         preDelResp = self.tileindex_db.getCuboid(chunk_key)
@@ -105,7 +105,7 @@ class Test_BossTileIndexDB(unittest.TestCase):
         # Cuboid must first have an entry before one of its tiles may be marked
         # as uploaded.
         num_tiles = settings.SUPER_CUBOID_SIZE[2]
-        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        chunk_key = '<hash>&{}&111&222&333&0&0&0&0&0'.format(num_tiles)
         self.tileindex_db.createCuboidEntry(chunk_key, 231)
 
         self.tileindex_db.markTileAsUploaded(chunk_key, 'fakekey')
@@ -117,7 +117,7 @@ class Test_BossTileIndexDB(unittest.TestCase):
 
     def test_deleteItem(self):
         num_tiles = settings.SUPER_CUBOID_SIZE[2]
-        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        chunk_key = '<hash>&{}&111&222&333&0&0&0&0&0'.format(num_tiles)
         self.tileindex_db.createCuboidEntry(chunk_key, 231)
         preDelResp = self.tileindex_db.getCuboid(chunk_key)
         self.assertEqual(chunk_key, preDelResp['chunk_key'])
@@ -128,17 +128,17 @@ class Test_BossTileIndexDB(unittest.TestCase):
 
     def test_getTaskItems(self):
         num_tiles = settings.SUPER_CUBOID_SIZE[2]
-        chunk_key1 = '<hash>&coll&exp&chan&0&0&z&t&{}'.format(num_tiles)
+        chunk_key1 = '<hash>&{}&111&222&333&0&0&0&z&t'.format(num_tiles)
         self.tileindex_db.createCuboidEntry(chunk_key1, task_id=3)
 
-        chunk_key2 = '<hash>&coll&exp&chan&1&0&z&t&{}'.format(num_tiles)
+        chunk_key2 = '<hash>&{}&111&222&333&0&1&0&z&t'.format(num_tiles)
         self.tileindex_db.createCuboidEntry(chunk_key2, task_id=3)
 
-        chunk_key3 = '<hash>&coll&exp&chan&2&0&z&t&{}'.format(num_tiles)
+        chunk_key3 = '<hash>&{}&111&222&333&0&2&0&z&t'.format(num_tiles)
         self.tileindex_db.createCuboidEntry(chunk_key3, task_id=3)
 
         # Cuboid for a different upload job.
-        chunk_key4 = '<hash>&coll&exp2&chan&0&0&z&t&{}'.format(num_tiles)
+        chunk_key4 = '<hash>&{}&555&666&777&0&0&0&z&t'.format(num_tiles)
         self.tileindex_db.createCuboidEntry(chunk_key4, task_id=5)
 
         expected = [ 

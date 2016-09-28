@@ -19,7 +19,7 @@ from ndingestproj.bossingestproj import BossIngestProj
 class TestBossIngestProj(unittest.TestCase):
     def test_project_name(self):
         """Project name should be collection name & experiment name."""
-        prj = BossIngestProj('col1', 'exp1', 'chanA', '0', '123', 'test.boss.io')
+        prj = BossIngestProj('col1', 'exp1', 'chanA', '0', '123')
         expected = 'col1&exp1'
         self.assertEqual(expected, prj.project_name)
 

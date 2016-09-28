@@ -20,7 +20,7 @@ class TestBossSettings(unittest.TestCase):
     def setUp(self):
         self.base_config = """
 [boss]
-chunk_key = coll1&exp1&chanA
+domain = test.boss.io
 [aws]
 """
 
@@ -38,6 +38,10 @@ chunk_key = coll1&exp1&chanA
     def test_secret_key_default(self):
         settings = BossSettings(None, self.fp)
         self.assertIsNone(settings.AWS_SECRET_ACCESS_KEY)
+
+    def test_domain_no_periods(self):
+        settings = BossSettings(None, self.fp)
+        self.assertEqual('test-boss-io', settings.DOMAIN)
 
 
 if __name__ == '__main__':

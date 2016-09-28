@@ -22,7 +22,7 @@ settings = Settings.load()
 from nddynamo.boss_tileindexdb import BossTileIndexDB
 from ndingestproj.bossingestproj import BossIngestProj
 job_id = '123'
-nd_proj = BossIngestProj('testCol', 'kasthuri11', 'image', 0, job_id, 'test.boss.io')
+nd_proj = BossIngestProj('testCol', 'kasthuri11', 'image', 0, job_id)
 import json
 import six
 import unittest

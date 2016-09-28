@@ -24,7 +24,7 @@ from ndbucket.tilebucket import TileBucket
 from ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 if settings.PROJECT_NAME == 'Boss':
-    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 124, 'test.boss.io')
+    nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 124)
 else:
     nd_proj = ProjClass('kasthuri11', 'image', '0')
 

@@ -36,7 +36,7 @@ class CleanupQueue(NDQueue):
     
   @staticmethod 
   def generateBossQueueName(nd_proj):
-    return '{}-delete-{}'.format(nd_proj.domain, nd_proj.job_id)
+    return '{}-delete-{}'.format(settings.DOMAIN, nd_proj.job_id)
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):

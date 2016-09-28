@@ -31,9 +31,13 @@ import unittest
 import boto3
 import botocore
 import time
+import warnings
 
-class Test_test_deadletter_queue(unittest.TestCase):
+class TestDeadletterQueue(unittest.TestCase):
     def setUp(self):
+        # Suppress ResourceWarning messages about unclosed connections.
+        warnings.simplefilter('ignore')
+
         if 'SQS_ENDPOINT' in dir(settings):
           self.endpoint_url = settings.SQS_ENDPOINT
         else:
@@ -57,7 +61,7 @@ class Test_test_deadletter_queue(unittest.TestCase):
 
         if settings.PROJECT_NAME == 'Boss':
             job_id = num
-            nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, job_id, 'test.boss.io')
+            nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, job_id)
         else:
             channel = 'image{}'.format(num)
             nd_proj = ProjClass('kasthuri11', channel, '0')

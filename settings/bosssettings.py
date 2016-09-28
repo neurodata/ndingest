@@ -21,11 +21,13 @@ except:
 
 class BossSettings(Settings):
     
-    def __init(self, file_name, fp=None):
+    def __init__(self, file_name, fp=None):
         super(BossSettings, self).__init__(file_name, fp)
+        self._domain = None
 
     def setPath(self):
         """Add path to other libraries"""
+        return NotImplemented
 
     @property
     def PROJECT_NAME(self):
@@ -120,3 +122,19 @@ class BossSettings(Settings):
         """Alias to match what Neurodata uses in case of developer confusion."""
         return self.DYNAMO_TEST_ENDPOINT
 
+    @property
+    def DOMAIN(self):
+        """Domain ndingest library is running in.
+
+        For example: 'api.boss.io'
+
+        In the above example, 'api-boss-io' will be returned for 
+        compatibility with AWS naming restrictions.
+
+        Returns:
+            (string): Periods will be replaced with dashes for compatibility with AWS naming restrictions.
+        """
+        if self._domain is None:
+            self._domain = self.parser.get('boss', 'domain').replace('.', '-')
+
+        return self._domain

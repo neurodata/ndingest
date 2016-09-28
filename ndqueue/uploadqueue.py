@@ -37,7 +37,7 @@ class UploadQueue(NDQueue):
     
   @staticmethod 
   def generateBossQueueName(nd_proj):
-    return '{}-upload-{}'.format(nd_proj.domain, nd_proj.job_id)
+    return '{}-upload-{}'.format(settings.DOMAIN, nd_proj.job_id)
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):

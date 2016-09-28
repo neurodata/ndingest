@@ -21,7 +21,7 @@ class BossIngestProj(IngestProj):
 
     def __init__(
         self, collection_name, experiment_name, channel_name, resolution, 
-        job_id, domain_name):
+        job_id):
         """Constructor.
 
         Collection name and experiment name are joined with an & to form the
@@ -33,9 +33,7 @@ class BossIngestProj(IngestProj):
             channel_name (string): Channel name.
             resolution (string): '0' indicates native resolution.
             job_id (string): Id for this ingest job.
-            domain_name (string): Domain ndingest running in.  Note, periods will be replaced with dashes for compatibility with AWS.
         """
-        self._domain_name = domain_name.replace('.', '-')
         self._project_name = collection_name + '&' + experiment_name
         self._channel_name = channel_name
         self._resolution = resolution
@@ -76,10 +74,6 @@ class BossIngestProj(IngestProj):
     @resolution.setter
     def resolution(self, value):
         self._resolution = value
-
-    @property
-    def domain(self):
-        return self._domain_name
 
     @property
     def job_id(self):

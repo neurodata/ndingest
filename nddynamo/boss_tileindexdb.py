@@ -24,11 +24,11 @@ from operator import floordiv
 from util.util import Util
 UtilClass = Util.load()
 import time
-try:
-    # Temp try-catch while developing on Windows.
-    from spdb.c_lib.ndlib import XYZMorton
-except Exception:
-    pass
+#try:
+#    # Temp try-catch while developing on Windows.
+#    from spdb.c_lib.ndlib import XYZMorton
+#except Exception:
+#    pass
 
 
 class BossTileIndexDB:
@@ -110,31 +110,20 @@ class BossTileIndexDB:
       return settings.DYNAMO_TILEINDEX_TABLE
 
 
-  def generatePrimaryKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
-    """Generate key for each supercuboid"""
-    morton_index = XYZMorton(map(floordiv, [x_index, y_index, z_index], settings.SUPER_CUBOID_SIZE))
-    return UtilClass.generateCuboidKey(self.project_name, channel_name, resolution, morton_index, t_index)
-
-
-  def createCuboidEntry(self, channel_name, resolution, x_index, y_index, z_index, t_index=0, task_id=0):
+  def createCuboidEntry(self, chunk_key, task_id):
     """Create the initial entry for tracking tiles uploaded for a cuboid.
 
     Call this before using markTileAsUploaded().
 
+    The chunk_key represents the encodes the collection, experiment, 
+    channel/layer, and x, y, z, t indices of a cuboid.  In addition, it 
+    encodes the number of tiles that comprises the cuboid in the case where 
+    there are less tiles than the normal size of a cuboid in the z direction.
+
     Args:
-        channel_name (string): Name of the channel the cuboid belongs to.
-        resolution (int): 0 for native resolution.
-        x_index (int): Starting x value of the cuboid.
-        y_index (int): Starting y value of the cuboid.
-        z_index (int): Starting z value of the cuboid.
-        t_index (optional[int]): Starting time index.  Defaults to 0.
-        task_id (optional[int]): Task or job id that this cuboid belongs to.  Defaults to 0.
-
-    Returns:
-        (string): Chunk key that holds the cuboid's entry in the table.
+        chunk_key (string): Key used to store the entry for the cuboid.
+        task_id (int): Task or job id that this cuboid belongs to.
     """
-    chunk_key = self.generatePrimaryKey(channel_name, resolution, x_index, y_index, z_index, t_index)
-
     try:
         response = self.table.put_item(
             Item = {
@@ -142,53 +131,60 @@ class BossTileIndexDB:
                 'tile_uploaded_map': {},
                 'task_id': task_id
             })
-        return chunk_key
     except botocore.exceptions.ClientError as e:
         print (e)
         raise
 
-  def markTileAsUploaded(self, tile_key, channel_name, resolution, x_index, y_index, z_index, t_index=0, task_id=0):
+  def markTileAsUploaded(self, chunk_key, tile_key):
     """Mark the tile as uploaded.
 
-    Marks the tile belonging to the cuboid specified by the channel name, resolution, and coordinates as uploaded.
+    Marks the tile belonging to the cuboid specified by the channel name, 
+    resolution, and coordinates as uploaded.  createCuboidEntry() must be 
+    called with the given chunk_key before tiles may be marked as uploaded.
 
     Args:
+        chunk_key (string): Key used to store the entry for the cuboid.
         tile_key (string): Key to retrieve tile from S3 bucket.
-        channel_name (string): Name of the channel the cuboid belongs to.
-        resolution (int): 0 for native resolution.
-        x_index (int): Starting x value of the cuboid.
-        y_index (int): Starting y value of the cuboid.
-        z_index (int): Starting z value of the cuboid.
-        t_index (optional[int]): Starting time index.  Defaults to 0.
-        task_id (optional[int]): Task or job id that this cuboid belongs to.  Defaults to 0.
 
     Returns:
-        (string, dict): Chunk key (cuboid's key) and the map of uploaded tiles.
+        (dict): Map of uploaded tiles.
     """
-    
-    chunk_key = self.generatePrimaryKey(channel_name, resolution, x_index, y_index, z_index, t_index)
     
     try:
       response = self.table.update_item(
           Key = {
             'chunk_key': chunk_key
           },
-          UpdateExpression = 'ADD tile_uploaded_map.{} :uploaded SET task_id = :task_id'.format(tile_key),
+          UpdateExpression = 'ADD tile_uploaded_map.{} :uploaded'.format(tile_key),
           ExpressionAttributeValues = {
-              ':uploaded': 1,
-              ':task_id': task_id
+              ':uploaded': 1
           },
           ReturnValues = 'ALL_NEW'
       )
-      return chunk_key, self.cuboidReady(response['Attributes']['tile_uploaded_map'])
+      return self.cuboidReady(chunk_key, response['Attributes']['tile_uploaded_map'])
     except botocore.exceptions.ClientError as e:
       print (e)
       raise
   
 
-  def cuboidReady(self, tile_uploaded_map):
-    """Verify if we have all tiles for a given cuboid"""
-    return len(tile_uploaded_map) == settings.SUPER_CUBOID_SIZE[2]
+  def cuboidReady(self, chunk_key, tile_uploaded_map):
+    """Verify if we have all tiles for a given cuboid.
+    
+    Args:
+        chunk_key (string):
+        tile_uploaded_map (dict):
+
+    Returns:
+        (bool)
+    """
+
+    # Last part of chunk key should be num_tiles.
+    (_, num_tiles_str) = chunk_key.rsplit('&', 1)
+    num_tiles = int(num_tiles_str)
+    if num_tiles < settings.SUPER_CUBOID_SIZE[2]:
+        return len(tile_uploaded_map) >= num_tiles
+
+    return len(tile_uploaded_map) >= settings.SUPER_CUBOID_SIZE[2]
   
 
   def getItem(self, chunk_key):

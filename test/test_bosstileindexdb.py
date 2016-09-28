@@ -26,10 +26,10 @@ nd_proj = BossIngestProj('testCol', 'kasthuri11', 'image', 0, job_id, 'test.boss
 import json
 import six
 import unittest
-try:
-    from unittest.mock import patch
-except:
-    from mock import patch
+#try:
+#    from unittest.mock import patch
+#except:
+#    from mock import patch
 import warnings
 
 
@@ -55,9 +55,9 @@ class Test_BossTileIndexDB(unittest.TestCase):
 
     def test_cuboidReady_false(self):
         fake_map = { 'o': 1 }
-        with patch.object(self.tileindex_db, 'generatePrimaryKey') as fake_generator:
-            fake_generator.return_value = '23'
-            assert(False == self.tileindex_db.cuboidReady(fake_map))
+        num_tiles = settings.SUPER_CUBOID_SIZE[2]
+        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        self.assertFalse(self.tileindex_db.cuboidReady(chunk_key, fake_map))
 
 
     def test_cuboidReady_true(self):
@@ -65,66 +65,89 @@ class Test_BossTileIndexDB(unittest.TestCase):
             's1': 1, 's2': 1, 's3': 1, 's4': 1, 's5': 1, 's6': 1, 's7': 1, 's8': 1,
             's9': 1, 's10': 1, 's11': 1, 's12': 1, 's13': 1, 's14': 1, 's15': 1, 's16': 1
         }
-        with patch.object(self.tileindex_db, 'generatePrimaryKey') as fake_generator:
-            fake_generator.return_value = '23'
-            assert(self.tileindex_db.cuboidReady(fake_map))
+        num_tiles = settings.SUPER_CUBOID_SIZE[2]
+        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        self.assertTrue(self.tileindex_db.cuboidReady(chunk_key, fake_map))
 
+
+    def test_cuboidReady_small_cuboid_true(self):
+        """Test case where the number of tiles is smaller than a cuboid in the z direction."""
+        fake_map = { 
+            's1': 1, 's2': 1, 's3': 1, 's4': 1, 's5': 1, 's6': 1, 's7': 1, 's8': 1
+        }
+
+        num_tiles = 8
+        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        self.assertTrue(self.tileindex_db.cuboidReady(chunk_key, fake_map))
+
+
+    def test_cuboidReady_small_cuboid_false(self):
+        """Test case where the number of tiles is smaller than a cuboid in the z direction."""
+        fake_map = { 
+            's1': 1, 's2': 1, 's3': 1, 's4': 1, 's5': 1, 's6': 1, 's7': 1
+        }
+
+        num_tiles = 8
+        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        self.assertFalse(self.tileindex_db.cuboidReady(chunk_key, fake_map))
 
     def test_createCuboidEntry(self):
-        with patch.object(self.tileindex_db, 'generatePrimaryKey') as fake_generator:
-            fake_generator.return_value = '23'
-            self.tileindex_db.createCuboidEntry('chanA', 0, 1, 1, 1)
-            preDelResp = self.tileindex_db.getItem('23')
-            self.assertEqual('23', preDelResp['chunk_key'])
-            self.assertEqual({}, preDelResp['tile_uploaded_map'])
+        num_tiles = settings.SUPER_CUBOID_SIZE[2]
+        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        task_id = 21
+        self.tileindex_db.createCuboidEntry(chunk_key, task_id)
+        preDelResp = self.tileindex_db.getItem(chunk_key)
+        self.assertEqual(chunk_key, preDelResp['chunk_key'])
+        self.assertEqual({}, preDelResp['tile_uploaded_map'])
 
 
     def test_markTileAsUploaded(self):
-        with patch.object(self.tileindex_db, 'generatePrimaryKey') as fake_generator:
-            fake_generator.return_value = '23'
-            # Cuboid must first have an entry before one of its tiles may be marked
-            # as uploaded.
-            self.tileindex_db.createCuboidEntry('chanA', 0, 1, 1, 1)
+        # Cuboid must first have an entry before one of its tiles may be marked
+        # as uploaded.
+        num_tiles = settings.SUPER_CUBOID_SIZE[2]
+        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        self.tileindex_db.createCuboidEntry(chunk_key, 231)
 
-            self.tileindex_db.markTileAsUploaded('fakekey', 'chanA', 0, 1, 1, 1)
+        self.tileindex_db.markTileAsUploaded(chunk_key, 'fakekey')
 
-            expected = { 'fakekey': 1 }
-            resp = self.tileindex_db.getItem('23')
-            self.assertEqual(expected, resp['tile_uploaded_map'])
+        expected = { 'fakekey': 1 }
+        resp = self.tileindex_db.getItem(chunk_key)
+        self.assertEqual(expected, resp['tile_uploaded_map'])
 
 
     def test_deleteItem(self):
-        with patch.object(self.tileindex_db, 'generatePrimaryKey') as fake_generator:
-            fake_generator.return_value = '23'
-            self.tileindex_db.createCuboidEntry('chanA', 0, 1, 1, 1)
-            preDelResp = self.tileindex_db.getItem('23')
-            self.assertEqual('23', preDelResp['chunk_key'])
-            self.tileindex_db.deleteItem('23')
-            postDelResp = self.tileindex_db.getItem('23')
-            self.assertIsNone(postDelResp)
+        num_tiles = settings.SUPER_CUBOID_SIZE[2]
+        chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
+        self.tileindex_db.createCuboidEntry(chunk_key, 231)
+        preDelResp = self.tileindex_db.getItem(chunk_key)
+        self.assertEqual(chunk_key, preDelResp['chunk_key'])
+        self.tileindex_db.deleteItem(chunk_key)
+        postDelResp = self.tileindex_db.getItem(chunk_key)
+        self.assertIsNone(postDelResp)
 
 
     def test_getTaskItems(self):
-        with patch.object(self.tileindex_db, 'generatePrimaryKey') as fake_generator:
-            fake_generator.return_value = '23'
-            self.tileindex_db.createCuboidEntry('chanA', 0, 1, 1, 1, task_id=3)
+        num_tiles = settings.SUPER_CUBOID_SIZE[2]
+        chunk_key1 = '<hash>&coll&exp&chan&0&0&z&t&{}'.format(num_tiles)
+        self.tileindex_db.createCuboidEntry(chunk_key1, task_id=3)
 
-        with patch.object(self.tileindex_db, 'generatePrimaryKey') as fake_generator:
-            fake_generator.return_value = '25'
-            self.tileindex_db.createCuboidEntry('chanA', 0, 1, 1, 16, task_id=3)
+        chunk_key2 = '<hash>&coll&exp&chan&1&0&z&t&{}'.format(num_tiles)
+        self.tileindex_db.createCuboidEntry(chunk_key2, task_id=3)
 
-        with patch.object(self.tileindex_db, 'generatePrimaryKey') as fake_generator:
-            fake_generator.return_value = '29'
-            self.tileindex_db.createCuboidEntry('chanA', 0, 1, 1, 32, task_id=3)
+        chunk_key3 = '<hash>&coll&exp&chan&2&0&z&t&{}'.format(num_tiles)
+        self.tileindex_db.createCuboidEntry(chunk_key3, task_id=3)
+
+        # Cuboid for a different upload job.
+        chunk_key4 = '<hash>&coll&exp2&chan&0&0&z&t&{}'.format(num_tiles)
+        self.tileindex_db.createCuboidEntry(chunk_key4, task_id=5)
 
         expected = [ 
-            {'task_id': 3, 'tile_uploaded_map': {}, 'chunk_key': '23'},
-            {'task_id': 3, 'tile_uploaded_map': {}, 'chunk_key': '25'},
-            {'task_id': 3, 'tile_uploaded_map': {}, 'chunk_key': '29'}
+            {'task_id': 3, 'tile_uploaded_map': {}, 'chunk_key': chunk_key1},
+            {'task_id': 3, 'tile_uploaded_map': {}, 'chunk_key': chunk_key2},
+            {'task_id': 3, 'tile_uploaded_map': {}, 'chunk_key': chunk_key3}
         ]
 
         actual = list(self.tileindex_db.getTaskItems(3))
 
         six.assertCountEqual(self, expected, actual)
 
-   

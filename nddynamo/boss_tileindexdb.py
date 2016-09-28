@@ -171,8 +171,8 @@ class BossTileIndexDB:
     """Verify if we have all tiles for a given cuboid.
     
     Args:
-        chunk_key (string):
-        tile_uploaded_map (dict):
+        chunk_key (string): Key used to store the entry for the cuboid.
+        tile_uploaded_map (dict): Dictionary with tile keys as the keys.  Presence of a tile indicates it's been uploaded.
 
     Returns:
         (bool)
@@ -187,8 +187,15 @@ class BossTileIndexDB:
     return len(tile_uploaded_map) >= settings.SUPER_CUBOID_SIZE[2]
   
 
-  def getItem(self, chunk_key):
-    """Get the item from the tile index table"""
+  def getCuboid(self, chunk_key):
+    """Get the cuboid entry from the DynamoDB table.
+
+    Args:
+        chunk_key (string): Key used to store the entry for the cuboid.
+
+    Returns:
+        (dict|None): Keys include 'tile_uploaded_map' and 'chunk_key'.
+    """
     
     try:
       response = self.table.get_item(
@@ -206,7 +213,14 @@ class BossTileIndexDB:
 
 
   def getTaskItems(self, task_id):
-    """Get all the items for a given task from the ingest table"""
+    """Get all the cuboid entries for a given task from the table.
+
+    Args:
+        task_id (int): Id of upload task/job.
+
+    Returns:
+        (generator): Dictionary with keys: 'chunk_key', 'task_id', 'tile_uploaded_map'.
+    """
     
     try:
       response = self.table.query(
@@ -223,8 +237,9 @@ class BossTileIndexDB:
       raise
 
 
-  def deleteItem(self, chunk_key):
-    """Delete item from database"""
+  def deleteCuboid(self, chunk_key):
+    """Delete cuboid from database.
+    """
    
     try:
       response = self.table.delete_item(

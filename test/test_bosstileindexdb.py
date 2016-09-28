@@ -96,7 +96,7 @@ class Test_BossTileIndexDB(unittest.TestCase):
         chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
         task_id = 21
         self.tileindex_db.createCuboidEntry(chunk_key, task_id)
-        preDelResp = self.tileindex_db.getItem(chunk_key)
+        preDelResp = self.tileindex_db.getCuboid(chunk_key)
         self.assertEqual(chunk_key, preDelResp['chunk_key'])
         self.assertEqual({}, preDelResp['tile_uploaded_map'])
 
@@ -111,7 +111,7 @@ class Test_BossTileIndexDB(unittest.TestCase):
         self.tileindex_db.markTileAsUploaded(chunk_key, 'fakekey')
 
         expected = { 'fakekey': 1 }
-        resp = self.tileindex_db.getItem(chunk_key)
+        resp = self.tileindex_db.getCuboid(chunk_key)
         self.assertEqual(expected, resp['tile_uploaded_map'])
 
 
@@ -119,10 +119,10 @@ class Test_BossTileIndexDB(unittest.TestCase):
         num_tiles = settings.SUPER_CUBOID_SIZE[2]
         chunk_key = '<hash>&coll&exp&chan&x&y&z&t&{}'.format(num_tiles)
         self.tileindex_db.createCuboidEntry(chunk_key, 231)
-        preDelResp = self.tileindex_db.getItem(chunk_key)
+        preDelResp = self.tileindex_db.getCuboid(chunk_key)
         self.assertEqual(chunk_key, preDelResp['chunk_key'])
-        self.tileindex_db.deleteItem(chunk_key)
-        postDelResp = self.tileindex_db.getItem(chunk_key)
+        self.tileindex_db.deleteCuboid(chunk_key)
+        postDelResp = self.tileindex_db.getCuboid(chunk_key)
         self.assertIsNone(postDelResp)
 
 

@@ -18,12 +18,21 @@ try:
     from ConfigParser import Error
 except:
     from configparser import Error
+import os
 
 class BossSettings(Settings):
+    """Global settings for the Boss version of ndingest.
+
+    Attributes:
+        _domain (string): Domain name that ndingest is running in.  Periods will be replaced by dashes for AWS naming compatibility (for queues, etc).  Lazily populated.
+        _test_mode (bool): True if the environment variable NDINGEST_TEST set.
+    """
     
     def __init__(self, file_name, fp=None):
         super(BossSettings, self).__init__(file_name, fp)
         self._domain = None
+        self._test_mode = ('NDINGEST_TEST' in os.environ)
+            
 
     def setPath(self):
         """Add path to other libraries"""
@@ -138,3 +147,12 @@ class BossSettings(Settings):
             self._domain = self.parser.get('boss', 'domain').replace('.', '-')
 
         return self._domain
+
+    @property
+    def TEST_MODE(self):
+        """If true, then ndingest tests are running.  This will affect the names of queues.
+
+        Returns:
+            (bool)
+        """
+        return self._test_mode

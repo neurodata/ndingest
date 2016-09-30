@@ -16,12 +16,12 @@ from __future__ import absolute_import
 from __future__ import print_function
 import sys
 sys.path.append('..')
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
-from ndqueue.serializer import Serializer
+from ..ndqueue.serializer import Serializer
 serializer = Serializer.load()
-from ndsns.ndsns import NDSns
-from ndingestproj.ingestproj import IngestProj
+from ..ndsns.ndsns import NDSns
+from ..ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 nd_proj = ProjClass('kasthuri11', 'image', '0')
 

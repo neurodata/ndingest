@@ -14,12 +14,12 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
 import json
 import boto3
 import botocore
-from ndqueue.ndqueue import NDQueue
+from ..ndqueue.ndqueue import NDQueue
 
 class CleanupQueue(NDQueue):
 
@@ -36,7 +36,10 @@ class CleanupQueue(NDQueue):
     
   @staticmethod 
   def generateBossQueueName(nd_proj):
-    return '{}-delete-{}'.format(nd_proj.domain, nd_proj.job_id)
+    if not settings.TEST_MODE:
+        return '{}-delete-{}'.format(settings.DOMAIN, nd_proj.job_id)
+
+    return 'test-{}-delete-{}'.format(settings.DOMAIN, nd_proj.job_id)
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):

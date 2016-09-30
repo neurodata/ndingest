@@ -15,7 +15,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 import json
-from ndqueue.serializer import Serializer
+from ..ndqueue.serializer import Serializer
 
 class NDSerializer(Serializer):
     

@@ -18,14 +18,25 @@ try:
     from ConfigParser import Error
 except:
     from configparser import Error
+import os
 
 class BossSettings(Settings):
+    """Global settings for the Boss version of ndingest.
+
+    Attributes:
+        _domain (string): Domain name that ndingest is running in.  Periods will be replaced by dashes for AWS naming compatibility (for queues, etc).  Lazily populated.
+        _test_mode (bool): True if the environment variable NDINGEST_TEST set.
+    """
     
-    def __init(self, file_name, fp=None):
+    def __init__(self, file_name, fp=None):
         super(BossSettings, self).__init__(file_name, fp)
+        self._domain = None
+        self._test_mode = ('NDINGEST_TEST' in os.environ)
+            
 
     def setPath(self):
         """Add path to other libraries"""
+        return NotImplemented
 
     @property
     def PROJECT_NAME(self):
@@ -106,3 +117,42 @@ class BossSettings(Settings):
         Must return '/' or a string beginning and ending with '/'.
         """
         return '/ingest/'
+
+    @property
+    def DYNAMO_TEST_ENDPOINT(self):
+        """URL of local DynamoDB instance for testing."""
+        try:
+            return self.parser.get('testing', 'dynamo_endpoint')
+        except Error:
+            return None
+
+    @property
+    def DYNAMO_ENDPOINT(self):
+        """Alias to match what Neurodata uses in case of developer confusion."""
+        return self.DYNAMO_TEST_ENDPOINT
+
+    @property
+    def DOMAIN(self):
+        """Domain ndingest library is running in.
+
+        For example: 'api.boss.io'
+
+        In the above example, 'api-boss-io' will be returned for 
+        compatibility with AWS naming restrictions.
+
+        Returns:
+            (string): Periods will be replaced with dashes for compatibility with AWS naming restrictions.
+        """
+        if self._domain is None:
+            self._domain = self.parser.get('boss', 'domain').replace('.', '-')
+
+        return self._domain
+
+    @property
+    def TEST_MODE(self):
+        """If true, then ndingest tests are running.  This will affect the names of queues.
+
+        Returns:
+            (bool)
+        """
+        return self._test_mode

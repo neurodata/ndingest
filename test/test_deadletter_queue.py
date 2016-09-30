@@ -17,23 +17,27 @@ from __future__ import absolute_import
 from __future__ import print_function
 import sys
 sys.path.append('..')
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
 import json
-from ndqueue.ndqueue import NDQueue
-from ndqueue.uploadqueue import UploadQueue
-from ndqueue.serializer import Serializer
+from ..ndqueue.ndqueue import NDQueue
+from ..ndqueue.uploadqueue import UploadQueue
+from ..ndqueue.serializer import Serializer
 serializer = Serializer.load()
-from ndingestproj.ingestproj import IngestProj
+from ..ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 from random import randint
 import unittest
 import boto3
 import botocore
 import time
+import warnings
 
-class Test_test_deadletter_queue(unittest.TestCase):
+class TestDeadletterQueue(unittest.TestCase):
     def setUp(self):
+        # Suppress ResourceWarning messages about unclosed connections.
+        warnings.simplefilter('ignore')
+
         if 'SQS_ENDPOINT' in dir(settings):
           self.endpoint_url = settings.SQS_ENDPOINT
         else:
@@ -57,7 +61,7 @@ class Test_test_deadletter_queue(unittest.TestCase):
 
         if settings.PROJECT_NAME == 'Boss':
             job_id = num
-            nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, job_id, 'test.boss.io')
+            nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, job_id)
         else:
             channel = 'image{}'.format(num)
             nd_proj = ProjClass('kasthuri11', channel, '0')

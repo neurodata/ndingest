@@ -15,12 +15,12 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
 import json
 import boto3
 import botocore
-from ndqueue.ndqueue import NDQueue
+from ..ndqueue.ndqueue import NDQueue
 
 class UploadQueue(NDQueue):
 
@@ -37,7 +37,10 @@ class UploadQueue(NDQueue):
     
   @staticmethod 
   def generateBossQueueName(nd_proj):
-    return '{}-upload-{}'.format(nd_proj.domain, nd_proj.job_id)
+    if not settings.TEST_MODE:
+        return '{}-upload-{}'.format(settings.DOMAIN, nd_proj.job_id)
+
+    return 'test-{}-upload-{}'.format(settings.DOMAIN, nd_proj.job_id)
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):

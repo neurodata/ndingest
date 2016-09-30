@@ -17,7 +17,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from abc import ABCMeta, abstractmethod
 import six
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
 
 @six.add_metaclass(ABCMeta)

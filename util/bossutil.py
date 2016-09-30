@@ -15,7 +15,7 @@
 
 from __future__ import absolute_import
 import hashlib
-from util.util import Util
+from .util import Util
 
 class BossUtil(Util):
 

@@ -17,11 +17,11 @@ from __future__ import absolute_import
 from __future__ import print_function
 import sys
 sys.path.append('..')
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
 from io import BytesIO
-from ndbucket.tilebucket import TileBucket
-from ndingestproj.ingestproj import IngestProj
+from ..ndbucket.tilebucket import TileBucket
+from ..ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 if settings.PROJECT_NAME == 'Boss':
     nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 124)

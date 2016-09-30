@@ -17,14 +17,14 @@ from __future__ import absolute_import
 from __future__ import print_function
 import sys
 sys.path.append('..')
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
 import json
-from ndqueue.ndqueue import NDQueue
-from ndqueue.uploadqueue import UploadQueue
-from ndqueue.serializer import Serializer
+from ..ndqueue.ndqueue import NDQueue
+from ..ndqueue.uploadqueue import UploadQueue
+from ..ndqueue.serializer import Serializer
 serializer = Serializer.load()
-from ndingestproj.ingestproj import IngestProj
+from ..ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 from random import randint
 import unittest

@@ -15,7 +15,7 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
 from abc import abstractmethod
 import boto3

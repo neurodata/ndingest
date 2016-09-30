@@ -16,11 +16,11 @@ from __future__ import print_function
 from __future__ import absolute_import
 import sys
 sys.path.append('..')
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
 import pytest
-from ndqueue.ingestqueue import IngestQueue
-from ndingestproj.ingestproj import IngestProj
+from ..ndqueue.ingestqueue import IngestQueue
+from ..ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 if settings.PROJECT_NAME == 'Boss':
     nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 12)

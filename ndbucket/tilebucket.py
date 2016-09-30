@@ -15,13 +15,13 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
 import boto3
 import botocore
 import hashlib
 import json
-from util.util import Util
+from ..util.util import Util
 UtilClass = Util.load()
 
 class TileBucket:

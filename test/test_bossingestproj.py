@@ -14,7 +14,7 @@
 
 import unittest
 import six
-from ndingestproj.bossingestproj import BossIngestProj
+from ..ndingestproj.bossingestproj import BossIngestProj
 
 class TestBossIngestProj(unittest.TestCase):
     def test_project_name(self):

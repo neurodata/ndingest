@@ -17,9 +17,9 @@ from __future__ import absolute_import
 from __future__ import print_function
 import boto3
 import botocore
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
-from ndqueue.ndqueue import NDQueue
+from ..ndqueue.ndqueue import NDQueue
 
 class IngestQueue(NDQueue):
 

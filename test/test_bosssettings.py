@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import unittest
-from settings.bosssettings import BossSettings
+from ..settings.bosssettings import BossSettings
 from six import StringIO
 
 class TestBossSettings(unittest.TestCase):

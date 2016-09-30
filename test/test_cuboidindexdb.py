@@ -16,10 +16,10 @@ from __future__ import print_function
 from __future__ import absolute_import
 import sys
 sys.path.append('..')
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
-from nddynamo.cuboidindexdb import CuboidIndexDB
-from ndingestproj.ingestproj import IngestProj
+from ..nddynamo.cuboidindexdb import CuboidIndexDB
+from ..ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 nd_proj = ProjClass('kasthuri11', 'image', '0')
 nd_proj2 = ProjClass('kasthuri11', 'image2', '0')

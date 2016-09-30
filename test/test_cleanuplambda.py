@@ -14,21 +14,21 @@
 
 import sys
 sys.path.append('..')
-from settings.settings import Settings
+from ..settings.settings import Settings
 settings = Settings.load()
 import cStringIO
 import pytest
 import emulambda
-from ndqueue.uploadqueue import UploadQueue
-from ndqueue.ingestqueue import IngestQueue
-from ndqueue.cleanupqueue import CleanupQueue
-from nddynamo.tileindexdb import TileIndexDB
-from nddynamo.cuboidindexdb import CuboidIndexDB
-from ndingestproj.ndingestproj import NDIngestProj
-from ndbucket.tilebucket import TileBucket
-from ndqueue.serializer import Serializer
+from ..ndqueue.uploadqueue import UploadQueue
+from ..ndqueue.ingestqueue import IngestQueue
+from ..ndqueue.cleanupqueue import CleanupQueue
+from ..nddynamo.tileindexdb import TileIndexDB
+from ..nddynamo.cuboidindexdb import CuboidIndexDB
+from ..ndingestproj.ndingestproj import NDIngestProj
+from ..ndbucket.tilebucket import TileBucket
+from ..ndqueue.serializer import Serializer
 serializer = Serializer.load()
-from ndingestproj.ingestproj import IngestProj
+from ..ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 nd_proj = ProjClass('kasthuri11', 'image', '0')
 

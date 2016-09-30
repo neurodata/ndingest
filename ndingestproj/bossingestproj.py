@@ -15,7 +15,7 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-from ndingestproj.ingestproj import IngestProj
+from .ingestproj import IngestProj
 
 class BossIngestProj(IngestProj):
 

@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,3 +53,7 @@ class Test_Cleanup_Queue():
       assert(supercuboid_key == message_body)
       response = self.cleanup_queue.deleteMessage(message_id, receipt_handle)
       assert('Successful' in response)
+
+
+if __name__ == '__main__':
+    pytest.main()

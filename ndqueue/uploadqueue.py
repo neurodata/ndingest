@@ -21,10 +21,13 @@ import json
 import boto3
 import botocore
 from ..ndqueue.ndqueue import NDQueue
+import random
 
 class UploadQueue(NDQueue):
 
-  
+  # Static variable to hold random number added to test queue names.
+  test_queue_id = -1
+
   def __init__(self, nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resources for the queue"""
     
@@ -40,7 +43,10 @@ class UploadQueue(NDQueue):
     if not settings.TEST_MODE:
         return '{}-upload-{}'.format(settings.DOMAIN, nd_proj.job_id)
 
-    return 'test-{}-upload-{}'.format(settings.DOMAIN, nd_proj.job_id)
+    if UploadQueue.test_queue_id == -1:
+        UploadQueue.test_queue_id = random.randint(0, 999)
+
+    return 'test{}-{}-upload-{}'.format(UploadQueue.test_queue_id, settings.DOMAIN, nd_proj.job_id)
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):

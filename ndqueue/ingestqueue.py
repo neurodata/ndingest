@@ -20,8 +20,12 @@ import botocore
 from ..settings.settings import Settings
 settings = Settings.load()
 from ..ndqueue.ndqueue import NDQueue
+import random
 
 class IngestQueue(NDQueue):
+
+  # Static variable to hold random number added to test queue names.
+  test_queue_id = -1
 
   def __init__(self, nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resources for the queue"""
@@ -38,7 +42,10 @@ class IngestQueue(NDQueue):
     if not settings.TEST_MODE:
         return '{}-ingest-{}'.format(settings.DOMAIN, nd_proj.job_id)
 
-    return 'test-{}-ingest-{}'.format(settings.DOMAIN, nd_proj.job_id)
+    if IngestQueue.test_queue_id == -1:
+        IngestQueue.test_queue_id = random.randint(0, 999)
+
+    return 'test{}-{}-ingest-{}'.format(IngestQueue.test_queue_id, settings.DOMAIN, nd_proj.job_id)
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):

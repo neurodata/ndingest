@@ -56,6 +56,17 @@ class NDQueue(object):
         (string)
       """
       return self.queue.url
+
+
+  @property
+  def arn(self):
+      """Gets the ARN of the queue.
+
+      Returns:
+        (string)
+      """
+      return self.queue.attributes['QueueArn']
+
   
   @staticmethod
   @abstractmethod

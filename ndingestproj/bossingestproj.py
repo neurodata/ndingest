@@ -15,13 +15,12 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-from .ingestproj import IngestProj
+from ndingest.ndingestproj.ingestproj import IngestProj
+from ndingest.util.bossutil import BossUtil
+
 
 class BossIngestProj(IngestProj):
-
-    def __init__(
-        self, collection_name, experiment_name, channel_name, resolution, 
-        job_id):
+    def __init__(self, collection_name, experiment_name, channel_name, resolution, job_id):
         """Constructor.
 
         Collection name and experiment name are joined with an & to form the
@@ -33,6 +32,9 @@ class BossIngestProj(IngestProj):
             channel_name (string): Channel name.
             resolution (string): '0' indicates native resolution.
             job_id (string): Id for this ingest job.
+
+        Returns
+            (BossIngestProj): An instance
         """
         self._project_name = collection_name + '&' + experiment_name
         self._channel_name = channel_name
@@ -41,14 +43,28 @@ class BossIngestProj(IngestProj):
 
     @classmethod
     def fromTileKey(cls, tile_key):
-        """Create a ndproj from supercuboid_key"""
-        return NotImplemented
+        """Create a BossIngestProj instance from the chunk key"""
+        parts = BossUtil.decode_tile_key(tile_key)
+        cls._project_name = parts["collection"] + '&' + parts["experiment"]
+        cls._channel_name = parts["channel"]
+        cls._resolution = parts["resolution"]
 
     @classmethod
     def fromSupercuboidKey(cls, supercuboid_key):
-        """Create a ndproj from supercuboid_key"""
-        return NotImplemented
-  
+        """Create a BossIngestProject instance from a supercuboid_key aka the chunk key
+
+        Args:
+            supercuboid_key(str): The chunk key
+
+        Returns:
+            (dict): containing the parsed parts of the key
+        """
+        parts = BossUtil.decode_chunk_key(supercuboid_key)
+        cls._project_name = parts["collection"] + '&' + parts["experiment"]
+        cls._channel_name = parts["channel"]
+        cls._resolution = parts["resolution"]
+
+
     @property
     def project_name(self):
         """For the Boss, this is the collection name and the experiment name, combined.
@@ -74,6 +90,10 @@ class BossIngestProj(IngestProj):
     @resolution.setter
     def resolution(self, value):
         self._resolution = value
+
+    @job_id.setter
+    def job_id(self, value):
+        self.job_id = value
 
     @property
     def job_id(self):

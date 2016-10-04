@@ -16,277 +16,296 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from ndingest.settings.settings import Settings
-settings = Settings.load()
 import boto3
 import botocore
 import hashlib
 import json
 
+settings = Settings.load()
+
+
 class TileBucket:
 
-  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
-    """Create resource for the upload queue"""
-    
-    self.region_name = region_name
-    self.endpoint_url = endpoint_url
-    bucket_name = TileBucket.getBucketName()
-    self.project_name = project_name
-    self.s3 = boto3.resource(
-        's3', region_name=region_name, endpoint_url=endpoint_url, 
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    try:
-      self.bucket = self.s3.Bucket(bucket_name)
-    except botocore.exceptions.ClientError as e:
-      print (e)
-      raise
+    def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
+        """Create resource for the upload queue"""
 
-  @staticmethod
-  def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
-    """Create the upload bucket"""
-    
-    bucket_name = TileBucket.getBucketName()
-    s3 = boto3.resource(
-        's3', region_name=region_name, endpoint_url=endpoint_url,
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    bucket = s3.Bucket(bucket_name)
-    try:
-      # creating the bucket
-      response = bucket.create(
-          ACL = 'private'
-      )
-    except Exception as e:
-      print (e)
-      raise
+        self.region_name = region_name
+        self.endpoint_url = endpoint_url
+        bucket_name = TileBucket.getBucketName()
+        self.project_name = project_name
+        self.s3 = boto3.resource(
+            's3', region_name=region_name, endpoint_url=endpoint_url,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+        try:
+            self.bucket = self.s3.Bucket(bucket_name)
+        except botocore.exceptions.ClientError as e:
+            print (e)
+            raise
 
-  @staticmethod
-  def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
-    """Delete the upload bucket"""
-    
-    bucket_name = TileBucket.getBucketName()
-    s3 = boto3.resource(
-        's3', region_name=region_name, endpoint_url=endpoint_url,
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    bucket = s3.Bucket(bucket_name)
-    try:
-      # deleting the bucket
-      response = bucket.delete()
-    except Exception as e:
-      print (e)
-      raise
-  
-  @staticmethod
-  def getBucketName():
-    """Generate the bucket name"""
-    return settings.S3_TILE_BUCKET
+    @staticmethod
+    def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
+        """Create the upload bucket"""
 
-  def encodeObjectKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
-    """Generate the key for the file in scratch space"""
-    hashm = hashlib.md5()
-    hashm.update('{}&{}&{}&{}&{}&{}&{}'.format(self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index).encode('utf-8'))
-    return '{}&{}&{}&{}&{}&{}&{}&{}'.format(hashm.hexdigest(), self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index)
+        bucket_name = TileBucket.getBucketName()
+        s3 = boto3.resource(
+            's3', region_name=region_name, endpoint_url=endpoint_url,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+        bucket = s3.Bucket(bucket_name)
+        try:
+            # creating the bucket
+            response = bucket.create(
+                ACL = 'private'
+            )
+        except Exception as e:
+            print (e)
+            raise
 
-  @staticmethod
-  def decodeObjectKey(object_key):
-    """Decode an object key"""
-    return object_key.split('&')
+    @staticmethod
+    def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
+        """Delete the upload bucket"""
 
-  def createPolicy(self, policy, name, folder=None, description=''):
-    """Create an IAM policy for the bucket.
+        bucket_name = TileBucket.getBucketName()
+        s3 = boto3.resource(
+            's3', region_name=region_name, endpoint_url=endpoint_url,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+        bucket = s3.Bucket(bucket_name)
+        try:
+            # deleting the bucket
+            response = bucket.delete()
+        except Exception as e:
+            print (e)
+            raise
 
-    The policy parameter defines actions allowed on the bucket.  This policy 
-    must be assigned to an AWS user to give access to the bucket.  Simple 
-    policies can be represented with a single IAM statement.  The bucket's ARN
-    will be added to each statment (as the Resource the statement applies to).
+    @staticmethod
+    def getBucketName():
+        """Generate the bucket name"""
+        return settings.S3_TILE_BUCKET
 
-    If folder is provided, each IAM statement is targeted at that folder.  
-    For example, if folder='/foo/bar' and the bucket is named my_tile_bucket,
-    this is added to each statement dictionary:
-        'Resource':'arn:aws:s3:::my_tile_bucket/foo/bar/*'
+    def encodeObjectKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
+        """Generate the key for the file in scratch space"""
+        hashm = hashlib.md5()
+        hashm.update('{}&{}&{}&{}&{}&{}&{}'.format(self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index).encode('utf-8'))
+        return '{}&{}&{}&{}&{}&{}&{}&{}'.format(hashm.hexdigest(), self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index)
 
+    @staticmethod
+    def decodeObjectKey(object_key):
+        """Decode an object key"""
+        return object_key.split('&')
 
-    Sample IAM statement dictionary: 
-        { 'Sid': 'Receive Access Statement',
-          'Effect': 'Allow',
-          'Action': ['s3:PutObject'] }
+    def createPolicy(self, policy, name, folder=None, description=''):
+        """Create an IAM policy for the bucket.
 
-    Args:
-        policy (list(dict)): List of IAM statements. 
-        name (string): Name for this policy.
-        folder (optional[string]): Optionally target each statement to a specific folder.
-        description (optional[string]): Description of policy.
+        The policy parameter defines actions allowed on the bucket.  This policy
+        must be assigned to an AWS user to give access to the bucket.  Simple
+        policies can be represented with a single IAM statement.  The bucket's ARN
+        will be added to each statment (as the Resource the statement applies to).
 
-    Returns:
-        (iam.Policy)
-    """
-    iam = boto3.resource(
-        'iam',
-        region_name=self.region_name, endpoint_url=self.endpoint_url, 
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-
-    full_policy = { 'Version': '2012-10-17', 'Statement': policy }
-
-    arn = TileBucket.buildArn(self.bucket.name, folder)
-
-    # Specify this bucket as the resource for each policy statement.
-    for statement in policy:
-        statement['Resource'] = arn
-
-    full_policy['Id'] = name
-
-    doc = json.dumps(full_policy)
-    return iam.create_policy(
-        PolicyName=full_policy['Id'],
-        PolicyDocument=json.dumps(full_policy),
-        Path=settings.IAM_POLICY_PATH,
-        Description=description)
+        If folder is provided, each IAM statement is targeted at that folder.
+        For example, if folder='/foo/bar' and the bucket is named my_tile_bucket,
+        this is added to each statement dictionary:
+            'Resource':'arn:aws:s3:::my_tile_bucket/foo/bar/*'
 
 
-  @staticmethod
-  def buildArn(bucket_name, folder=None):
-    """Build an S3 ARN for use in an IAM policy.
+        Sample IAM statement dictionary:
+            { 'Sid': 'Receive Access Statement',
+              'Effect': 'Allow',
+              'Action': ['s3:PutObject'] }
 
-    Example: arn:aws:s3:::my_bucket/some/folder/*
+        Args:
+            policy (list(dict)): List of IAM statements.
+            name (string): Name for this policy.
+            folder (optional[string]): Optionally target each statement to a specific folder.
+            description (optional[string]): Description of policy.
 
-    Args:
-      bucket_name (string): Name of bucket.
-      folder (optional[string]): Optional folder to apply IAM policy to.
+        Returns:
+            (iam.Policy)
+        """
+        iam = boto3.resource(
+            'iam',
+            region_name=self.region_name, endpoint_url=self.endpoint_url,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
 
-    Returns:
-      (string)
-    """
-    arn = 'arn:aws:s3:::' + bucket_name
-    if folder is not None:
-        if folder[0] != '/':
-            arn += '/'
-        arn += folder
-        if not folder.endswith('/'):
-            arn += '/'
-        arn += '*'
-    else:
-        arn += '/*'
+        full_policy = { 'Version': '2012-10-17', 'Statement': policy }
 
-    return arn
+        arn = TileBucket.buildArn(self.bucket.name, folder)
 
+        # Specify this bucket as the resource for each policy statement.
+        for statement in policy:
+            statement['Resource'] = arn
 
-  def deletePolicy(self, name):
-    """Deletes the queue's policy.
+        full_policy['Id'] = name
 
-    Args:
-        name (string): Policy name.
-    """
-
-    arn = self.getPolicyArn(name)
-    if arn is None:
-        raise RuntimeError('Policy {} could not be found.'.format(name))
-
-    iam = boto3.resource(
-        'iam',
-        region_name=self.region_name, endpoint_url=self.endpoint_url, 
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-
-    policy = iam.Policy(arn)
-    policy.delete()
+        doc = json.dumps(full_policy)
+        return iam.create_policy(
+            PolicyName=full_policy['Id'],
+            PolicyDocument=json.dumps(full_policy),
+            Path=settings.IAM_POLICY_PATH,
+            Description=description)
 
 
-  def getPolicyArn(self, name):
-    """Find the named policy and return its Arn.
+    @staticmethod
+    def buildArn(bucket_name, folder=None):
+        """Build an S3 ARN for use in an IAM policy.
 
-    Only user created policies with a path prefix as defined in settings.ini are retrieved.  
-    Global AWS policies are ignored.
+        Example: arn:aws:s3:::my_bucket/some/folder/*
 
-    Args:
-        name (string): Name of policy.
+        Args:
+          bucket_name (string): Name of bucket.
+          folder (optional[string]): Optional folder to apply IAM policy to.
 
-    Returns:
-        (string|None): None if policy cannot be found.
-    """
-    iam = boto3.resource(
-        'iam',
-        region_name=self.region_name, endpoint_url=self.endpoint_url, 
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+        Returns:
+          (string)
+        """
+        arn = 'arn:aws:s3:::' + bucket_name
+        if folder is not None:
+            if folder[0] != '/':
+                arn += '/'
+            arn += folder
+            if not folder.endswith('/'):
+                arn += '/'
+            arn += '*'
+        else:
+            arn += '/*'
 
-    for policy in iam.policies.all():
-        if policy.policy_name == name:
-            return policy.arn
-
-    return None
+        return arn
 
 
-  def putObject(self, tile_handle, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle, time=0):
-    """Put object in the upload bucket"""
-    
-    # generate the key
-    tile_key = self.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile, time)
+    def deletePolicy(self, name):
+        """Deletes the queue's policy.
 
-    try:
-      response = self.bucket.put_object(
-          ACL = 'private',
-          Body = tile_handle,
-          Key = tile_key,
-          Metadata = {
-            'message_id' : message_id,
-            'receipt_handle' : receipt_handle
-          },
-          StorageClass = 'STANDARD'
-      )
-      return response
-    except Exception as e:
-      print (e)
-      raise
+        Args:
+            name (string): Policy name.
+        """
 
-  def getObjectByKey(self, tile_key):
-    """Get object by tile key"""
-    try:
-      s3_obj = self.s3.Object(self.bucket.name, tile_key)
-      response = s3_obj.get()
-      return response['Body'].read(), response['Metadata']['message_id'], response['Metadata']['receipt_handle']
-    except Exception as e:
-      if e.response['Error']['Code'] == 'NoSuchKey':
+        arn = self.getPolicyArn(name)
+        if arn is None:
+            raise RuntimeError('Policy {} could not be found.'.format(name))
+
+        iam = boto3.resource(
+            'iam',
+            region_name=self.region_name, endpoint_url=self.endpoint_url,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+
+        policy = iam.Policy(arn)
+        policy.delete()
+
+
+    def getPolicyArn(self, name):
+        """Find the named policy and return its Arn.
+
+        Only user created policies with a path prefix as defined in settings.ini are retrieved.
+        Global AWS policies are ignored.
+
+        Args:
+            name (string): Name of policy.
+
+        Returns:
+            (string|None): None if policy cannot be found.
+        """
+        iam = boto3.resource(
+            'iam',
+            region_name=self.region_name, endpoint_url=self.endpoint_url,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+
+        for policy in iam.policies.all():
+            if policy.policy_name == name:
+                return policy.arn
+
         return None
-      else:
-        print (e)
-        raise
 
-  def getObject(self, channel_name, resolution, x_tile, y_tile, z_tile, time_index=0):
-    """Get object from the upload bucket"""
-    tile_key = self.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile, time_index)
-    return self.getObjectByKey(tile_key)
 
-  def getMetadata(self, object_key):
-    """Get the object key from the upload bucket"""
+    def putObject(self, tile_handle, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle, time=0):
+        """Put object in the upload bucket"""
 
-    message_body, message_id, receipt_handle = self.getObjectByKey(object_key)
-    return message_id, receipt_handle
+        # generate the key
+        tile_key = self.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile, time)
 
-  def deleteObject(self, object_key):
-    """Delete object from the upload bucket"""
-    
-    try:
-      s3_obj = self.s3.Object(self.bucket.name, object_key)
-      response = s3_obj.delete()
-      return response
-      # response = self.bucket.delete_objects(
-          # Delete = {
+        try:
+            response = self.bucket.put_object(
+                ACL = 'private',
+                Body = tile_handle,
+                Key = tile_key,
+                Metadata = {
+                    'message_id' : message_id,
+                    'receipt_handle' : receipt_handle
+                },
+                StorageClass = 'STANDARD'
+            )
+            return response
+        except Exception as e:
+            print (e)
+            raise
+
+    def getObjectByKey(self, tile_key):
+        """Get object by tile key while loading metadata
+
+        NOTE: It is assumed that the client writes "message_id" and "receipt_handle" to the s3 object on the PUT so the
+        message can be deleted later in the workflow.
+
+        Optionally a json encoded string of additional metadata can be provided in the key "metadata"
+
+        Args:
+            tile_key(str): The tile key
+
+        Returns:
+            (bytes, str, str, dict): the object body, upload task message id, upload task message receipt_handle, client supplied metadata dictionary
+
+        """
+        try:
+            s3_obj = self.s3.Object(self.bucket.name, tile_key)
+            response = s3_obj.get()
+            if "metadata" in response["Metadata"]:
+                metadata = json.loads(response['Metadata']['metadata'])
+            else:
+                metadata = {}
+            return response['Body'].read(), response['Metadata']['message_id'], response['Metadata']['receipt_handle'], metadata
+        except Exception as e:
+            if e.response['Error']['Code'] == 'NoSuchKey':
+                return None
+            else:
+                print (e)
+                raise
+
+    def getObject(self, channel_name, resolution, x_tile, y_tile, z_tile, time_index=0):
+        """Get object from the upload bucket"""
+        tile_key = self.encodeObjectKey(channel_name, resolution, x_tile, y_tile, z_tile, time_index)
+        return self.getObjectByKey(tile_key)
+
+    def getMetadata(self, object_key):
+        """Get the object key from the upload bucket"""
+
+        message_body, message_id, receipt_handle = self.getObjectByKey(object_key)
+        return message_id, receipt_handle
+
+    def deleteObject(self, object_key):
+        """Delete object from the upload bucket"""
+
+        try:
+            s3_obj = self.s3.Object(self.bucket.name, object_key)
+            response = s3_obj.delete()
+            return response
+            # response = self.bucket.delete_objects(
+            # Delete = {
             # 'Objects' : [
-              # {
-                # 'Key' : self.generateKey(file_name)
-              # },
+            # {
+            # 'Key' : self.generateKey(file_name)
+            # },
             # ],
             # 'Quiet' : False
-          # }
-      # )
-    except Exception as e:
-      print (e)
-      raise
+            # }
+            # )
+        except Exception as e:
+            print (e)
+            raise
 
-  def getAllObjects(self):
-    """Get a collection of ObjectSummary for all objects in the bucket."""
+    def getAllObjects(self):
+        """Get a collection of ObjectSummary for all objects in the bucket."""
 
-    try:
-      return self.bucket.objects.all()
-    except Exception as e:
-      print (e)
-      raise
+        try:
+            return self.bucket.objects.all()
+        except Exception as e:
+            print (e)
+            raise

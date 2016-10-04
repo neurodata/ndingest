@@ -15,12 +15,12 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import hashlib
 import boto3
 import botocore
-from ..util.util import Util
+from ndingest.util.util import Util
 UtilClass = Util.load()
 
 

@@ -16,10 +16,10 @@ from __future__ import print_function
 from __future__ import absolute_import
 import sys
 sys.path.append('..')
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
-from ..nddynamo.tileindexdb import TileIndexDB
-from ..ndingestproj.ingestproj import IngestProj
+from ndingest.nddynamo.tileindexdb import TileIndexDB
+from ndingest.ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 nd_proj = ProjClass('kasthuri11', 'image', '0')
 

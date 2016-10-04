@@ -17,13 +17,13 @@ from __future__ import absolute_import
 from __future__ import print_function
 import sys
 sys.path.append('..')
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import json
-from ..ndqueue.uploadqueue import UploadQueue
-from ..ndqueue.serializer import Serializer
+from ndingest.ndqueue.uploadqueue import UploadQueue
+from ndingest.ndqueue.serializer import Serializer
 serializer = Serializer.load()
-from ..ndingestproj.ingestproj import IngestProj
+from ndingest.ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 if settings.PROJECT_NAME == 'Boss':
     nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 123)

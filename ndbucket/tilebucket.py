@@ -21,8 +21,6 @@ import boto3
 import botocore
 import hashlib
 import json
-#from ndingest.util.util import Util
-#UtilClass = Util.load()
 
 class TileBucket:
 

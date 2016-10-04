@@ -17,7 +17,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from abc import ABCMeta, abstractmethod
 import six
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 
 @six.add_metaclass(ABCMeta)
@@ -27,10 +27,10 @@ class Util(object):
   def load():
     """Factory method to load the correct util file"""
     if settings.PROJECT_NAME == 'Neurodata':
-      from .ndutil import NDUtil
+      from ndingest.util.ndutil import NDUtil
       return NDUtil
     elif settings.PROJECT_NAME == 'Boss':
-      from .bossutil import BossUtil
+      from ndingest.util.bossutil import BossUtil
       return BossUtil
     else:
       print('Unknown project name {}'.format(settings.PROJECT_NAME ))

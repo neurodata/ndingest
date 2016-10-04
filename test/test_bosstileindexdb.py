@@ -17,10 +17,10 @@ from __future__ import print_function
 from __future__ import absolute_import
 import sys
 sys.path.append('..')
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
-from ..nddynamo.boss_tileindexdb import BossTileIndexDB
-from ..ndingestproj.bossingestproj import BossIngestProj
+from ndingest.nddynamo.boss_tileindexdb import BossTileIndexDB
+from ndingest.ndingestproj.bossingestproj import BossIngestProj
 job_id = '123'
 nd_proj = BossIngestProj('testCol', 'kasthuri11', 'image', 0, job_id)
 import json

@@ -14,12 +14,12 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import json
 import boto3
 import botocore
-from ..ndqueue.ndqueue import NDQueue
+from ndingest.ndqueue.ndqueue import NDQueue
 import random
 
 class CleanupQueue(NDQueue):

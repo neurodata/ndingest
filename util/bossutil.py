@@ -14,8 +14,17 @@
 # limitations under the License.
 
 from __future__ import absolute_import
+from __future__ import print_function
+import boto3
+from ndingest.settings.settings import Settings
+settings = Settings.load()
 import hashlib
+import json
 from .util import Util
+from ndingest.ndbucket.tilebucket import TileBucket
+from ndingest.ndqueue.uploadqueue import UploadQueue
+
+INGEST_POLICY_NAME = '{}-client-policy-{}'
 
 class BossUtil(Util):
 
@@ -52,3 +61,81 @@ class BossUtil(Util):
         result["t_index"] = int(parts[9])
 
         return result
+
+    @staticmethod
+    def generate_ingest_policy(
+        job_id, upload_queue, tile_bucket, 
+        region_name=settings.REGION_NAME, endpoint_url=None, description=''):
+        """Generate the combined IAM policy.
+       
+        Policy allows receiving messages from the queue and writing to the tile bucket.
+
+        Args:
+            job_id (int): Id of ingest job.
+            upload_queue (UploadQueue):
+            tile_bucket (TileBucket):
+            region_name (optional[string]): AWS region.
+            endpoint_url (string|None): Alternative URL boto3 should use for testing instead of connecting to AWS.
+
+        Returns:
+            (iam.Policy)
+        """
+        iam = boto3.resource(
+            'iam',
+            region_name=region_name, endpoint_url=endpoint_url, 
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+
+        policy = {
+            "Version": "2012-10-17",
+            "Id": INGEST_POLICY_NAME.format(settings.DOMAIN, job_id),
+            "Statement": [
+                {
+                    "Sid": "ClientQueuePolicy",
+                    "Effect": "Allow",
+                    "Action": ["sqs:ReceiveMessage"],
+                    "Resource": upload_queue.arn
+                },
+                {
+                    "Sid": "ClientTileBucketPolicy",
+                    "Effect": "Allow",
+                    "Action": ["s3:PutObject"],
+                    "Resource": TileBucket.buildArn(tile_bucket.bucket.name)
+                }
+                ]
+            }
+
+        return iam.create_policy(
+            PolicyName=policy['Id'],
+            PolicyDocument=json.dumps(policy),
+            Path=settings.IAM_POLICY_PATH,
+            Description=description)
+
+    @staticmethod
+    def delete_ingest_policy(
+        job_id, region_name=settings.REGION_NAME, endpoint_url=None):
+        """Delete the IAM policy associated with the given job id.
+
+        Args:
+            job_id (int): Id of ingest job.
+            region_name (optional[string]): AWS region.
+            endpoint_url (string|None): Alternative URL boto3 should use for testing instead of connecting to AWS.
+            
+        Returns:
+            (bool): False if policy not found.
+        """
+
+        name = INGEST_POLICY_NAME.format(settings.DOMAIN, job_id)
+
+        iam = boto3.resource(
+            'iam',
+            region_name=region_name, endpoint_url=endpoint_url, 
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+
+        for policy in iam.policies.filter(Scope='Local', PathPrefix=settings.IAM_POLICY_PATH):
+            if policy.policy_name == name:
+                policy.delete()
+                return True
+
+        return False

@@ -91,11 +91,13 @@ class BossIngestProj(IngestProj):
     def resolution(self, value):
         self._resolution = value
 
-    @job_id.setter
-    def job_id(self, value):
-        self.job_id = value
-
     @property
     def job_id(self):
         return self._job_id
+
+    @job_id.setter
+    def job_id(self, value):
+        self._job_id = value
+
+
 

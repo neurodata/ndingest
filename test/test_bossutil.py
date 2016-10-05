@@ -19,6 +19,7 @@ from ndingest.ndqueue.uploadqueue import UploadQueue
 from ndingest.ndingestproj.bossingestproj import BossIngestProj
 from ndingest.settings.settings import Settings
 settings = Settings.load()
+import os
 import warnings
 
 class TestBossUtil(unittest.TestCase):
@@ -40,9 +41,6 @@ class TestBossUtil(unittest.TestCase):
     def tearDownClass(cls):
         UploadQueue.deleteQueue(cls.nd_proj)
         TileBucket.deleteBucket()
-
-    def setUp(self):
-        pass
 
     def test_create_ingest_policy(self):
         policy = BossUtil.generate_ingest_policy(

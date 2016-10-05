@@ -23,10 +23,16 @@ import json
 from .util import Util
 from ndingest.ndbucket.tilebucket import TileBucket
 from ndingest.ndqueue.uploadqueue import UploadQueue
+import random
 
 INGEST_POLICY_NAME = '{}-client-policy-{}'
 
+# Test policies introduce a random number to avoid collisions between tests.
+TEST_INGEST_POLICY_NAME = '{}-test-{}-client-policy-{}'
+
 class BossUtil(Util):
+    # Static variable to hold random number added to test queue names.
+    test_policy_id = -1
 
     @staticmethod
     def generateCuboidKey(project_name, channel_name, resolution, morton_index, time_index=0):
@@ -113,9 +119,17 @@ class BossUtil(Util):
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
 
+        if not settings.TEST_MODE:
+            policy_name = INGEST_POLICY_NAME.format(settings.DOMAIN, job_id)
+        else:
+            if BossUtil.test_policy_id == -1:
+                BossUtil.test_policy_id = random.randint(0, 999)
+            policy_name = TEST_INGEST_POLICY_NAME.format(
+                settings.DOMAIN, BossUtil.test_policy_id, job_id)
+
         policy = {
             "Version": "2012-10-17",
-            "Id": INGEST_POLICY_NAME.format(settings.DOMAIN, job_id),
+            "Id": policy_name,
             "Statement": [
                 {
                     "Sid": "ClientQueuePolicy",
@@ -152,7 +166,11 @@ class BossUtil(Util):
             (bool): False if policy not found.
         """
 
-        name = INGEST_POLICY_NAME.format(settings.DOMAIN, job_id)
+        if not settings.TEST_MODE:
+            name = INGEST_POLICY_NAME.format(settings.DOMAIN, job_id)
+        else:
+            name = TEST_INGEST_POLICY_NAME.format(
+                settings.DOMAIN, BossUtil.test_policy_id, job_id)
 
         iam = boto3.resource(
             'iam',

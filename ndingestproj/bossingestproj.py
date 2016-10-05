@@ -24,7 +24,7 @@ class BossIngestProj(IngestProj):
         """Constructor.
 
         Collection name and experiment name are joined with an & to form the
-        project name.  
+        project name.
 
         Args:
             collection_name (string): Collection name.
@@ -43,39 +43,51 @@ class BossIngestProj(IngestProj):
 
     @classmethod
     def fromTileKey(cls, tile_key):
-        """Create a BossIngestProj instance from the chunk key"""
-        parts = BossUtil.decode_tile_key(tile_key)
-        cls._project_name = parts["collection"] + '&' + parts["experiment"]
-        cls._channel_name = parts["channel"]
-        cls._resolution = parts["resolution"]
+        """Create a BossIngestProj instance from the chunk key
 
-    @classmethod
-    def fromSupercuboidKey(cls, supercuboid_key):
-        """Create a BossIngestProject instance from a supercuboid_key aka the chunk key
+        Note, the BossIngestProj returned will have None for its job_id and
+        will have ids for collection, experiment,  and channel, instead of names.
 
         Args:
             supercuboid_key(str): The chunk key
 
         Returns:
-            (dict): containing the parsed parts of the key
+            (BossIngestProj):
+        """
+        parts = BossUtil.decode_tile_key(tile_key)
+        return cls(
+            parts['collection'], parts['experiment'], parts['channel'],
+            parts['resolution'], None)
+
+    @classmethod
+    def fromSupercuboidKey(cls, supercuboid_key):
+        """Create a BossIngestProject instance from a supercuboid_key aka the chunk key
+
+        Note, the BossIngestProj returned will have None for its job_id and
+        will have ids for collection, experiment,  and channel, instead of names.
+
+        Args:
+            supercuboid_key(str): The chunk key
+
+        Returns:
+            (BossIngestProj):
         """
         parts = BossUtil.decode_chunk_key(supercuboid_key)
-        cls._project_name = parts["collection"] + '&' + parts["experiment"]
-        cls._channel_name = parts["channel"]
-        cls._resolution = parts["resolution"]
-
+        return cls(
+            parts['collection'], parts['experiment'], parts['channel'],
+            parts['resolution'], None)
 
     @property
     def project_name(self):
         """For the Boss, this is the collection name and the experiment name, combined.
         """
         return self._project_name
-  
+
     @project_name.setter
     def project_name(self, value):
         self._project_name = value
 
-    @property 
+    @property
     def channel_name(self):
         return self._channel_name
 
@@ -98,6 +110,3 @@ class BossIngestProj(IngestProj):
     @job_id.setter
     def job_id(self, value):
         self._job_id = value
-
-
-

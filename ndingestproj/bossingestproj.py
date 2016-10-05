@@ -36,7 +36,7 @@ class BossIngestProj(IngestProj):
         Returns
             (BossIngestProj): An instance
         """
-        self._project_name = collection_name + '&' + experiment_name
+        self._project_name = "{}&{}".format(collection_name, experiment_name)
         self._channel_name = channel_name
         self._resolution = resolution
         self._job_id = job_id
@@ -56,7 +56,7 @@ class BossIngestProj(IngestProj):
         """
         parts = BossUtil.decode_tile_key(tile_key)
         return cls(
-            parts['collection'], parts['experiment'], parts['channel'],
+            parts['collection'], parts['experiment'], parts['channel_layer'],
             parts['resolution'], None)
 
     @classmethod
@@ -74,7 +74,7 @@ class BossIngestProj(IngestProj):
         """
         parts = BossUtil.decode_chunk_key(supercuboid_key)
         return cls(
-            parts['collection'], parts['experiment'], parts['channel'],
+            parts['collection'], parts['experiment'], parts['channel_layer'],
             parts['resolution'], None)
 
     @property

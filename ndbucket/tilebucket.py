@@ -277,8 +277,8 @@ class TileBucket:
     def getMetadata(self, object_key):
         """Get the object key from the upload bucket"""
 
-        message_body, message_id, receipt_handle = self.getObjectByKey(object_key)
-        return message_id, receipt_handle
+        _, message_id, receipt_handle, metadata = self.getObjectByKey(object_key)
+        return message_id, receipt_handle, metadata
 
     def deleteObject(self, object_key):
         """Delete object from the upload bucket"""

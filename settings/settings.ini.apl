@@ -5,8 +5,6 @@ DEV_MODE = False
 domain =
 [aws]
 region = us-east-1
-access_key_id =
-secret_key =
 tile_bucket =
 cuboid_bucket =
 tile_index_table =

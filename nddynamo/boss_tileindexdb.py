@@ -154,7 +154,15 @@ class BossTileIndexDB:
           Key = {
             'chunk_key': chunk_key
           },
-          UpdateExpression = 'ADD tile_uploaded_map.{} :uploaded'.format(tile_key),
+          #UpdateExpression = 'ADD tile_uploaded_map.{} :uploaded'.format(tile_key),
+          #ExpressionAttributeValues = {
+          #    ':uploaded': 1
+          #},
+          UpdateExpression = 'ADD #tilemap.#tilekey :uploaded',
+          ExpressionAttributeNames = {
+              '#tilemap': 'tile_uploaded_map',
+              '#tilekey': tile_key
+          },
           ExpressionAttributeValues = {
               ':uploaded': 1
           },

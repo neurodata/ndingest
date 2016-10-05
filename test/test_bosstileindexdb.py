@@ -108,11 +108,30 @@ class Test_BossTileIndexDB(unittest.TestCase):
         chunk_key = '<hash>&{}&111&222&333&0&0&0&0&0'.format(num_tiles)
         self.tileindex_db.createCuboidEntry(chunk_key, 231)
 
-        self.tileindex_db.markTileAsUploaded(chunk_key, 'fakekey')
+        self.tileindex_db.markTileAsUploaded(chunk_key, 'fakekey&sss')
 
-        expected = { 'fakekey': 1 }
+        expected = { 'fakekey&sss': 1 }
         resp = self.tileindex_db.getCuboid(chunk_key)
         self.assertEqual(expected, resp['tile_uploaded_map'])
+
+
+    def test_markTileAsUploaded_multiple(self):
+        # Cuboid must first have an entry before one of its tiles may be marked
+        # as uploaded.
+        num_tiles = settings.SUPER_CUBOID_SIZE[2]
+        chunk_key = '<hash>&{}&111&222&333&0&0&0&0&0'.format(num_tiles)
+        self.tileindex_db.createCuboidEntry(chunk_key, 231)
+
+        self.tileindex_db.markTileAsUploaded(chunk_key, 'fakekey&sss')
+
+        expected_first = { 'fakekey&sss': 1 }
+        resp = self.tileindex_db.getCuboid(chunk_key)
+        self.assertEqual(expected_first, resp['tile_uploaded_map'])
+
+        expected_second = { 'fakekey&sss': 1, 'fakekey&ttt': 1 }
+        self.tileindex_db.markTileAsUploaded(chunk_key, 'fakekey&ttt')
+        resp = self.tileindex_db.getCuboid(chunk_key)
+        self.assertCountEqual(expected_second, resp['tile_uploaded_map'])
 
 
     def test_deleteItem(self):
@@ -151,3 +170,5 @@ class Test_BossTileIndexDB(unittest.TestCase):
 
         six.assertCountEqual(self, expected, actual)
 
+if __name__ == '__main__':
+    unittest.main()

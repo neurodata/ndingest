@@ -17,6 +17,8 @@ DYNAMO_DEV_ENDPOINT = http://localhost:8000
 SQS_DEV_ENDPOINT = http://localhost:4568
 [sns]
 SNS_DEV_ENDPOINT = http://localhost:9292
+[lambda]
+LAMBDA_FUNCTION_LIST = cleanup, ingest, upload
 [cuboid]
 SUPER_CUBOID_SIZE = 512, 512, 64
 [path]

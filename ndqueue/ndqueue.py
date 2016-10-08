@@ -15,7 +15,7 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 from abc import abstractmethod
 import boto3
@@ -56,6 +56,17 @@ class NDQueue(object):
         (string)
       """
       return self.queue.url
+
+
+  @property
+  def arn(self):
+      """Gets the ARN of the queue.
+
+      Returns:
+        (string)
+      """
+      return self.queue.attributes['QueueArn']
+
   
   @staticmethod
   @abstractmethod

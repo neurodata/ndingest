@@ -1,4 +1,5 @@
 # Copyright 2014 NeuroData (http://neurodata.io)
+# Copyright 2016 The Johns Hopkins University Applied Physics Laboratory
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,11 +17,11 @@ from __future__ import print_function
 from __future__ import absolute_import
 import sys
 sys.path.append('..')
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import pytest
-from ..ndqueue.cleanupqueue import CleanupQueue
-from ..ndingestproj.ingestproj import IngestProj
+from ndingest.ndqueue.cleanupqueue import CleanupQueue
+from ndingest.ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 if settings.PROJECT_NAME == 'Boss':
     nd_proj = ProjClass('testCol', 'kasthuri11', 'image', 0, 12)
@@ -52,3 +53,7 @@ class Test_Cleanup_Queue():
       assert(supercuboid_key == message_body)
       response = self.cleanup_queue.deleteMessage(message_id, receipt_handle)
       assert('Successful' in response)
+
+
+if __name__ == '__main__':
+    pytest.main()

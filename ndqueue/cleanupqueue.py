@@ -14,15 +14,18 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import json
 import boto3
 import botocore
-from ..ndqueue.ndqueue import NDQueue
+from ndingest.ndqueue.ndqueue import NDQueue
+import random
 
 class CleanupQueue(NDQueue):
 
+  # Static variable to hold random number added to test queue names.
+  test_queue_id = -1
   
   def __init__(self, nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
     """Create resources for the queue"""
@@ -39,7 +42,10 @@ class CleanupQueue(NDQueue):
     if not settings.TEST_MODE:
         return '{}-delete-{}'.format(settings.DOMAIN, nd_proj.job_id)
 
-    return 'test-{}-delete-{}'.format(settings.DOMAIN, nd_proj.job_id)
+    if CleanupQueue.test_queue_id == -1:
+        CleanupQueue.test_queue_id = random.randint(0, 999)
+
+    return 'test{}-{}-delete-{}'.format(CleanupQueue.test_queue_id, settings.DOMAIN, nd_proj.job_id)
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):

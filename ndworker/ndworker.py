@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import ndproj
-from ..ndqueue.uploadqueue import UploadQueue
-from ..ndqueue.uploadmessage import UploadMessage
+from ndingest.ndqueue.uploadqueue import UploadQueue
+from ndingest.ndqueue.uploadmessage import UploadMessage
 
 class NDWorker():
 

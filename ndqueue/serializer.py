@@ -17,7 +17,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 import six
 from abc import ABCMeta, abstractmethod
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 
 @six.add_metaclass(ABCMeta)
@@ -27,10 +27,10 @@ class Serializer(object):
   def load():
     """Factory method to fetch the correct serializer"""
     if settings.PROJECT_NAME == 'Neurodata':
-      from ..ndqueue.ndserializer import NDSerializer
+      from ndingest.ndqueue.ndserializer import NDSerializer
       return NDSerializer()
     elif settings.PROJECT_NAME == 'Boss':
-      from ..ndqueue.bossserializer import BossSerializer
+      from ndingest.ndqueue.bossserializer import BossSerializer
       return BossSerializer()
     else:
       err = "Incorrect Serializer {}".format(settings.PROJECT_NAME)

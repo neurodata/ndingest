@@ -16,21 +16,21 @@ from __future__ import print_function
 from __future__ import absolute_import
 import sys
 sys.path.append('..')
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import cStringIO
 import pytest
 import emulambda
 from ndctypelib import XYZMorton
-from ..ndqueue.uploadqueue import UploadQueue
-from ..ndqueue.ingestqueue import IngestQueue
-from ..ndqueue.cleanupqueue import CleanupQueue
-from ..nddynamo.tileindexdb import TileIndexDB
-from ..nddynamo.cuboidindexdb import CuboidIndexDB
-from ..ndbucket.tilebucket import TileBucket
-from ..ndbucket.cuboidbucket import CuboidBucket
-from ..ndqueue.ndserializer import NDSerializer
-from ..ndingestproj.ingestproj import IngestProj
+from ndingest.ndqueue.uploadqueue import UploadQueue
+from ndingest.ndqueue.ingestqueue import IngestQueue
+from ndingest.ndqueue.cleanupqueue import CleanupQueue
+from ndingest.nddynamo.tileindexdb import TileIndexDB
+from ndingest.nddynamo.cuboidindexdb import CuboidIndexDB
+from ndingest.ndbucket.tilebucket import TileBucket
+from ndingest.ndbucket.cuboidbucket import CuboidBucket
+from ndingest.ndqueue.ndserializer import NDSerializer
+from ndingest.ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
 nd_proj = ProjClass('kasthuri11', 'image', '0')
 

@@ -14,14 +14,14 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import botocore
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from operator import div
 from ndctypelib import XYZMorton
-from ..util.util import Util
+from ndingest.util.util import Util
 UtilClass = Util.load()
 
 

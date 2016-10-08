@@ -17,14 +17,14 @@ from __future__ import absolute_import
 from __future__ import print_function
 import sys
 sys.path.append('..')
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import numpy as np
 import blosc
 #import cStringIO
 import hashlib
-from ..ndbucket.cuboidbucket import CuboidBucket
-from ..ndingestproj.ingestproj import IngestProj
+from ndingest.ndbucket.cuboidbucket import CuboidBucket
+from ndingest.ndingestproj.ingestproj import IngestProj
 import pytest
 ProjClass = IngestProj.load()
 if settings.PROJECT_NAME == 'Boss':

@@ -16,7 +16,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import six
 from abc import ABCMeta, abstractmethod
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 
 @six.add_metaclass(ABCMeta)
@@ -26,10 +26,10 @@ class IngestProj(object):
   def load():
     """Factory to load the correct ndproj type"""
     if settings.PROJECT_NAME == 'Neurodata':
-      from ..ndingestproj.ndingestproj import NDIngestProj
+      from ndingest.ndingestproj.ndingestproj import NDIngestProj
       return NDIngestProj
     elif settings.PROJECT_NAME == 'Boss':
-      from ..ndingestproj.bossingestproj import BossIngestProj
+      from ndingest.ndingestproj.bossingestproj import BossIngestProj
       return BossIngestProj
     else:
       print ("Unknown Project-type {}".format(project_type))

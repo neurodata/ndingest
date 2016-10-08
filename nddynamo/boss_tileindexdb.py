@@ -15,13 +15,13 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import botocore
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from operator import floordiv
-from ..util.bossutil import BossUtil
+from ndingest.util.bossutil import BossUtil
 import time
 #try:
 #    # Temp try-catch while developing on Windows.
@@ -154,7 +154,15 @@ class BossTileIndexDB:
           Key = {
             'chunk_key': chunk_key
           },
-          UpdateExpression = 'ADD tile_uploaded_map.{} :uploaded'.format(tile_key),
+          #UpdateExpression = 'ADD tile_uploaded_map.{} :uploaded'.format(tile_key),
+          #ExpressionAttributeValues = {
+          #    ':uploaded': 1
+          #},
+          UpdateExpression = 'ADD #tilemap.#tilekey :uploaded',
+          ExpressionAttributeNames = {
+              '#tilemap': 'tile_uploaded_map',
+              '#tilekey': tile_key
+          },
           ExpressionAttributeValues = {
               ':uploaded': 1
           },

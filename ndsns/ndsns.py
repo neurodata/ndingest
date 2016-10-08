@@ -14,7 +14,7 @@
   
 from __future__ import print_function
 from __future__ import absolute_import
-from ..settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 import boto3
 import botocore

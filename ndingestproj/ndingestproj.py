@@ -21,7 +21,10 @@ class NDIngestProj(IngestProj):
   def __init__(self, project_name, channel_name, resolution):
     self._project_name = project_name
     self._channel_name = channel_name
-    self._resolution = resolution
+    if type(resolution) is str:
+      self._resolution = resolution
+    else:
+      self._resolution = str(resolution)
   
   @classmethod
   def fromTileKey(cls, tile_key):

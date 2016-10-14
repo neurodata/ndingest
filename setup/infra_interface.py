@@ -28,6 +28,7 @@ class InfraInterface(object):
     pass
 
   def createInfrastructure(self):
+    """Create the infrastructure"""
     # create cuboid index table
     CuboidIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
     # create the tile index table
@@ -43,6 +44,7 @@ class InfraInterface(object):
 
 
   def deleteInfrastructure(self):
+    """Delete the infrastructure"""
     # delete cuboid index table
     CuboidIndexDB.deleteTable(endpoint_url=settings.DYNAMO_ENDPOINT)
     # delete the tile index table

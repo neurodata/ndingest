@@ -20,7 +20,7 @@ from ndingest.ndqueue.serializer import Serializer
 class NDSerializer(Serializer):
     
   @staticmethod
-  def encodeUploadMessage(project_name, channel_name, resolution, x_tile, y_tile, z_tile, time_range=None):
+  def encodeUploadMessage(project_name, channel_name, resolution, x_tile, y_tile, z_tile, t_tile=0):
     """Encode a message for the upload queue"""
     message = { 
                  'project' : project_name,
@@ -29,7 +29,7 @@ class NDSerializer(Serializer):
                  'x_tile' : x_tile,
                  'y_tile' : y_tile,
                  'z_tile' : z_tile,
-                 'time_range' : time_range
+                 't_tile' : t_tile
               }
     return json.dumps(message)
 

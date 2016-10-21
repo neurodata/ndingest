@@ -22,6 +22,7 @@ settings = Settings.load()
 import os
 import warnings
 
+@unittest.skipIf(settings.PROJECT_NAME == 'Neurodata', 'Test not applicable to Neurodata')
 class TestBossUtil(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

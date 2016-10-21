@@ -29,7 +29,7 @@ import unittest
 import warnings
 
 
-
+@unittest.skipIf(settings.PROJECT_NAME == 'Neurodata', 'Test not applicable to Neurodata')
 class Test_BossTileIndexDB(unittest.TestCase):
     """
     Note that the chunk keys used, for testing, do not have real hash keys.

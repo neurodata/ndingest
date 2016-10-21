@@ -15,6 +15,7 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+import pytest
 import sys
 sys.path.append('..')
 from ndingest.settings.settings import Settings
@@ -70,6 +71,7 @@ class Test_UploadQueue():
       assert('Successful' in response)
 
 
+  @pytest.mark.skipif(settings.PROJECT_NAME == 'Neurodata', reason='Policy not supported by Neurodata yet')
   def test_createPolicy(self):
     """Test policy creation"""
 
@@ -98,6 +100,7 @@ class Test_UploadQueue():
     finally:
         actual.delete()
 
+  @pytest.mark.skipif(settings.PROJECT_NAME == 'Neurodata', reason='Policy not supported by Neurodata yet')
   def test_deletePolicy(self):
     """Test policy deletion"""
 

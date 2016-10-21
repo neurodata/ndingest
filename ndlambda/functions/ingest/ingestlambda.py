@@ -26,7 +26,7 @@ import cStringIO
 from PIL import Image
 from ndctypelib import MortonXYZ
 from ndtype import *
-from spdb.cube import Cube
+from spdb.ndcube.cube import Cube
 from ndqueue.ingestqueue import IngestQueue
 from ndqueue.cleanupqueue import CleanupQueue
 from nddynamo.tileindexdb import TileIndexDB
@@ -50,7 +50,7 @@ def lambda_handler(event, context):
   [x_tile, y_tile, z_tile] = MortonXYZ(morton_index)
 
   # create a supercuboid from the slab
-  cube = Cube.getCube(settings.SUPER_CUBOID_SIZE, IMAGE, UINT8)
+  cube = Cube.CubeFactory(settings.SUPER_CUBOID_SIZE, IMAGE, UINT8)
   cube.zeros()
   
   cuboidindex_db = CuboidIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)

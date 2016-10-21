@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import unittest
+from ndingest.settings.settings import Settings
+settings = Settings.load()
 from ndingest.settings.bosssettings import BossSettings
 from six import StringIO
 
+@unittest.skipIf(settings.PROJECT_NAME == 'Neurodata', 'Test not applicable to Neurodata')
 class TestBossSettings(unittest.TestCase):
     def setUp(self):
         self.base_config = """

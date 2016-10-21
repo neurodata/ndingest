@@ -15,6 +15,7 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+import pytest
 import sys
 sys.path.append('..')
 from ndingest.settings.settings import Settings
@@ -67,16 +68,17 @@ class Test_Upload_Bucket():
       tile_handle.close()
       object_key = self.tile_bucket.encodeObjectKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
       # fetching object
-      object_body, object_message_id, object_receipt_handle = self.tile_bucket.getObject(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
+      object_body, object_message_id, object_receipt_handle, metadata = self.tile_bucket.getObject(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
       assert( object_message_id == message_id )
       assert( object_receipt_handle == receipt_handle )
-      object_message_id, object_receipt_handle = self.tile_bucket.getMetadata(object_key)
+      object_message_id, object_receipt_handle, metadata = self.tile_bucket.getMetadata(object_key)
       assert( object_message_id == message_id )
       assert( object_receipt_handle == receipt_handle )
       # delete the object
       response = self.tile_bucket.deleteObject(object_key)
 
 
+  @pytest.mark.skipif(settings.PROJECT_NAME == 'Neurodata', reason='Policy not supported by Neurodata yet')
   def test_buildArn_no_folder(self):
     """Test buildArn with folder's default value."""
 
@@ -85,6 +87,7 @@ class Test_Upload_Bucket():
     assert(expected == actual)
     
 
+  @pytest.mark.skipif(settings.PROJECT_NAME == 'Neurodata', reason='Policy not supported by Neurodata yet')
   def test_buildArn_with_folder_no_slashes(self):
     """Test buildArn with a folder."""
 
@@ -93,6 +96,7 @@ class Test_Upload_Bucket():
     assert(expected == actual)
     
 
+  @pytest.mark.skipif(settings.PROJECT_NAME == 'Neurodata', reason='Policy not supported by Neurodata yet')
   def test_buildArn_with_folder_with_slashes(self):
     """Test buildArn with folder with slashes at beginning and end."""
 
@@ -101,6 +105,7 @@ class Test_Upload_Bucket():
     assert(expected == actual)
 
 
+  @pytest.mark.skipif(settings.PROJECT_NAME == 'Neurodata', reason='Policy not supported by Neurodata yet')
   def test_createPolicy(self):
     """Test policy creation"""
 
@@ -131,6 +136,7 @@ class Test_Upload_Bucket():
         actual.delete()
 
 
+  @pytest.mark.skipif(settings.PROJECT_NAME == 'Neurodata', reason='Policy not supported by Neurodata yet')
   def test_createPolicy_with_folder(self):
     """Test policy creation with a folder"""
 
@@ -160,6 +166,7 @@ class Test_Upload_Bucket():
         actual.delete()
 
 
+  @pytest.mark.skipif(settings.PROJECT_NAME == 'Neurodata', reason='Policy not supported by Neurodata yet')
   def test_deletePolicy(self):
     """Test policy deletion"""
 

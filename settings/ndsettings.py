@@ -113,3 +113,7 @@ class NDSettings(Settings):
   @property
   def LAMBDA_FUNCTION_LIST(self):
     return [i for i in self.parser.get('lambda', 'LAMBDA_FUNCTION_LIST').split(',')]
+
+  @property
+  def IAM_POLICY_PATH(self):
+    return '/ingest/'

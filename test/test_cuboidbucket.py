@@ -21,7 +21,6 @@ from ndingest.settings.settings import Settings
 settings = Settings.load()
 import numpy as np
 import blosc
-#import cStringIO
 import hashlib
 from ndingest.ndbucket.cuboidbucket import CuboidBucket
 from ndingest.ndingestproj.ingestproj import IngestProj

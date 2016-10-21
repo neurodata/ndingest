@@ -14,8 +14,11 @@
 
 import unittest
 import six
+from ndingest.settings.settings import Settings
+settings = Settings.load()
 from ndingest.ndingestproj.bossingestproj import BossIngestProj
 
+@unittest.skipIf(settings.PROJECT_NAME == 'Neurodata', 'Test not applicable to Neurodata')
 class TestBossIngestProj(unittest.TestCase):
     def test_project_name(self):
         """Project name should be collection name & experiment name."""

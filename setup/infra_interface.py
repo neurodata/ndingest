@@ -13,14 +13,15 @@
 # limitations under the License.
 
 import sys
-sys.path.append('..')
-from settings.settings import Settings
+sys.path.append('../..')
+import argparse
+from ndingest.settings.settings import Settings
 settings = Settings.load()
-from nddyanmo.cuboidindexdb import CuboidIndexDB
-from nddyanmo.tileindexdb import TileIndexDB
-from ndbucket.cuboidbucket import CuboidBucket
-from ndbucket.tilebucket import TileBucket
-from ndlambda.lambdainterface import LambdaInterface
+from ndingest.nddynamo.cuboidindexdb import CuboidIndexDB
+from ndingest.nddynamo.tileindexdb import TileIndexDB
+from ndingest.ndbucket.cuboidbucket import CuboidBucket
+from ndingest.ndbucket.tilebucket import TileBucket
+from ndingest.ndlambda.lambdainterface import LambdaInterface
 
 class InfraInterface(object):
   
@@ -30,6 +31,7 @@ class InfraInterface(object):
   def createInfrastructure(self):
     """Create the infrastructure"""
     # create cuboid index table
+    import pdb; pdb.set_trace()
     CuboidIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
     # create the tile index table
     TileIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
@@ -58,10 +60,10 @@ class InfraInterface(object):
       lambda_interface = LambdaInterface(func_name)
       lambda_interface.deleteFunction()
 
-def main()
+def main():
   
   parser = argparse.ArgumentParser(description='')
-  parser.add_argument('--action', dest='action', action='store', choices=['create', 'delete'], help='Action')
+  parser.add_argument(dest='action', action='store', choices=['create', 'delete'], help='Action')
   result = parser.parse_args()
 
   infra_interface = InfraInterface()

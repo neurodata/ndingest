@@ -104,5 +104,12 @@ class NDSettings(Settings):
       return None
   
   @property
+  def LAMBDA_ENDPOINT(self):
+    if self.DEV_MODE:
+      return self.parser.get('lambda', 'LAMBDA_DEV_ENDPOINT')
+    else:
+      return None
+
+  @property
   def LAMBDA_FUNCTION_LIST(self):
     return [i for i in self.parser.get('lambda', 'LAMBDA_FUNCTION_LIST').split(',')]

@@ -13,13 +13,13 @@
 # limitations under the License.
 
 import boto3
-from settings.settings import Settings
+from ndingest.settings.settings import Settings
 settings = Settings.load()
 
 class LambdaInterface(object):
 
-  def __init__(self, func_name):
-    self.client = boto3.client('lambda')
+  def __init__(self, func_name, region_name=settings.REGION_NAME, endpoint_url=''):
+    self.client = boto3.client('lambda', region_name=settings.REGION_NAME, endpoint_url=endpoint_url)
     self.func_name = func_name
 
   def readZipFile(self, zip_file, encode_base64=True):
@@ -35,7 +35,7 @@ class LambdaInterface(object):
           Handler = 'lambda_handler',
           Code = {
             'ZipFile': self.readZipFile(zip_file),
-            }
+          },
           Timeout = timeout,
           MemorySize = memory_size,
           Publis = True

@@ -21,6 +21,10 @@ class LambdaInterface(object):
   def __init__(self, func_name, region_name=settings.REGION_NAME, endpoint_url=''):
     self.client = boto3.client('lambda', region_name=settings.REGION_NAME, endpoint_url=endpoint_url)
     self.func_name = func_name
+  
+  @staticmethod
+  def buildArn(func_name):
+    return 'arn:aws:lambda:{}:{}:function:{}'.format(settings.REGION_NAME, settings.ACCOUNT_ID, func_name)
 
   def readZipFile(self, zip_file, encode_base64=True):
     return None

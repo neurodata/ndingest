@@ -142,10 +142,31 @@ class TileBucket:
             PolicyDocument=json.dumps(full_policy),
             Path=settings.IAM_POLICY_PATH,
             Description=description)
+    
+    @staticmethod
+    def putLambdaConfig(self, lambda_arn, region_name=settings.REGION_NAME, endpoint_url=None):
+      """Create the trigger for a lambda function"""
 
+      s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+      bucket_notification = s3.BucketNotification(bucket_name)
+      try:
+        response = bucket_notification.put(
+            NotificationConfiguration = {
+              'LambdaFunctionConfigurations': [
+                {
+                  'LambdaFunctionArn': lambda_arn,
+                  'Events': [
+                    's3.ObjectCreated:*',
+                  ],
+                }
+              }
+            )
+      except Exception as e:
+        print (e)
+        raise
 
     @staticmethod
-    def buildArn(bucket_name, folder=None):
+    def buildArn(folder=None):
         """Build an S3 ARN for use in an IAM policy.
 
         Example: arn:aws:s3:::my_bucket/some/folder/*
@@ -157,7 +178,7 @@ class TileBucket:
         Returns:
           (string)
         """
-        arn = 'arn:aws:s3:::' + bucket_name
+        arn = 'arn:aws:s3:::{}'.format(TileBucket.getBucketName())
         if folder is not None:
             if folder[0] != '/':
                 arn += '/'

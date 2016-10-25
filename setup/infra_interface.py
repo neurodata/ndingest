@@ -31,7 +31,6 @@ class InfraInterface(object):
   def createInfrastructure(self):
     """Create the infrastructure"""
     # create cuboid index table
-    import pdb; pdb.set_trace()
     CuboidIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
     # create the tile index table
     TileIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
@@ -43,7 +42,16 @@ class InfraInterface(object):
     for func_name in settings.LAMBDA_FUNCTION_LIST:
       lambda_interface = LambdaInterface(func_name)
       lambda_interface.createFunction()
-
+    # crate the tile bucket lambda trigger
+    lambda_arn = lambda_interface.buildArn('upload')
+    TileBucket.putLambdaConfig(lambda_arn, endpoint_url=settings.S3_ENDPOINT)
+  
+  def updateInfrastructure(self):
+    """Update the lambda functions and policies"""
+    for func_name in settings.LAMBDA_FUNCTION_LIST:
+      lambda_interface = LambdaInterface(func_name)
+      lambda_interface.updateFunctionCode()
+      lambda_interface.updateFunctionConfiguration()
 
   def deleteInfrastructure(self):
     """Delete the infrastructure"""
@@ -63,7 +71,7 @@ class InfraInterface(object):
 def main():
   
   parser = argparse.ArgumentParser(description='')
-  parser.add_argument(dest='action', action='store', choices=['create', 'delete'], help='Action')
+  parser.add_argument(dest='action', action='store', choices=['create', 'delete', 'update'], help='Action')
   result = parser.parse_args()
 
   infra_interface = InfraInterface()
@@ -71,6 +79,8 @@ def main():
     infra_interface.createInfrastructure()
   elif result.action == 'delete':
     infra_interface.deleteInfrastructure()
+  elif result.action == 'update':
+    infra_interface.updateInfrastructure()
   else:
     raise ValueError("Error: Invalid value for action {}".format(result.action))
 

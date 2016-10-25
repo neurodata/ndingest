@@ -16,11 +16,11 @@ from __future__ import absolute_import
 from __future__ import print_function
 from ndingest.settings.settings import Settings
 settings = Settings.load()
+import random
 import json
 import boto3
 import botocore
 from ndingest.ndqueue.ndqueue import NDQueue
-import random
 
 class CleanupQueue(NDQueue):
 

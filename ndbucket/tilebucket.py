@@ -159,8 +159,9 @@ class TileBucket:
                     's3.ObjectCreated:*',
                   ],
                 }
-              }
-            )
+              ]
+            }
+        )
       except Exception as e:
         print (e)
         raise

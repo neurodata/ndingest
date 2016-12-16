@@ -42,7 +42,13 @@ class LambdaInterface(object):
           },
           Timeout = timeout,
           MemorySize = memory_size,
-          Publis = True
+          Publish = True,
+          VpcConfig = {
+            'SubnetIds': [
+              'string'
+            ]
+          }
+
       )
       return response
     except Exception as e:

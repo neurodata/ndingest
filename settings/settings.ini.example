@@ -8,6 +8,7 @@ AWS_SECRET_ACCESS_KEY =
 [s3]
 S3_CUBOID_BUCKET = neurodata-cuboid-store
 S3_TILE_BUCKET = neurodata-tile-store
+S3_BACKYP_BUCKET = ndplay
 S3_DEV_ENDPOINT = http://localhost:4567
 [dynamo]
 DYNAMO_CUBOIDINDEX_TABLE = s3indexdb

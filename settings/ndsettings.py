@@ -58,6 +58,10 @@ class NDSettings(Settings):
   @property
   def S3_TILE_BUCKET(self):
     return self.parser.get('s3', 'S3_TILE_BUCKET')
+  
+  @property
+  def S3_BACKUP_BUCKET(self):
+    return self.parser.get('s3', 'S3_BACKUP_BUCKET')
 
   @property
   def DYNAMO_CUBOIDINDEX_TABLE(self):

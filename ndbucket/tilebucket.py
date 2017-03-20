@@ -81,7 +81,7 @@ class TileBucket:
         """Generate the bucket name"""
         return settings.S3_TILE_BUCKET
 
-    def encodeObjectKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
+    def encodeObjectKey(self, channel_name, resolution, x_index, y_index, z_index, t_index):
         """Generate the key for the file in scratch space"""
         hashm = hashlib.md5()
         hashm.update('{}&{}&{}&{}&{}&{}&{}'.format(self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index).encode('utf-8'))
@@ -239,7 +239,7 @@ class TileBucket:
         return None
 
 
-    def putObject(self, tile_handle, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle, time=0):
+    def putObject(self, tile_handle, channel_name, resolution, x_tile, y_tile, z_tile, time, message_id, receipt_handle):
         """Put object in the upload bucket"""
 
         # generate the key

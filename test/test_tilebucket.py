@@ -57,6 +57,7 @@ class Test_Upload_Bucket():
     
     x_tile = 0
     y_tile = 0
+    time_tile = 0
     message_id = '1123'
     receipt_handle = 'test_string'
 
@@ -64,11 +65,11 @@ class Test_Upload_Bucket():
       # creating a tile handle for test
       tile_handle = BytesIO()
       # uploading object
-      response = self.tile_bucket.putObject(tile_handle, nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, message_id, receipt_handle)
+      response = self.tile_bucket.putObject(tile_handle, nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, time_tile, message_id, receipt_handle)
       tile_handle.close()
-      object_key = self.tile_bucket.encodeObjectKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
+      object_key = self.tile_bucket.encodeObjectKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, time_tile)
       # fetching object
-      object_body, object_message_id, object_receipt_handle, metadata = self.tile_bucket.getObject(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
+      object_body, object_message_id, object_receipt_handle, metadata = self.tile_bucket.getObject(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, time_tile)
       assert( object_message_id == message_id )
       assert( object_receipt_handle == receipt_handle )
       object_message_id, object_receipt_handle, metadata = self.tile_bucket.getMetadata(object_key)

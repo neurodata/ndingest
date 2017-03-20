@@ -80,12 +80,12 @@ class CuboidBucket:
     return settings.S3_CUBOID_BUCKET
   
 
-  def putObject(self, channel_name, resolution, morton_index, cube_data, time_index=0):
+  def putObject(self, channel_name, resolution, morton_index, time_index, cube_data, neariso=False):
     """Put object in the cuboid bucket.
 
     Not supported by the Boss.  Use putObjectByKey() instead.
     """
-    supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index)
+    supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index, neariso=neariso)
     return self.putObjectByKey(supercuboid_key, cube_data)
     
   def putObjectByKey(self, supercuboid_key, cube_data):
@@ -114,18 +114,18 @@ class CuboidBucket:
       print (e)
       raise
 
-  def getObject(self, channel_name, resolution, morton_index, time_index=0):
+  def getObject(self, channel_name, resolution, morton_index, time_index, neariso=False):
     """Get object from the cuboid bucket based on parameters.
 
     Not supported by the Boss.  Use getObjectByKey() instead.
     """
 
-    supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index)
+    supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index, neariso=neariso)
     return self.getObjectByKey(supercuboid_key)
 
-  def generateSupercuboidKey(self, channel_name, resolution, morton_index, time_index=0):
+  def generateSupercuboidKey(self, channel_name, resolution, morton_index, time_index, neariso=False):
     """Generate the supercuboid key"""
-    return UtilClass.generateCuboidKey(self.project_name, channel_name, resolution, morton_index, time_index)
+    return UtilClass.generateCuboidKey(self.project_name, channel_name, resolution, morton_index, time_index, neariso=neariso)
 
   def deleteObject(self, supercuboid_key):
     """Delete object from the upload bucket"""

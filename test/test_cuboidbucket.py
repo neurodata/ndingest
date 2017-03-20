@@ -57,10 +57,10 @@ class Test_Cuboid_Bucket():
     """Testing put object"""
     cube_data = blosc.pack_array(np.zeros(settings.SUPER_CUBOID_SIZE))
     for morton_index in range(0, 10, 1):
-      self.cuboid_bucket.putObject(nd_proj.channel_name, nd_proj.resolution, morton_index, cube_data)
+      self.cuboid_bucket.putObject(nd_proj.channel_name, nd_proj.resolution, morton_index, 0, cube_data)
 
     for morton_index in range(0, 10, 1):
-      supercuboid_key = self.cuboid_bucket.generateSupercuboidKey(nd_proj.channel_name, nd_proj.resolution, morton_index)
+      supercuboid_key = self.cuboid_bucket.generateSupercuboidKey(nd_proj.channel_name, nd_proj.resolution, morton_index, 0)
       self.cuboid_bucket.deleteObject(supercuboid_key)
 
   def test_put_object_by_key(self):

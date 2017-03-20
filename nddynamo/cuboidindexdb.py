@@ -124,16 +124,16 @@ class CuboidIndexDB:
     """Return table name"""
     return settings.DYNAMO_CUBOIDINDEX_TABLE
 
-  def generatePrimaryKey(self, channel_name, resolution, x, y, z, time_index=0):
+  def generatePrimaryKey(self, channel_name, resolution, x, y, z, time_index, neariso=False):
     """Generate key for each supercuboid"""
     morton_index = XYZMorton([x, y, z])
-    return UtilClass.generateCuboidKey(self.project, channel_name, resolution, morton_index, time_index)
+    return UtilClass.generateCuboidKey(self.project, channel_name, resolution, morton_index, time_index, neariso=neariso)
 
 
-  def putItem(self, channel_name, resolution, x, y, z, time=0, task_id=0):
+  def putItem(self, channel_name, resolution, x, y, z, time, task_id=0, neariso=False):
     """Inserting an index for each supercuboid_array"""
     
-    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z, time)
+    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z, time, neariso=neariso)
     version_number = 0
 
     try:
@@ -152,10 +152,10 @@ class CuboidIndexDB:
       raise 
  
 
-  def getItem(self, channel_name, resolution, x, y, z):
+  def getItem(self, channel_name, resolution, x, y, z, time, neariso=False):
     """Get an item based on supercuboid_key"""
 
-    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z)
+    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z, time, neariso=neariso)
     version_number = 0
     try:
       response =  self.table.get_item(
@@ -244,10 +244,10 @@ class CuboidIndexDB:
       raise
 
 
-  def deleteXYZ(self, channel_name, resolution, x, y, z):
+  def deleteXYZ(self, channel_name, resolution, x, y, z, time, neariso=False):
     """Delete item from database"""
     
-    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z)
+    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z, time, neariso=neariso)
     return self.deleteItem(supercuboid_key)
   
 

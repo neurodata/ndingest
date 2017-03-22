@@ -26,7 +26,7 @@ UtilClass = Util.load()
 
 class CuboidIndexDB:
 
-  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=settings.DYNAMO_ENDPOINT):
 
     # create the resource
     table_name = CuboidIndexDB.getTableName()
@@ -36,7 +36,7 @@ class CuboidIndexDB:
  
 
   @staticmethod
-  def createTable(region_name=settings.REGION_NAME, endpoint_url=None):
+  def createTable(region_name=settings.REGION_NAME, endpoint_url=settings.DYNAMO_ENDPOINT):
     """Create the s3index database in dynamodb"""
     
     # create the resource
@@ -106,7 +106,7 @@ class CuboidIndexDB:
 
 
   @staticmethod
-  def deleteTable(region_name=settings.REGION_NAME, endpoint_url=None):
+  def deleteTable(region_name=settings.REGION_NAME, endpoint_url=settings.DYNAMO_ENDPOINT):
     """Delete the ingest database in dynamodb"""
     
     # create the resource
@@ -264,5 +264,28 @@ class CuboidIndexDB:
       )
       return response
     except botocore.exceptions.ClientError as e:
+      print (e)
+      raise
+
+  def getAllItems(self):
+    """Get all items in the dynamo table"""
+    try:
+      # need to call once to generate lastevaluatedkey
+      response = self.table.scan(
+          Limit = 100,
+          Select = 'ALL_ATTRIBUTES'
+        )
+      for item in response['Items']:
+        yield item
+      # till we have lastevaluatedkey
+      while 'LastEvaluatedKey' in response:
+        response = self.table.scan(
+            Limit = 100,
+            Select = 'ALL_ATTRIBUTES',
+            ExclusiveStartKey = response['LastEvaluatedKey']
+        )
+        for item in response['Items']:
+          yield item
+    except Exception as e:
       print (e)
       raise

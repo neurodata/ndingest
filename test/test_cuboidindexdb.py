@@ -16,8 +16,6 @@ from __future__ import print_function
 from __future__ import absolute_import
 import sys
 sys.path.append('..')
-from ndingest.settings.settings import Settings
-settings = Settings.load()
 from ndingest.nddynamo.cuboidindexdb import CuboidIndexDB
 from ndingest.ndingestproj.ingestproj import IngestProj
 ProjClass = IngestProj.load()
@@ -30,15 +28,15 @@ class Test_CuboidIndexDB():
   def setup_class(self):
     """Setup parameters"""
     try:
-      CuboidIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
+      CuboidIndexDB.createTable()
     except Exception as e:
       pass
-    self.cuboid_index = CuboidIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)
+    self.cuboid_index = CuboidIndexDB(nd_proj.project_name)
     
 
   def teardown_class(self):
     """Teardown parameters"""
-    CuboidIndexDB.deleteTable(endpoint_url=settings.DYNAMO_ENDPOINT)
+    CuboidIndexDB.deleteTable()
     
 
   def test_putItem(self):
@@ -86,6 +84,14 @@ class Test_CuboidIndexDB():
       
     for item in self.cuboid_index.queryTaskItems(nd_proj.channel_name, nd_proj.resolution, 1):
       assert( item['channel_resolution_taskid'] == '{}&{}&{}'.format(nd_proj2.channel_name, nd_proj.resolution, 0) )
+
+  
+  def test_getAllItems(self):
+    """Test the scan over the entire table"""
+    
+    data = self.cuboid_index.getAllItems()
+    for item in data:
+      print (item)
 
 
   def test_deleteXYZ(self):

@@ -26,7 +26,7 @@ UtilClass = Util.load()
 
 class CuboidBucket:
 
-  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
     """Create resource for the cuboid queue"""
     
     bucket_name = CuboidBucket.getBucketName()
@@ -41,7 +41,7 @@ class CuboidBucket:
       raise
 
   @staticmethod
-  def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
+  def createBucket(region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
     """Create the cuboid bucket"""
     
     bucket_name = CuboidBucket.getBucketName()
@@ -59,7 +59,7 @@ class CuboidBucket:
       raise
 
   @staticmethod
-  def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
+  def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
     """Delete the cuboid bucket"""
     
     bucket_name = CuboidBucket.getBucketName()
@@ -146,4 +146,3 @@ class CuboidBucket:
     except Exception as e:
       print (e)
       raise
-

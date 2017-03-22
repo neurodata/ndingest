@@ -34,12 +34,8 @@ class Test_Upload_Bucket():
 
   def setup_class(self):
     """Setup Parameters"""
-    if 'S3_ENDPOINT' in dir(settings):
-      self.endpoint_url = settings.S3_ENDPOINT
-    else:
-      self.endpoint_url = None
-    TileBucket.createBucket(endpoint_url=self.endpoint_url)
-    self.tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=self.endpoint_url)
+    TileBucket.createBucket()
+    self.tile_bucket = TileBucket(nd_proj.project_name)
 
 
   def teardown_class(self):
@@ -49,7 +45,7 @@ class Test_Upload_Bucket():
     for objs in self.tile_bucket.getAllObjects():
       self.tile_bucket.deleteObject(objs.key)
 
-    TileBucket.deleteBucket(endpoint_url=self.endpoint_url)
+    TileBucket.deleteBucket()
 
 
   def test_put_object(self):

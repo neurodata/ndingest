@@ -26,7 +26,7 @@ settings = Settings.load()
 
 class TileBucket:
 
-    def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
+    def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
         """Create resource for the upload queue"""
 
         self.region_name = region_name
@@ -43,7 +43,7 @@ class TileBucket:
             raise
 
     @staticmethod
-    def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
+    def createBucket(region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
         """Create the upload bucket"""
 
         bucket_name = TileBucket.getBucketName()
@@ -61,7 +61,7 @@ class TileBucket:
             raise
 
     @staticmethod
-    def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
+    def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
         """Delete the upload bucket"""
 
         bucket_name = TileBucket.getBucketName()
@@ -144,7 +144,7 @@ class TileBucket:
             Description=description)
     
     @staticmethod
-    def putLambdaConfig(self, lambda_arn, region_name=settings.REGION_NAME, endpoint_url=None):
+    def putLambdaConfig(self, lambda_arn, region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
       """Create the trigger for a lambda function"""
 
       s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)

@@ -32,7 +32,7 @@ class NDQueue(object):
     queue_name (string): The friendly name of the queue.
   """
 
-  def __init__(self, queue_name, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, queue_name, region_name=settings.REGION_NAME, endpoint_url=settings.SQS_ENDPOINT):
     """Create resource for the queue"""
     
     self.region_name = region_name
@@ -89,7 +89,7 @@ class NDQueue(object):
 
 
   @staticmethod
-  def deleteQueueByName(name, region_name=settings.REGION_NAME, endpoint_url=None, delete_deadletter_queue=False):
+  def deleteQueueByName(name, region_name=settings.REGION_NAME, endpoint_url=settings.SQS_ENDPOINT, delete_deadletter_queue=False):
     """Delete the named queue.
     
     Also delete the dead letter queue if delete_deadletter_queue is true.

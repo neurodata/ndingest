@@ -15,15 +15,14 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from ndingest.settings.settings import Settings
-settings = Settings.load()
-import json
 import boto3
 import botocore
+from ndingest.settings.settings import Settings
+settings = Settings.load()
 from ndingest.ndqueue.ndqueue import NDQueue
 import random
 
-class UploadQueue(NDQueue):
+class PropagateQueue(NDQueue):
 
   # Static variable to hold random number added to test queue names.
   test_queue_id = -1
@@ -31,29 +30,29 @@ class UploadQueue(NDQueue):
   def __init__(self, nd_proj, region_name=settings.REGION_NAME, endpoint_url=settings.SQS_ENDPOINT):
     """Create resources for the queue"""
     
-    self.queue_name = UploadQueue.generateQueueName(nd_proj)
-    return super(UploadQueue, self).__init__(self.queue_name, region_name=region_name, endpoint_url=endpoint_url)
+    queue_name = PropagateQueue.generateQueueName(nd_proj)
+    super(PropagateQueue, self).__init__(queue_name, region_name=region_name, endpoint_url=endpoint_url)
 
   @staticmethod 
   def generateNeurodataQueueName(nd_proj):
-    return '-'.join(nd_proj.generateProjectInfo()+['UPLOAD']).replace('&', '-')
+    return '-'.join(nd_proj.generateProjectInfo()+['PROPAGATE']).replace('&', '-')
     
   @staticmethod 
   def generateBossQueueName(nd_proj):
     if not settings.TEST_MODE:
-        return '{}-upload-{}'.format(settings.DOMAIN, nd_proj.job_id)
+        return '{}-propagate-{}'.format(settings.DOMAIN, nd_proj.job_id)
 
-    if UploadQueue.test_queue_id == -1:
-        UploadQueue.test_queue_id = random.randint(0, 999)
+    if IngestQueue.test_queue_id == -1:
+        IngestQueue.test_queue_id = random.randint(0, 999)
 
-    return 'test{}-{}-upload-{}'.format(UploadQueue.test_queue_id, settings.DOMAIN, nd_proj.job_id)
+    return 'test{}-{}-ingest-{}'.format(IngestQueue.test_queue_id, settings.DOMAIN, nd_proj.job_id)
 
   @staticmethod
   def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=settings.SQS_ENDPOINT):
     """Create the upload queue"""
     
     # creating the resource
-    queue_name = UploadQueue.generateQueueName(nd_proj)
+    queue_name = PropagateQueue.generateQueueName(nd_proj)
     sqs = boto3.resource('sqs', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     
     try:
@@ -73,7 +72,7 @@ class UploadQueue(NDQueue):
 
   @staticmethod  
   def deleteQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=settings.SQS_ENDPOINT, delete_deadletter_queue=False):
-    """Delete the upload queue.
+    """Delete the ingest queue.
     
     Also delete the dead letter queue if delete_deadletter_queue is true.
 
@@ -85,29 +84,32 @@ class UploadQueue(NDQueue):
     """
 
     # creating the resource
-    queue_name = UploadQueue.generateQueueName(nd_proj)
+    queue_name = PropagateQueue.generateQueueName(nd_proj)
     NDQueue.deleteQueueByName(queue_name, region_name, endpoint_url, delete_deadletter_queue)
 
 
   @staticmethod
   def generateQueueName(nd_proj):
     """Generate the queue name based on project information"""
-    # TODO come up with new naming scheme.  Limited to 80 chars.
-    return UploadQueue.getNameGenerator()(nd_proj)
-
-  def sendMessage(self, tile_info):
+    return PropagateQueue.getNameGenerator()(nd_proj)
+  
+  
+  def sendMessage(self, supercuboid_key):
     """Send a message to upload queue"""
-    return super(UploadQueue, self).sendMessage(tile_info)
+    return super(PropagateQueue, self).sendMessage(supercuboid_key)
+
 
   def receiveMessage(self, number_of_messages=1):
     """Receive a message from the upload queue"""
-    message_list = super(UploadQueue, self).receiveMessage(number_of_messages=number_of_messages)
+
+    message_list = super(PropagateQueue, self).receiveMessage(number_of_messages=number_of_messages)
     if message_list is None:
       raise StopIteration
     else:
       for message in message_list:
-        yield message.message_id, message.receipt_handle, json.loads(message.body)
+        yield message.message_id, message.receipt_handle, message.body
+
 
   def deleteMessage(self, message_id, receipt_handle, number_of_messages=1):
     """Delete a message from the upload queue"""
-    return super(UploadQueue, self).deleteMessage(message_id, receipt_handle, number_of_messages=number_of_messages)
+    return super(PropagateQueue, self).deleteMessage(message_id, receipt_handle, number_of_messages=1)

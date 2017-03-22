@@ -27,7 +27,7 @@ class IngestQueue(NDQueue):
   # Static variable to hold random number added to test queue names.
   test_queue_id = -1
 
-  def __init__(self, nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, nd_proj, region_name=settings.REGION_NAME, endpoint_url=settings.SQS_ENDPOINT):
     """Create resources for the queue"""
     
     queue_name = IngestQueue.generateQueueName(nd_proj)
@@ -48,7 +48,7 @@ class IngestQueue(NDQueue):
     return 'test{}-{}-ingest-{}'.format(IngestQueue.test_queue_id, settings.DOMAIN, nd_proj.job_id)
 
   @staticmethod
-  def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None):
+  def createQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=settings.SQS_ENDPOINT):
     """Create the upload queue"""
     
     # creating the resource
@@ -71,7 +71,7 @@ class IngestQueue(NDQueue):
 
 
   @staticmethod  
-  def deleteQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=None, delete_deadletter_queue=False):
+  def deleteQueue(nd_proj, region_name=settings.REGION_NAME, endpoint_url=settings.SQS_ENDPOINT, delete_deadletter_queue=False):
     """Delete the ingest queue.
     
     Also delete the dead letter queue if delete_deadletter_queue is true.

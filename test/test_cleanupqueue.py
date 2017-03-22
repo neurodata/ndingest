@@ -33,16 +33,12 @@ class Test_Cleanup_Queue():
 
   def setup_class(self):
     """Setup class parameters"""
-    if 'SQS_ENDPOINT' in dir(settings):
-      self.endpoint_url = settings.SQS_ENDPOINT
-    else:
-      self.endpoint_url = None
-    CleanupQueue.createQueue(nd_proj, endpoint_url=self.endpoint_url)
-    self.cleanup_queue = CleanupQueue(nd_proj, endpoint_url=self.endpoint_url)
+    CleanupQueue.createQueue(nd_proj)
+    self.cleanup_queue = CleanupQueue(nd_proj)
   
   def teardown_class(self):
     """Teardown parameters"""
-    CleanupQueue.deleteQueue(nd_proj, endpoint_url=self.endpoint_url)
+    CleanupQueue.deleteQueue(nd_proj)
 
   def test_Message(self):
     """Testing the upload queue"""

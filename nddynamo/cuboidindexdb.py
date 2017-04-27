@@ -151,6 +151,24 @@ class CuboidIndexDB:
       print (e)
       raise 
  
+  def getItemByKey(self, supercuboid_key):
+    version_number = 0
+    try:
+      response =  self.table.get_item(
+          Key = {
+            'supercuboid_key' : supercuboid_key,
+            'version_number' : version_number
+          },
+          ConsistentRead = True,
+          ReturnConsumedCapacity = 'INDEXES'
+      )
+      return response['Item'] if 'Item' in response else None
+      # response = self.table.query(
+          # KeyConditionExpression = Key('supercuboid_key').eq(supercuboid_key)
+      # )
+    except Exception as e:
+      print (e)
+      raise
 
   def getItem(self, channel_name, resolution, x, y, z, time, neariso=False):
     """Get an item based on supercuboid_key"""

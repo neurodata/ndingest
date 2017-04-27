@@ -105,7 +105,8 @@ class CuboidBucket:
    
   def getObjectByKey(self, supercuboid_key):
     """Get an object from the cuboid bucket based on key. """
-
+    
+    print(supercuboid_key)
     try:
       s3_obj = self.s3.Object(self.bucket.name, supercuboid_key)
       response = s3_obj.get()

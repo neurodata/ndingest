@@ -26,7 +26,7 @@ UtilClass = Util.load()
 
 class CuboidBucket:
 
-  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
     """Create resource for the cuboid queue"""
     
     bucket_name = CuboidBucket.getBucketName()
@@ -41,7 +41,7 @@ class CuboidBucket:
       raise
 
   @staticmethod
-  def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
+  def createBucket(region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
     """Create the cuboid bucket"""
     
     bucket_name = CuboidBucket.getBucketName()
@@ -59,7 +59,7 @@ class CuboidBucket:
       raise
 
   @staticmethod
-  def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
+  def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
     """Delete the cuboid bucket"""
     
     bucket_name = CuboidBucket.getBucketName()
@@ -80,12 +80,12 @@ class CuboidBucket:
     return settings.S3_CUBOID_BUCKET
   
 
-  def putObject(self, channel_name, resolution, morton_index, cube_data, time_index=0):
+  def putObject(self, channel_name, resolution, morton_index, time_index, cube_data, neariso=False):
     """Put object in the cuboid bucket.
 
     Not supported by the Boss.  Use putObjectByKey() instead.
     """
-    supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index)
+    supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index, neariso=neariso)
     return self.putObjectByKey(supercuboid_key, cube_data)
     
   def putObjectByKey(self, supercuboid_key, cube_data):
@@ -105,27 +105,27 @@ class CuboidBucket:
    
   def getObjectByKey(self, supercuboid_key):
     """Get an object from the cuboid bucket based on key. """
-
+    
     try:
       s3_obj = self.s3.Object(self.bucket.name, supercuboid_key)
       response = s3_obj.get()
       return response['Body'].read()
     except Exception as e:
-      print (e)
+      # print (e)
       raise
 
-  def getObject(self, channel_name, resolution, morton_index, time_index=0):
+  def getObject(self, channel_name, resolution, morton_index, time_index, neariso=False):
     """Get object from the cuboid bucket based on parameters.
 
     Not supported by the Boss.  Use getObjectByKey() instead.
     """
 
-    supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index)
+    supercuboid_key = self.generateSupercuboidKey(channel_name, resolution, morton_index, time_index, neariso=neariso)
     return self.getObjectByKey(supercuboid_key)
 
-  def generateSupercuboidKey(self, channel_name, resolution, morton_index, time_index=0):
+  def generateSupercuboidKey(self, channel_name, resolution, morton_index, time_index, neariso=False):
     """Generate the supercuboid key"""
-    return UtilClass.generateCuboidKey(self.project_name, channel_name, resolution, morton_index, time_index)
+    return UtilClass.generateCuboidKey(self.project_name, channel_name, resolution, morton_index, time_index, neariso=neariso)
 
   def deleteObject(self, supercuboid_key):
     """Delete object from the upload bucket"""
@@ -146,4 +146,3 @@ class CuboidBucket:
     except Exception as e:
       print (e)
       raise
-

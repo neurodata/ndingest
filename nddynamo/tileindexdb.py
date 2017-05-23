@@ -27,7 +27,7 @@ UtilClass = Util.load()
 
 class TileIndexDB:
 
-  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=settings.DYNAMO_ENDPOINT):
 
     # creating the resource
     table_name = TileIndexDB.getTableName()
@@ -37,7 +37,7 @@ class TileIndexDB:
     self.project_name = project_name
  
   @staticmethod
-  def createTable(region_name=settings.REGION_NAME, endpoint_url=None):
+  def createTable(region_name=settings.REGION_NAME, endpoint_url=settings.DYNAMO_ENDPOINT):
     """Create the ingest database in dynamodb"""
     
     # creating the resource
@@ -91,7 +91,7 @@ class TileIndexDB:
       raise
 
   @staticmethod
-  def deleteTable(region_name=settings.REGION_NAME, endpoint_url=None):
+  def deleteTable(region_name=settings.REGION_NAME, endpoint_url=settings.DYNAMO_ENDPOINT):
     """Delete the ingest database in dynamodb"""
 
     # creating the resource

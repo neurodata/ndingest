@@ -34,12 +34,8 @@ class Test_Upload_Bucket():
 
   def setup_class(self):
     """Setup Parameters"""
-    if 'S3_ENDPOINT' in dir(settings):
-      self.endpoint_url = settings.S3_ENDPOINT
-    else:
-      self.endpoint_url = None
-    TileBucket.createBucket(endpoint_url=self.endpoint_url)
-    self.tile_bucket = TileBucket(nd_proj.project_name, endpoint_url=self.endpoint_url)
+    TileBucket.createBucket()
+    self.tile_bucket = TileBucket(nd_proj.project_name)
 
 
   def teardown_class(self):
@@ -49,7 +45,7 @@ class Test_Upload_Bucket():
     for objs in self.tile_bucket.getAllObjects():
       self.tile_bucket.deleteObject(objs.key)
 
-    TileBucket.deleteBucket(endpoint_url=self.endpoint_url)
+    TileBucket.deleteBucket()
 
 
   def test_put_object(self):
@@ -57,6 +53,7 @@ class Test_Upload_Bucket():
     
     x_tile = 0
     y_tile = 0
+    time_tile = 0
     message_id = '1123'
     receipt_handle = 'test_string'
 
@@ -64,11 +61,11 @@ class Test_Upload_Bucket():
       # creating a tile handle for test
       tile_handle = BytesIO()
       # uploading object
-      response = self.tile_bucket.putObject(tile_handle, nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, message_id, receipt_handle)
+      response = self.tile_bucket.putObject(tile_handle, nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, time_tile, message_id, receipt_handle)
       tile_handle.close()
-      object_key = self.tile_bucket.encodeObjectKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
+      object_key = self.tile_bucket.encodeObjectKey(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, time_tile)
       # fetching object
-      object_body, object_message_id, object_receipt_handle, metadata = self.tile_bucket.getObject(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile)
+      object_body, object_message_id, object_receipt_handle, metadata = self.tile_bucket.getObject(nd_proj.channel_name, nd_proj.resolution, x_tile, y_tile, z_tile, time_tile)
       assert( object_message_id == message_id )
       assert( object_receipt_handle == receipt_handle )
       object_message_id, object_receipt_handle, metadata = self.tile_bucket.getMetadata(object_key)

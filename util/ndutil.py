@@ -20,9 +20,12 @@ from ndingest.util.util import Util
 class NDUtil(Util):
 
   @staticmethod
-  def generateCuboidKey(project_name, channel_name, resolution, morton_index, time_index=0):
+  def generateCuboidKey(project_name, channel_name, resolution, morton_index, time_index, neariso=False):
     """Generate the key for the supercube"""
 
     hashm = hashlib.md5()
     hashm.update('{}&{}&{}&{}&{}'.format(project_name, channel_name, resolution, morton_index, time_index))
-    return '{}&{}&{}&{}&{}&{}'.format(hashm.hexdigest(), project_name, channel_name, resolution, morton_index, time_index)
+    if neariso:
+      return '{}&{}&{}&{}&{}&{}&neariso'.format(hashm.hexdigest(), project_name, channel_name, resolution, morton_index, time_index)
+    else:  
+      return '{}&{}&{}&{}&{}&{}'.format(hashm.hexdigest(), project_name, channel_name, resolution, morton_index, time_index)

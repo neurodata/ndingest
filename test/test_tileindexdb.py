@@ -28,12 +28,12 @@ class Test_TileIndexDB():
 
   def setup_class(self):
     """Setup parameters"""
-    TileIndexDB.createTable(endpoint_url=settings.DYNAMO_ENDPOINT)
-    self.tileindex_db = TileIndexDB(nd_proj.project_name, endpoint_url=settings.DYNAMO_ENDPOINT)
+    TileIndexDB.createTable()
+    self.tileindex_db = TileIndexDB(nd_proj.project_name)
     
   def teardown_class(self):
     """Teardown parameters"""
-    TileIndexDB.deleteTable(endpoint_url=settings.DYNAMO_ENDPOINT)
+    TileIndexDB.deleteTable()
     
   def test_putItem(self):
     """Test data insertion"""

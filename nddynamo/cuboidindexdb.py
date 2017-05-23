@@ -26,7 +26,7 @@ UtilClass = Util.load()
 
 class CuboidIndexDB:
 
-  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
+  def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=settings.DYNAMO_ENDPOINT):
 
     # create the resource
     table_name = CuboidIndexDB.getTableName()
@@ -36,7 +36,7 @@ class CuboidIndexDB:
  
 
   @staticmethod
-  def createTable(region_name=settings.REGION_NAME, endpoint_url=None):
+  def createTable(region_name=settings.REGION_NAME, endpoint_url=settings.DYNAMO_ENDPOINT):
     """Create the s3index database in dynamodb"""
     
     # create the resource
@@ -106,7 +106,7 @@ class CuboidIndexDB:
 
 
   @staticmethod
-  def deleteTable(region_name=settings.REGION_NAME, endpoint_url=None):
+  def deleteTable(region_name=settings.REGION_NAME, endpoint_url=settings.DYNAMO_ENDPOINT):
     """Delete the ingest database in dynamodb"""
     
     # create the resource
@@ -124,16 +124,16 @@ class CuboidIndexDB:
     """Return table name"""
     return settings.DYNAMO_CUBOIDINDEX_TABLE
 
-  def generatePrimaryKey(self, channel_name, resolution, x, y, z, time_index=0):
+  def generatePrimaryKey(self, channel_name, resolution, x, y, z, time_index, neariso=False):
     """Generate key for each supercuboid"""
     morton_index = XYZMorton([x, y, z])
-    return UtilClass.generateCuboidKey(self.project, channel_name, resolution, morton_index, time_index)
+    return UtilClass.generateCuboidKey(self.project, channel_name, resolution, morton_index, time_index, neariso=neariso)
 
 
-  def putItem(self, channel_name, resolution, x, y, z, time=0, task_id=0):
+  def putItem(self, channel_name, resolution, x, y, z, time, task_id=0, neariso=False):
     """Inserting an index for each supercuboid_array"""
     
-    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z, time)
+    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z, time, neariso=neariso)
     version_number = 0
 
     try:
@@ -151,11 +151,29 @@ class CuboidIndexDB:
       print (e)
       raise 
  
+  def getItemByKey(self, supercuboid_key):
+    version_number = 0
+    try:
+      response =  self.table.get_item(
+          Key = {
+            'supercuboid_key' : supercuboid_key,
+            'version_number' : version_number
+          },
+          ConsistentRead = True,
+          ReturnConsumedCapacity = 'INDEXES'
+      )
+      return response['Item'] if 'Item' in response else None
+      # response = self.table.query(
+          # KeyConditionExpression = Key('supercuboid_key').eq(supercuboid_key)
+      # )
+    except Exception as e:
+      print (e)
+      raise
 
-  def getItem(self, channel_name, resolution, x, y, z):
+  def getItem(self, channel_name, resolution, x, y, z, time, neariso=False):
     """Get an item based on supercuboid_key"""
 
-    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z)
+    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z, time, neariso=neariso)
     version_number = 0
     try:
       response =  self.table.get_item(
@@ -244,10 +262,10 @@ class CuboidIndexDB:
       raise
 
 
-  def deleteXYZ(self, channel_name, resolution, x, y, z):
+  def deleteXYZ(self, channel_name, resolution, x, y, z, time, neariso=False):
     """Delete item from database"""
     
-    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z)
+    supercuboid_key = self.generatePrimaryKey(channel_name, resolution, x, y, z, time, neariso=neariso)
     return self.deleteItem(supercuboid_key)
   
 
@@ -264,5 +282,28 @@ class CuboidIndexDB:
       )
       return response
     except botocore.exceptions.ClientError as e:
+      print (e)
+      raise
+
+  def getAllItems(self):
+    """Get all items in the dynamo table"""
+    try:
+      # need to call once to generate lastevaluatedkey
+      response = self.table.scan(
+          Limit = 100,
+          Select = 'ALL_ATTRIBUTES'
+        )
+      for item in response['Items']:
+        yield item
+      # till we have lastevaluatedkey
+      while 'LastEvaluatedKey' in response:
+        response = self.table.scan(
+            Limit = 100,
+            Select = 'ALL_ATTRIBUTES',
+            ExclusiveStartKey = response['LastEvaluatedKey']
+        )
+        for item in response['Items']:
+          yield item
+    except Exception as e:
       print (e)
       raise

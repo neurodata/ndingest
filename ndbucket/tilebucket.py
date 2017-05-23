@@ -26,7 +26,7 @@ settings = Settings.load()
 
 class TileBucket:
 
-    def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=None):
+    def __init__(self, project_name, region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
         """Create resource for the upload queue"""
 
         self.region_name = region_name
@@ -43,7 +43,7 @@ class TileBucket:
             raise
 
     @staticmethod
-    def createBucket(region_name=settings.REGION_NAME, endpoint_url=None):
+    def createBucket(region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
         """Create the upload bucket"""
 
         bucket_name = TileBucket.getBucketName()
@@ -61,7 +61,7 @@ class TileBucket:
             raise
 
     @staticmethod
-    def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=None):
+    def deleteBucket(region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
         """Delete the upload bucket"""
 
         bucket_name = TileBucket.getBucketName()
@@ -81,7 +81,7 @@ class TileBucket:
         """Generate the bucket name"""
         return settings.S3_TILE_BUCKET
 
-    def encodeObjectKey(self, channel_name, resolution, x_index, y_index, z_index, t_index=0):
+    def encodeObjectKey(self, channel_name, resolution, x_index, y_index, z_index, t_index):
         """Generate the key for the file in scratch space"""
         hashm = hashlib.md5()
         hashm.update('{}&{}&{}&{}&{}&{}&{}'.format(self.project_name, channel_name, resolution, x_index, y_index, z_index, t_index).encode('utf-8'))
@@ -144,7 +144,7 @@ class TileBucket:
             Description=description)
     
     @staticmethod
-    def putLambdaConfig(self, lambda_arn, region_name=settings.REGION_NAME, endpoint_url=None):
+    def putLambdaConfig(self, lambda_arn, region_name=settings.REGION_NAME, endpoint_url=settings.S3_ENDPOINT):
       """Create the trigger for a lambda function"""
 
       s3 = boto3.resource('s3', region_name=region_name, endpoint_url=endpoint_url, aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
@@ -239,7 +239,7 @@ class TileBucket:
         return None
 
 
-    def putObject(self, tile_handle, channel_name, resolution, x_tile, y_tile, z_tile, message_id, receipt_handle, time=0):
+    def putObject(self, tile_handle, channel_name, resolution, x_tile, y_tile, z_tile, time, message_id, receipt_handle):
         """Put object in the upload bucket"""
 
         # generate the key

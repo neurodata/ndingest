@@ -106,13 +106,12 @@ class CuboidBucket:
   def getObjectByKey(self, supercuboid_key):
     """Get an object from the cuboid bucket based on key. """
     
-    print(supercuboid_key)
     try:
       s3_obj = self.s3.Object(self.bucket.name, supercuboid_key)
       response = s3_obj.get()
       return response['Body'].read()
     except Exception as e:
-      print (e)
+      # print (e)
       raise
 
   def getObject(self, channel_name, resolution, morton_index, time_index, neariso=False):
